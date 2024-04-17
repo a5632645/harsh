@@ -10,40 +10,55 @@ add_executable (AdditiveSynthEngine
 "engine/Oscillor.cpp"
 "engine/synth.cpp"
 
+"engine/IProcessor.h"
+"engine/standard/phase.h"
+"engine/standard/phase.cpp"
+"engine/standard/freq.h"
+"engine/standard/freq.cpp"
+
 "engine/modulation/Parameter.h"
 "engine/modulation/Parameter.cpp"
 "engine/modulation/ParamBank.h"
 "engine/modulation/ParamBank.cpp"
 "engine/modulation/Modulator.h"
-"engine/modulation/ChoiceParameter.h"
-"engine/modulation/ChoiceParameter.cpp"
 "engine/modulation/Modulator.cpp"
 "engine/modulation/Modulation.h"
 "engine/modulation/Modulation.cpp"
 
-"engine/IProcessor.h"
-"engine/freq/freq.h"
-"engine/freq/freq.cpp"
 "engine/timber/dual_saw.h"
 "engine/timber/dual_saw.cpp"
 
-"param/synth_bind_param.cpp"
-"param/voice_param.h"
-"param/timber_param.h"
+"param/param.h"
 "param/synth_param.h"
+"param/synth_bind_param.cpp"
+"param/standard_param.h"
+"param/dissonance_param.h"
 
-#"ui/WrapDropBox.h"
-#"ui/WrapDropBox.cpp"
+"param/timber.h"
+"param/filter_param.h"
+
+"ui/WrapDropBox.h"
+"ui/WrapDropBox.cpp"
 #"ui/WrapGroupBox.h"
 #"ui/WrapGroupBox.cpp"
-#"ui/ParamBox.h"
-#"ui/ParamBox.cpp"
 "ui/Knob.cpp"
-"ui/ChooseKnob.cpp"
-"ui/UIMaker.h"
-"ui/UIMaker.cpp"
+
+
+
 "layout/SynthLayout.h"
-"layout/SynthLayout.cpp" "param/timber_proc_param.h" "engine/timber_proc/hard_sync.h" "engine/timber_proc/hard_sync.cpp"  )
+"layout/SynthLayout.cpp"
+
+#"engine/timber_proc/hard_sync.h"
+#"engine/timber_proc/hard_sync.cpp"
+"engine/dissonance/string.h"
+"engine/dissonance/string.cpp"
+"ui/oscilloscope.h"
+"ui/oscilloscope.cpp"
+"engine/filter/filter.h"
+"engine/filter/filter.cpp"
+"engine/dissonance/dissonance.h"
+"engine/dissonance/dissonance.cpp"
+ "layout/DissonanceLayout.h" "layout/DissonanceLayout.cpp"     "layout/timber_layout.h" "layout/timber_layout.cpp" "engine/timber/timber.h" "engine/timber/timber.cpp" "engine/timber/sync.h" "engine/timber/sync.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)

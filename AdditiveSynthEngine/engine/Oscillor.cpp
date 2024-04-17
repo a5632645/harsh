@@ -1,14 +1,14 @@
 #include "Oscillor.h"
 
-#include "freq/freq.h"
-#include "timber/dual_saw.h"
-#include "timber_proc/hard_sync.h"
+#include "standard/freq.h"
+#include "timber/timber.h"
+#include "dissonance/dissonance.h"
 
 namespace mana {
-Oscillor::Oscillor(const param::SynthParam& p) {
-    AddProcessor(std::make_shared<FreqProcessor>(p.voice_param));
-    AddProcessor(std::make_shared<DualSaw>(p.timber_param.dual_saw));
-    AddProcessor(std::make_shared<HardSync>(p.timber_proc_param.hard_sync));
+Oscillor::Oscillor() {
+    AddProcessor(std::make_shared<FreqProcessor>());
+    AddProcessor(std::make_shared<Dissonance>());
+    AddProcessor(std::make_shared<Timber>());
 }
 
 void Oscillor::Init(size_t bufferSize, float sampleRate) {
@@ -24,7 +24,7 @@ void Oscillor::Init(size_t bufferSize, float sampleRate) {
     std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->Init(sampleRate); });
 }
 
-void Oscillor::NoteOn(int note_number,float velocity) {
+void Oscillor::NoteOn(int note_number, float velocity) {
     midi_velocity_ = velocity;
     midi_note_ = note_number;
     note_on_ = true;
@@ -34,10 +34,10 @@ void Oscillor::NoteOn(int note_number,float velocity) {
     std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnNoteOn(note_number); });
 }
 
-void Oscillor::update_state(size_t step) {
+void Oscillor::update_state(const SynthParam& param, int step) {
     if (!IsPlaying()) return;
 
-    std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnUpdateTick(step); });
+    std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnUpdateTick(param, step); });
     std::ranges::for_each(processors_, [this](std::shared_ptr<IProcessor>& p) {p->Process(partials_); });
 
     sine_bank_.load_particles(partials_);

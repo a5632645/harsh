@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include <string_view>
 #include <memory>
+#include <functional>
 
 namespace mana {
 class Parameter;
@@ -27,10 +28,10 @@ public:
     Knob& set_parameter(Parameter* parameter);
 
     float get_value() const;
-protected:
-    virtual std::string get_value_text();
 
-    std::string_view m_name{"unkown"};
+    std::function<std::string(float)> value_to_text_function = EmptyV2Tcaller;
+protected:
+    std::string_view m_name{ "unkown" };
     float m_default_alue{};
     float m_value{};
     float m_min{};
@@ -51,15 +52,6 @@ protected:
     Parameter* m_parameter;
 private:
     static void empty_callback(float) {}
+    static std::string EmptyV2Tcaller(float) { return {}; }
 };
-
-std::unique_ptr<Knob> create_knob(std::string_view name,
-                                  int x, int y, int w, int h,
-                                  float default_value,
-                                  float min, float max, float step,
-                                  int sensitify = 2);
-
-std::unique_ptr<Knob> create_knob(int x, int y, int w, int h,
-                                  int sensitify = 2);
-
 }

@@ -1,15 +1,31 @@
 #pragma once
 
-#include "timber_param.h"
-#include "voice_param.h"
-#include "timber_proc_param.h"
-
-namespace mana::param {
-
+namespace mana {
 struct SynthParam {
-    TimberParam timber_param;
-    TimberProcParam timber_proc_param;
-    VoiceParam voice_param;
-};
+    // standard
+    struct {
+        float pitch_bend;
+        struct {
+            float phase_type;
+            float phase_random;
+        } phase;
+    } standard;
 
+    // timber
+    struct {
+        int timber_type;
+        float arg0;
+        float arg1;
+        float arg2;
+        float arg3;
+    } timber;
+
+    // dissonance
+    struct {
+        bool is_enable;
+        int dissonance_type;
+        float arg0;
+        float arg1;
+    } dissonance;
+};
 }

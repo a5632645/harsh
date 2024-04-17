@@ -5,15 +5,9 @@
 
 namespace mana {
 Parameter::Parameter(std::string_view id,
-                     std::string_view name,
-                     float default_value,
-                     float min, float max, float step) :
+                     float default_value) :
     m_id(id),
-    m_name(name),
     m_default_value(default_value),
-    m_min(min),
-    m_max(max),
-    m_step(step),
     m_value(default_value) {
 }
 
@@ -23,8 +17,8 @@ void Parameter::update_output() {
         modulation_v += ptr_modulation->get_output_value();
     }
 
-    float v = modulation_v * (m_max - m_min) + m_value;
-    v = std::clamp(v, m_min, m_max);
+    float v = modulation_v + m_value;
+    v = std::clamp(v, 0.0f, 1.0f);
 
     if (v != m_output_value) {
         m_output_value = v;

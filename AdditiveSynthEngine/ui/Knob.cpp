@@ -5,15 +5,13 @@
 #include <cmath>
 #include <string>
 #include <format>
-#include "ChooseKnob.h"
 #include "engine/modulation/Parameter.h"
 
 namespace mana {
-inline static std::shared_ptr<Parameter> s_empty_parameter = std::make_shared<Parameter>("", "", 0.0F, 0.0F, 0.0F, 0.0F);
+inline static std::shared_ptr<Parameter> s_empty_parameter = std::make_shared<Parameter>("", 0.0F);
 }
 
 namespace mana {
-
 inline static Knob* s_currentKnob = nullptr;
 
 Knob::Knob() {
@@ -80,7 +78,7 @@ void Knob::display() {
         .height = static_cast<float>(m_number_font_size)
     };
     // draw number
-    auto const numberText = get_value_text();
+    auto const numberText = value_to_text_function(m_value);
     auto const numberTextWidth = MeasureText(numberText.c_str(), m_number_font_size);
     auto const exSpace = text_bound.width - numberTextWidth;
     DrawText(numberText.c_str(), m_bounds.x + exSpace * 0.5F, text_bound.y, m_number_font_size, m_fore_color);
@@ -104,9 +102,9 @@ void Knob::display() {
         };
         DrawLine(centerX, centerY, pointerPos.x, pointerPos.y, m_fore_color);
     }
-    
+
     // draw pointer2
-    if(m_parameter->has_modulation()) {
+    if (m_parameter->has_modulation()) {
         auto const pw = (m_parameter->get_output_value() - m_min) / (m_max - m_min);
         auto const startAngle = 5.0F / 4.0F * std::numbers::pi_v<float>;
         auto const endAngle = -1.0F / 4.0F * std::numbers::pi_v<float>;
@@ -201,37 +199,12 @@ Knob& Knob::set_bound(int x, int y, int w, int h) {
 
 Knob& Knob::set_parameter(Parameter* parameter) {
     m_parameter = parameter;
+    this->set_range(0.0f, 1.0f, 0.005f, parameter->get_default_value());
+    this->set_value(parameter->get_default_value());
     return *this;
 }
 
 float Knob::get_value() const {
     return m_value;
-}
-
-std::string Knob::get_value_text() {
-    auto weishu = -std::floor(std::log10(m_step));
-
-    return std::format("{0:.{1}f}", m_value, static_cast<unsigned int>(weishu));
-}
-
-std::unique_ptr<Knob> create_knob(std::string_view name,
-                                         int x, int y, int w, int h,
-                                         float default_value,
-                                         float min, float max, float step,
-                                         int sensitify) {
-    auto knob = std::make_unique<Knob>();
-    knob->set_title(name);
-    knob->set_bound(x, y, w, h);
-    knob->set_range(min, max, step, default_value);
-    knob->set_sensitivity(sensitify);
-    knob->set_value(default_value);
-    return knob;
-}
-
-std::unique_ptr<Knob> create_knob(int x, int y, int w, int h, int sensitify) {
-    auto knob = std::make_unique<Knob>();
-    knob->set_bound(x, y, w, h);
-    knob->set_sensitivity(sensitify);
-    return knob;
 }
 }

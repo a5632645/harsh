@@ -11,39 +11,10 @@ void ParamBank::UpdateParamOutput() {
 }
 
 Parameter& ParamBank::AddOrCreateIfNull(std::string_view id,
-                                        std::string_view name,
-                                        float default_value,
-                                        float min, float max, float step) {
-    auto e = std::make_shared<Parameter>(id, name, default_value, min, max, step);
+                                        float default_value) {
+    auto e = std::make_shared<Parameter>(id, default_value);
     parameters_[id] = e;
     return *e;
-}
-
-Parameter & ParamBank::AddOrCreateIfNull(std::string_view id, 
-                                         std::string_view name, 
-                                         float default_value, 
-                                         float min, 
-                                         float max, 
-                                         int step_count) {
-    return AddOrCreateIfNull(id, name, default_value, min, max, (max - min) / step_count);
-}
-
-ChoiceParameter& ParamBank::AddOrCreateIfNull(std::string_view id,
-                                              std::string_view name,
-                                              std::vector<std::string_view> choices,
-                                              std::string_view default_choice) {
-    auto x = std::make_shared<ChoiceParameter>(id, name, choices, default_choice);
-    parameters_[id] = x;
-    return *x;
-}
-
-ChoiceParameter& ParamBank::AddOrCreateIfNull(std::string_view id,
-                                              std::string_view name,
-                                              std::vector<std::string_view> choices,
-                                              int default_choice) {
-    auto x = std::make_shared<ChoiceParameter>(id, name, choices, default_choice);
-    parameters_[id] = x;
-    return *x;
 }
 
 Parameter* ParamBank::GetParamPtr(std::string_view id) const {

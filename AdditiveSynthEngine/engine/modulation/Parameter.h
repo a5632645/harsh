@@ -15,15 +15,8 @@ class Knob;
 
 class Parameter {
 public:
-    enum class Type {
-        kFloat,
-        kChoice
-    };
-
     Parameter(std::string_view id,
-              std::string_view name,
-              float default_value,
-              float min, float max, float step);
+              float default_value);
 
     virtual ~Parameter() = default;
     Parameter(Parameter const&) = delete;
@@ -40,27 +33,11 @@ public:
     }
 
     void set_current(float v) {
-        m_value = std::clamp(v, m_min, m_max);
+        m_value = std::clamp(v, 0.0f, 1.0f);
     }
 
     std::string const& get_id() const {
         return m_id;
-    }
-
-    std::string const& get_name() const {
-        return m_name;
-    }
-
-    float get_min() const {
-        return m_min;
-    }
-
-    float get_max() const {
-        return m_max;
-    }
-
-    float get_step() const {
-        return m_step;
     }
 
     float get_default_value() const {
@@ -76,16 +53,10 @@ public:
     }
     std::shared_ptr<Modulation> find_modulator(std::string_view modulator_id);
     std::function<void(float)> on_output_changed = empty_callback;
-
-    virtual Type GetParamType() const { return Type::kFloat; }
 protected:
     virtual void _on_output_changed(float v) {}
 
     std::string m_id;
-    std::string m_name;
-    float m_min{};
-    float m_max{};
-    float m_step{};
     float m_value{};
     float m_default_value{};
     float m_output_value{};

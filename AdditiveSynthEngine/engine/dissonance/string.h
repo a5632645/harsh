@@ -1,10 +1,10 @@
 #pragma once
 
 #include "engine/IProcessor.h"
-#include "param/synth_param.h"
+#include "param/dissonance_param.h"
 
 namespace mana {
-class DualSaw : public IProcessor {
+class StringDissonance : public IProcessor {
 public:
     // 通过 IProcessor 继承
     void Init(float sample_rate) override;
@@ -12,12 +12,7 @@ public:
     void OnUpdateTick(const SynthParam& param, int skip) override;
     void OnNoteOn(int note) override;
     void OnNoteOff() override;
-
 private:
-    float ratio_{};
-    float beating_rate_{};
-    float saw_square_{};
-    float sample_rate_{};
-    float beating_phase_{};
+    float stretch_factor_;
 };
 }

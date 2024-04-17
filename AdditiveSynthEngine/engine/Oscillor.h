@@ -13,7 +13,7 @@ namespace mana {
 
 class Oscillor {
 public:
-    Oscillor(const param::SynthParam& param);
+    Oscillor();
 
     void Init(size_t bufferSize, float sampleRate);
 
@@ -57,7 +57,7 @@ public:
     }
 
     //=============================STREAM================================================
-    void update_state(size_t skip);
+    void update_state(const SynthParam& param, int skip);
 
     void renderBuffer(size_t length) {
         std::ranges::fill(audio_buffer_, 0.0F);

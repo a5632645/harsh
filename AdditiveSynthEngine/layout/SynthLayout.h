@@ -1,6 +1,10 @@
 #pragma once
 
 #include "engine/synth.h"
+#include "ui/oscilloscope.h"
+#include "ui/Knob.h"
+#include "DissonanceLayout.h"
+#include "timber_layout.h"
 
 namespace mana {
 class SynthLayout {
@@ -8,13 +12,13 @@ public:
     SynthLayout(Synth& synth);
 
     void paint();
-    void resized(int x, int y, int w, int h);
-
+    void SetBounds(int x, int y, int w, int h);
+    Oscilloscope& GetOsciiloscope() { return scope_; }
 private:
-    std::shared_ptr<Knob> ratio_;
-    std::shared_ptr<Knob> beating_rate_;
-    std::shared_ptr<Knob> saw_square_;
-    std::shared_ptr<Knob> hard_sync_;
-    std::shared_ptr<Knob> pitch_bend_;
+    Knob pitch_bend_;
+    Oscilloscope scope_;
+
+    DissonanceLayout dissonance_layout_;
+    TimberLayout timber_layout_;
 };
 }

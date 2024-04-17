@@ -2,7 +2,7 @@
 
 namespace mana {
 Synth::Synth() {
-    m_oscillators.resize(kNumOscillors, Oscillor{ synth_param_ });
+    m_oscillators.resize(kNumOscillors);
     BindParam();
 }
 
@@ -53,10 +53,10 @@ void Synth::Init(size_t bufferSize, float sampleRate) {
     }
 }
 
-void Synth::update_state(size_t step) {
+void Synth::update_state(int step) {
     param_bank_.UpdateParamOutput();
     for (Oscillor& o : m_oscillators) {
-        o.update_state(step);
+        o.update_state(synth_param_, step);
     }
 }
 
