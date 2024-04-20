@@ -5,6 +5,7 @@
 #include "ui/Knob.h"
 #include "DissonanceLayout.h"
 #include "timber_layout.h"
+#include "filter_layout.h"
 
 namespace mana {
 class SynthLayout {
@@ -20,5 +21,6 @@ private:
 
     DissonanceLayout dissonance_layout_;
     TimberLayout timber_layout_;
+    FilterLayout filter_layout_;
 };
 }

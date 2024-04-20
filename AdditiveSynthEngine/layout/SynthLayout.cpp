@@ -8,7 +8,8 @@ namespace mana {
 SynthLayout::SynthLayout(Synth& synth)
     : scope_(synth)
     , dissonance_layout_(synth)
-    , timber_layout_(synth) {
+    , timber_layout_(synth)
+    , filter_layout_(synth) {
     const auto& bank = synth.GetParamBank();
 
     pitch_bend_.set_parameter(bank.GetParamPtr("standard.pitch_bend"));
@@ -22,6 +23,7 @@ void SynthLayout::paint() {
     pitch_bend_.display();
     scope_.Paint();
     dissonance_layout_.Paint();
+    filter_layout_.Paint();
 }
 
 void SynthLayout::SetBounds(int x, int y, int w, int h) {
@@ -29,5 +31,6 @@ void SynthLayout::SetBounds(int x, int y, int w, int h) {
     pitch_bend_.set_bound(200, 0, 50, 70);
     scope_.SetBounds(x, y, w, h);
     dissonance_layout_.SetBounds(250, 0, 100, 152);
+    filter_layout_.SetBounds(350, 0, 100, 0);
 }
 }

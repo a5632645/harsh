@@ -2,5 +2,5 @@
 
 namespace mana {
 static constexpr int kNumOscillors = 4;
-static constexpr int kNumPartials = 128;
+static constexpr int kNumPartials = 256;
 }

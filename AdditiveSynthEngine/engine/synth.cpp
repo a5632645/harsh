@@ -62,6 +62,7 @@ void Synth::update_state(int step) {
 
 const Oscillor& Synth::GetDisplayOscillor() const {
     auto idx = static_cast<int>(m_rrPosition) - 1;
+    auto last_played = (idx + kNumOscillors) % kNumOscillors;
     for (size_t i = 0; i < kNumOscillors; ++i) {
         idx += kNumOscillors;
         idx %= kNumOscillors;
@@ -71,6 +72,6 @@ const Oscillor& Synth::GetDisplayOscillor() const {
         --idx;
     }
 
-    return m_oscillators[m_rrPosition];
+    return m_oscillators[last_played];
 }
 }

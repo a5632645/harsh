@@ -30,8 +30,8 @@ struct DualSaw_Ratio {
 
 struct DualSaw_BeatingRate {
     static constexpr auto kName = "beating"sv;
-    static constexpr float kMin = -2.0f;
-    static constexpr float kMax = 2.0f;
+    static constexpr float kMin = -8.0f;
+    static constexpr float kMax = 8.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr int kTextPrecision = 3;
 };
@@ -51,13 +51,13 @@ struct Sync_WaveShape {
     enum class WaveShape {
         kSine = 0,
         kTriangle,
-        kSaw,
         kSquare,
+        kSaw,
         kNumEnums
     };
 
     static constexpr auto kNames = std::to_array({
-        "sine"sv,"tri"sv,"saw"sv,"square"sv
+        "sine"sv,"tri"sv,"square"sv,"saw"sv
                                                  });
 
     static constexpr auto kName = "shape"sv;
@@ -66,7 +66,7 @@ struct Sync_WaveShape {
 struct Sync_Sync {
     static constexpr auto kName = "sync"sv;
     static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 48.0f;
+    static constexpr float kMax = 12.0f * 5.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr auto kStuff = "st"sv;
     static constexpr int kTextPrecision = 1;

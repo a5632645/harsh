@@ -40,7 +40,11 @@ void DissonanceLayout::OnDissonanceTypeChanged(int c) {
     switch (type) {
     case kString:
         arg0_.set_title(param::StringDissStretch::kName);
+        arg1_.set_title(param::StringMultiRatio::kName);
+
         arg0_.value_to_text_function = param::FloatParam<param::StringDissStretch>::GetText;
+        arg1_.value_to_text_function =
+            param::FloatChoiceParam<param::StringMultiRatio, param::StringMultiRatio::RatioEnum>::GetText;
         break;
     case kHarmonicStretch:
         arg0_.set_title(param::HarmonicStrech::kName);

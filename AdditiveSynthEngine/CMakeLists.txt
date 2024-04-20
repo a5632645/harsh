@@ -25,8 +25,12 @@ add_executable (AdditiveSynthEngine
 "engine/modulation/Modulation.h"
 "engine/modulation/Modulation.cpp"
 
+"engine/timber/timber.h"
+"engine/timber/timber.cpp"
 "engine/timber/dual_saw.h"
 "engine/timber/dual_saw.cpp"
+"engine/timber/sync.h"
+"engine/timber/sync.cpp"
 
 "param/param.h"
 "param/synth_param.h"
@@ -47,18 +51,20 @@ add_executable (AdditiveSynthEngine
 
 "layout/SynthLayout.h"
 "layout/SynthLayout.cpp"
+"layout/DissonanceLayout.h"
+"layout/DissonanceLayout.cpp"
+"layout/timber_layout.h"
+"layout/timber_layout.cpp"
 
-#"engine/timber_proc/hard_sync.h"
-#"engine/timber_proc/hard_sync.cpp"
-"engine/dissonance/string.h"
-"engine/dissonance/string.cpp"
 "ui/oscilloscope.h"
 "ui/oscilloscope.cpp"
 "engine/filter/filter.h"
 "engine/filter/filter.cpp"
 "engine/dissonance/dissonance.h"
 "engine/dissonance/dissonance.cpp"
- "layout/DissonanceLayout.h" "layout/DissonanceLayout.cpp"     "layout/timber_layout.h" "layout/timber_layout.cpp" "engine/timber/timber.h" "engine/timber/timber.cpp" "engine/timber/sync.h" "engine/timber/sync.cpp")
+"engine/dissonance/string.h"
+"engine/dissonance/string.cpp"
+ "layout/filter_layout.h" "layout/filter_layout.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)

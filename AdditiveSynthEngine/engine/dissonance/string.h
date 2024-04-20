@@ -14,5 +14,6 @@ public:
     void OnNoteOff() override;
 private:
     float stretch_factor_;
+    float ratio_multi_;
 };
 }

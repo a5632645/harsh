@@ -35,7 +35,6 @@ int main(void) {
     keyboard_.onNoteOn = [](int n) {synth_.NoteOn(n, 1.0f); };
     keyboard_.onNoteOff = [](int n) {synth_.NoteOff(n, 1.0f); };
 
-
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -44,15 +43,20 @@ int main(void) {
         // drawing
         BeginDrawing();
         ClearBackground(BLACK);
+        synth_layout_.paint();
 
         const auto& partials = synth_.GetDisplayOscillor().GetPartials();
         for (size_t i = 0; i < mana::kNumPartials; ++i) {
-            int x = static_cast<int>(800 * partials.freqs[i]);
-            int y = static_cast<int>(600 * (1.0f - partials.gains[i]));
-            DrawLine(x, y, x, 600, RED);
+            auto x_nor = partials.pitches[i] / 140.0f;
+            auto y_nor = 0.0f;
+            if (partials.gains[i] >= 0.00001f) {
+                auto y_del = std::clamp(20.0f * std::log10(partials.gains[i]), -60.0f, 20.0f);
+                y_nor = (y_del + 60.0f) / 80.0f;
+            }
+            int x = static_cast<int>(800 * x_nor);
+            int y = static_cast<int>(600 * (1.0f - y_nor));
+            DrawLine(x, y, x, 600, RAYWHITE);
         }
-
-        synth_layout_.paint();
 
 
         EndDrawing();

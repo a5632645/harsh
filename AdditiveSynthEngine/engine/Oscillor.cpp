@@ -3,12 +3,14 @@
 #include "standard/freq.h"
 #include "timber/timber.h"
 #include "dissonance/dissonance.h"
+#include "filter/filter.h"
 
 namespace mana {
 Oscillor::Oscillor() {
     AddProcessor(std::make_shared<FreqProcessor>());
     AddProcessor(std::make_shared<Dissonance>());
     AddProcessor(std::make_shared<Timber>());
+    AddProcessor(std::make_shared<Filter>());
 }
 
 void Oscillor::Init(size_t bufferSize, float sampleRate) {

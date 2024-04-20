@@ -26,6 +26,7 @@ public:
 
     bool IsPlaying() const {
         return midi_note_ != -1;
+        //return true;
     }
 
     int getMidiNote() const {

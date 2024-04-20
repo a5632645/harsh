@@ -7,6 +7,7 @@ static void DoHarmonicStretch(Partials& partials, float stretch) {
 
     for (int i = 0; i < kNumPartials; ++i) {
         partials.freqs[i] = base_freq * ratio;
+        partials.pitches[i] = partials.base_pitch + 12.0f * std::log2(ratio);
         ratio += stretch;
     }
 }
@@ -18,6 +19,7 @@ static void DoSemitoneSpace(Partials& partials, float semitone) {
 
     for (int i = 0; i < kNumPartials; ++i) {
         partials.freqs[i] = ratio * base_freq;
+        partials.pitches[i] = partials.base_pitch + i * semitone;
         ratio *= ratio_mul;
     }
 }
@@ -28,7 +30,9 @@ void Dissonance::Init(float sample_rate) {
 void Dissonance::Process(Partials& partials) {
     if (!is_enable_) {
         for (int i = 0; i < kNumPartials; ++i) {
-            partials.freqs[i] = (i + 1.0f) * partials.base_frequency;
+            auto ratio = i + 1.0f;
+            partials.freqs[i] = ratio * partials.base_frequency;
+            partials.pitches[i] = partials.base_pitch + 12.0f * std::log2(ratio);
         }
         return;
     }
