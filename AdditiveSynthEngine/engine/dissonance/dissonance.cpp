@@ -40,7 +40,7 @@ void Dissonance::Process(Partials& partials) {
     using enum param::DissonanceType::DissonaceTypeEnum;
     switch (type_) {
     case kString:
-        string_.Process(partials);
+        decay_.Process(partials);
         break;
     case kHarmonicStretch:
         DoHarmonicStretch(partials, harmonic_stretch_ratio_);
@@ -53,7 +53,7 @@ void Dissonance::Process(Partials& partials) {
     }
 }
 
-void Dissonance::OnUpdateTick(const SynthParam& params, int skip) {
+void Dissonance::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
     is_enable_ = params.dissonance.is_enable;
     type_ = param::IntChoiceParam<param::DissonanceType, param::DissonanceType::DissonaceTypeEnum>::GetEnum(
         params.dissonance.dissonance_type
@@ -65,7 +65,7 @@ void Dissonance::OnUpdateTick(const SynthParam& params, int skip) {
     using enum param::DissonanceType::DissonaceTypeEnum;
     switch (type_) {
     case kString:
-        string_.OnUpdateTick(params, skip);
+        decay_.OnUpdateTick(params, skip, module_idx);
         break;
     case kHarmonicStretch:
         harmonic_stretch_ratio_ = param::FloatParam<param::HarmonicStrech>::GetNumber(arg0);

@@ -4,6 +4,7 @@
 #include "timber/timber.h"
 #include "dissonance/dissonance.h"
 #include "filter/filter.h"
+#include "effect/effect.h"
 
 namespace mana {
 Oscillor::Oscillor() {
@@ -11,6 +12,9 @@ Oscillor::Oscillor() {
     AddProcessor(std::make_shared<Dissonance>());
     AddProcessor(std::make_shared<Timber>());
     AddProcessor(std::make_shared<Filter>());
+    AddProcessor(std::make_shared<Effect>(0));
+    AddProcessor(std::make_shared<Effect>(1));
+    AddProcessor(std::make_shared<Effect>(2));
 }
 
 void Oscillor::Init(size_t bufferSize, float sampleRate) {
@@ -33,13 +37,18 @@ void Oscillor::NoteOn(int note_number, float velocity) {
     partials_.update_phase = true;
     sine_bank_.note_on();
 
+    //std::random_device rd;
+    //for (auto& p : partials_.phases) {
+    //    p = static_cast<float>(rd()) / static_cast<float>(std::random_device::max());
+    //}
+
     std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnNoteOn(note_number); });
 }
 
 void Oscillor::update_state(const SynthParam& param, int step) {
     if (!IsPlaying()) return;
 
-    std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnUpdateTick(param, step); });
+    std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnUpdateTick(param, step, 0); });
     std::ranges::for_each(processors_, [this](std::shared_ptr<IProcessor>& p) {p->Process(partials_); });
 
     sine_bank_.load_particles(partials_);

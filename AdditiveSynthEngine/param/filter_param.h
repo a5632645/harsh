@@ -32,10 +32,9 @@ struct Filter_Cutoff { // arg0
 };
 
 struct Filter_Resonance { // arg1
-    // Todo
     static constexpr auto kName = "resonance"sv;
     static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 1.0f;
+    static constexpr float kMax = 20.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr int kTextPrecision = 1;
     static constexpr auto kStuff = "dB"sv;
@@ -103,7 +102,7 @@ struct Filter_CombPhaser { // arg5
 struct Filter_PhaserNotches { // arg3
     static constexpr int kArgIdx = 3;
     static constexpr float kMin = 1.0f;
-    static constexpr float kMax = 16.0f;
+    static constexpr float kMax = 8.0f;
     static constexpr float kDefault = 1.0f;
     static constexpr int kTextPrecision = 0;
     static constexpr auto kName = "notch"sv;
@@ -112,7 +111,7 @@ struct Filter_PhaserNotches { // arg3
 struct Filter_PhaserWidth { // arg5
     static constexpr int kArgIdx = 5;
     static constexpr float kMin = 0.1f;
-    static constexpr float kMax = 24.0f;
+    static constexpr float kMax = 120.0f;
     static constexpr float kDefault = 1.0f;
     static constexpr int kTextPrecision = 1;
     static constexpr auto kName = "width"sv;

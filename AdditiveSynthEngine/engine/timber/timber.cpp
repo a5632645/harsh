@@ -1,5 +1,7 @@
 #include "timber.h"
 
+#include <ranges>
+#include <algorithm>
 #include "param/param.h"
 
 namespace mana {
@@ -9,8 +11,12 @@ void Timber::Init(float sample_rate) {
 }
 
 void Timber::Process(Partials& partials) {
-    using enum param::TimberType::TimberEnum;
+    if (!is_note_on_) {
+        std::ranges::fill(partials.gains, float{});
+        return;
+    }
 
+    using enum param::TimberType::TimberEnum;
     switch (timber_type_) {
     case kDualSaw:
         dual_saw_.Process(partials);
@@ -21,20 +27,22 @@ void Timber::Process(Partials& partials) {
     }
 }
 
-void Timber::OnUpdateTick(const SynthParam& params, int skip) {
+void Timber::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
     timber_type_ = param::IntChoiceParam<param::TimberType, param::TimberType::TimberEnum>::GetEnum(
         params.timber.timber_type
     );
 
-    dual_saw_.OnUpdateTick(params, skip);
-    sync_.OnUpdateTick(params, skip);
+    dual_saw_.OnUpdateTick(params, skip, module_idx);
+    sync_.OnUpdateTick(params, skip, module_idx);
 }
 
 void Timber::OnNoteOn(int note) {
+    is_note_on_ = true;
     dual_saw_.OnNoteOn(note);
     sync_.OnNoteOn(note);
 }
 
 void Timber::OnNoteOff() {
+    is_note_on_ = false;
 }
 }

@@ -49,15 +49,15 @@ int main(void) {
         for (size_t i = 0; i < mana::kNumPartials; ++i) {
             auto x_nor = partials.pitches[i] / 140.0f;
             auto y_nor = 0.0f;
-            if (partials.gains[i] >= 0.00001f) {
-                auto y_del = std::clamp(20.0f * std::log10(partials.gains[i]), -60.0f, 20.0f);
+            auto y_gain = std::abs(partials.gains[i]);
+            if (y_gain >= 0.00001f) {
+                auto y_del = std::clamp(20.0f * std::log10(y_gain), -60.0f, 20.0f);
                 y_nor = (y_del + 60.0f) / 80.0f;
             }
             int x = static_cast<int>(800 * x_nor);
             int y = static_cast<int>(600 * (1.0f - y_nor));
-            DrawLine(x, y, x, 600, RAYWHITE);
+            DrawLine(x, y, x, 600, GREEN);
         }
-
 
         EndDrawing();
     }

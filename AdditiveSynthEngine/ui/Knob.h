@@ -29,6 +29,8 @@ public:
 
     float get_value() const;
 
+    void SetEnable(bool enable);
+
     std::function<std::string(float)> value_to_text_function = EmptyV2Tcaller;
 protected:
     std::string_view m_name{ "unkown" };
@@ -44,6 +46,7 @@ protected:
     int m_number_font_size = 10;
 
     bool m_isPressed = false;
+    bool enable_ = true;
     Vector2 m_lastMousePosition{};
     int m_counter = 0;
 

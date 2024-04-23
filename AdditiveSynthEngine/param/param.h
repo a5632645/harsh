@@ -12,11 +12,20 @@ template<typename DetailParam>
 }
 struct FloatParam {
     static constexpr bool kHasStuff = requires {DetailParam::kStuff; };
+    static constexpr bool kHasArgIdx = requires {DetailParam::kArgIdx; };
 
     static constexpr float kNorDefault = (DetailParam::kDefault - DetailParam::kMin) / (DetailParam::kMax - DetailParam::kMin);
 
     static constexpr float GetNumber(float nor) {
         return std::lerp(DetailParam::kMin, DetailParam::kMax, nor);
+    }
+
+    template<size_t N>
+    static constexpr float GetNumber(const std::array<float, N>& arr) {
+        static_assert(kHasArgIdx, "must has arg index.");
+        static_assert(DetailParam::kArgIdx < N, "must valid arg idx");
+
+        return GetNumber(arr[DetailParam::kArgIdx]);
     }
 
     static std::string GetText(float nor) {

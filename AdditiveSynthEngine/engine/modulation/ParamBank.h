@@ -16,6 +16,6 @@ public:
 
     Parameter* GetParamPtr(std::string_view id) const;
 private:
-    std::unordered_map<std::string_view, std::shared_ptr<Parameter>> parameters_;
+    std::unordered_map<std::string, std::shared_ptr<Parameter>> parameters_;
 };
 }

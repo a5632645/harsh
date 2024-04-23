@@ -19,7 +19,7 @@ void StringDissonance::Process(Partials& partials) {
     }
 }
 
-void StringDissonance::OnUpdateTick(const SynthParam& param, int skip) {
+void StringDissonance::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
     auto ratio_idx = param::FloatChoiceParam<param::StringMultiRatio, param::StringMultiRatio::RatioEnum>::GetChoiceIndex(
         param.dissonance.arg1
     );

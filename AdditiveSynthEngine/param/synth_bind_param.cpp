@@ -37,6 +37,13 @@ void Synth::BindParam() {
     param_bank_.AddOrCreateIfNull("filter.arg5", 0.0f)
         .on_output_changed = [this](float v) {synth_param_.filter.arg5 = v; };
 
+    for (int effect_idx = 0; effect_idx < 3; ++effect_idx) {
+        for (int arg_idx = 0; arg_idx < 6; ++arg_idx) {
+            param_bank_.AddOrCreateIfNull(std::format("effect{}.arg{}", effect_idx, arg_idx), 0.0f)
+                .on_output_changed = [this, effect_idx, arg_idx](float v) {synth_param_.effects[effect_idx].args[arg_idx] = v; };
+        }
+    }
+
     //param_bank_.AddOrCreateIfNull("timber_proc.hard_sync.sync", "sync", 1.0f, 1.0f, 16.0f, 0.1f)
     //    .on_output_changed = [this](float v) {synth_param_.timber_proc_param.hard_sync.sync = v; };
 

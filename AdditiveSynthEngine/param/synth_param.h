@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 namespace mana {
 struct SynthParam {
     // standard
@@ -39,5 +41,13 @@ struct SynthParam {
         float arg4;
         float arg5;
     } filter;
+
+    // effect
+    struct EffectParams {
+        bool is_enable;
+        int effect_type;
+        std::array<float, 6> args;
+    };
+    std::array<EffectParams, 3 > effects;
 };
 }

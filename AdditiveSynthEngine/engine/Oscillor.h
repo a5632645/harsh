@@ -10,7 +10,6 @@
 #include "IProcessor.h"
 
 namespace mana {
-
 class Oscillor {
 public:
     Oscillor();
@@ -25,8 +24,8 @@ public:
     }
 
     bool IsPlaying() const {
+        return true;
         return midi_note_ != -1;
-        //return true;
     }
 
     int getMidiNote() const {
@@ -35,6 +34,7 @@ public:
 
     void NoteOff() {
         midi_note_ = -1;
+        std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnNoteOff(); });
     }
 
     void forceChangeNoteNumber(int note) {

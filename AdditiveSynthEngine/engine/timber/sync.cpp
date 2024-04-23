@@ -12,7 +12,7 @@ static constexpr auto kTriTable = makeHarmonicArray<kNumPartials>([](float x) {
     if ((xint & 1) == 0) {
         return 0.0f;
     }
-    
+
     auto x2 = (xint - 1) / 2;
     auto sign = 1.0f;
     if ((x2 & 1) == 1) {
@@ -34,6 +34,8 @@ static constexpr float GetPartialGain(param::Sync_WaveShape::WaveShape a, int id
         return kSawTable[idx];
     case mana::param::Sync_WaveShape::WaveShape::kSquare:
         return kSquareTable[idx];
+    default:
+        return 0.0f;
     }
 }
 
@@ -73,14 +75,14 @@ void Sync::Process(Partials& partials) {
     }
 }
 
-void Sync::OnUpdateTick(const SynthParam& params, int skip) {
-    auto [a,b,c] = param::FloatChoiceParam<param::Sync_WaveShape, param::Sync_WaveShape::WaveShape>::GetInterpIndex(
+void Sync::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
+    auto [a, b, c] = param::FloatChoiceParam<param::Sync_WaveShape, param::Sync_WaveShape::WaveShape>::GetInterpIndex(
         params.timber.arg0
     );
     first_shape_ = a;
     second_shape_ = b;
     fraction_ = c;
-    
+
     auto semitone = param::FloatParam<param::Sync_Sync>::GetNumber(params.timber.arg1);
     sync_ratio_ = std::exp2(semitone / 12.0f);
 }

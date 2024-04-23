@@ -15,6 +15,7 @@ void Filter::Process(Partials& partials) {
 
     switch (filter_type_) {
     case param::Filter_Type::TypeEnum::kLowpass:
+        DoLowPassFilter(partials);
         break;
     case param::Filter_Type::TypeEnum::kCombFilter:
         SetCombCutoff(std::lerp(normalized_cutoff_, partials.base_frequency * std::exp2(cutoff_semitone_ / 12.0f), key_track_),
@@ -27,7 +28,7 @@ void Filter::Process(Partials& partials) {
     }
 }
 
-void Filter::OnUpdateTick(const SynthParam& params, int skip) {
+void Filter::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
     filter_type_ = param::IntChoiceParam<param::Filter_Type, param::Filter_Type::TypeEnum>::GetEnum(
         params.filter.filter_type
     );
@@ -36,6 +37,7 @@ void Filter::OnUpdateTick(const SynthParam& params, int skip) {
     normalized_cutoff_ = std::exp2(cutoff_semitone_ / 12.0f) * 8.1758f * 2.0f / sample_rate_;
     slope_ = param::FloatParam<param::Filter_Slope>::GetNumber(params.filter.arg2);
     key_track_ = param::FloatParam<param::Filter_KeyTracking>::GetNumber(params.filter.arg3);
+    resonance_ = std::exp(0.11512925464970228420089957273422f * param::FloatParam<param::Filter_Resonance>::GetNumber(params.filter.arg4));
 
     // comb
     comb_shape_ = param::FloatParam<param::Filter_CombShape>::GetNumber(params.filter.arg1);
@@ -45,19 +47,25 @@ void Filter::OnUpdateTick(const SynthParam& params, int skip) {
 
     // phaser
     phaser_width_ = param::FloatParam<param::Filter_PhaserWidth>::GetNumber(params.filter.arg5);
-    phaser_cycles_ = std::numbers::pi_v<float> / phaser_width_ * phaser_notches_;
+    phaser_cycles_ = std::numbers::pi_v<float> *2.0f / phaser_width_ * phaser_notches_;
     phaser_depth_ = param::FloatParam<param::Filter_PhaserDepth>::GetNumber(params.filter.arg4);
     phaser_notches_ = param::FloatParam<param::Filter_PhaserNotches>::GetNumber(params.filter.arg3);
     phaser_phase_ = param::FloatParam<param::Filter_PhaserPhase>::GetNumber(params.filter.arg2) * std::numbers::pi_v<float>*2.0f;
     phaser_shape_ = param::FloatParam<param::Filter_PhaserShape>::GetNumber(params.filter.arg1);
-    phaser_begin_pitch_ = cutoff_semitone_ - phaser_width_;
-    phaser_end_pitch_ = cutoff_semitone_ + phaser_width_;
+    phaser_begin_pitch_ = cutoff_semitone_ - phaser_width_ * 0.5f;
+    phaser_end_pitch_ = cutoff_semitone_ + phaser_width_ * 0.5f;
 }
 
 void Filter::OnNoteOn(int note) {
 }
 
 void Filter::OnNoteOff() {
+}
+
+// ===============================================================
+// low pass
+// ===============================================================
+void Filter::DoLowPassFilter(Partials& partials) {
 }
 
 // ===============================================================
@@ -110,19 +118,46 @@ void Filter::DoCombFilter(Partials& partials) {
 void Filter::DoPhaserFilter(Partials& partials) {
     for (int i = 0; i < kNumPartials; ++i) {
         if (partials.pitches[i] >= phaser_begin_pitch_ && partials.pitches[i] <= phaser_end_pitch_) {
-            auto s = phaser_shape_ * phaser_shape_;
-            auto pitch_offset = partials.pitches[i] - cutoff_semitone_;
-            auto phaser_phase = pitch_offset * phaser_cycles_ + phaser_phase_;
-            auto morph = s > 0.5f ? 1.0f : 2.0f * s;
-            auto phaser_val = CombFunc(phaser_phase, phaser_shape_ * 0.9f);
-            auto phaser_val0 = CombFunc(phaser_phase, 0.0f);
-            auto phaser_f = std::lerp(phaser_val0, phaser_val, morph);
-            auto excite = 1.0f + std::lerp(0.0f, 2.0f * s * s, phaser_f);
-            auto add_gain = std::lerp(0.1f * (1.0f - s), 0.0f, phaser_f);
-            auto final_gain = std::lerp(1.0f, phaser_f * excite + add_gain, comb_depth_);
+            //auto s = phaser_shape_ * phaser_shape_;
+            //auto pitch_offset = partials.pitches[i] - cutoff_semitone_;
+            //auto phaser_phase = pitch_offset * phaser_cycles_ + phaser_phase_;
+            //auto morph = s > 0.5f ? 1.0f : 2.0f * s;
+            //auto phaser_val = CombFunc(phaser_phase, phaser_shape_ * 0.9f);
+            //auto phaser_val0 = CombFunc(phaser_phase, 0.0f);
+            //auto phaser_f = std::lerp(phaser_val0, phaser_val, morph);
+            //auto excite = std::lerp(1.0f, 2.0f * s, s);
+            //auto decay = std::lerp(1.0f, 0.8f * s, s);
+
+            //auto phaser_total_width = phaser_end_pitch_ - phaser_begin_pitch_;
+            //auto window_pos = pitch_offset / phaser_total_width * 2.0f * std::numbers::pi_v<float>;
+            //auto up_window = excite * CombFunc(window_pos, -3.0f) + 1.0f;
+            //auto down_window = 1.0f - decay * CombFunc(window_pos, -3.0f);
+            //auto out_gain = std::lerp(down_window, up_window, phaser_f);
+            //auto gain = std::lerp(1.0f, out_gain, phaser_depth_);
+
+            //gain = up_window;
+            //auto add_gain = std::lerp(0.1f * (1.0f - s), 0.0f, phaser_f);
+            //auto final_gain = std::lerp(1.0f, phaser_f * excite + add_gain, comb_depth_);
             //auto org_gain = 1.0f - PhaserFunc(pitch_offset * phaser_cycles_ + phaser_phase_, phaser_shape_);
 
-            partials.gains[i] *= final_gain;
+            auto pitch_offset = partials.pitches[i] - cutoff_semitone_;
+            auto org_cos_val = -std::cos(pitch_offset * phaser_cycles_ + phaser_phase_);
+            auto cos_shape_val = std::lerp(0.2f, 0.9f, phaser_shape_);
+            auto shaped_cos_val = (org_cos_val - cos_shape_val) / (1.0f - org_cos_val * cos_shape_val);
+            auto shaped_cos_val01 = 0.5f + 0.5f * shaped_cos_val;
+
+            auto s = phaser_shape_ * phaser_shape_;
+            auto up_a = 4.0f / phaser_width_ / phaser_width_;
+            auto window_val = -up_a * pitch_offset * pitch_offset + 1.0f;
+            auto up_excite = std::lerp(0.0f, 2.0f * s * s, s);
+            auto up_window = 1.0f + window_val * up_excite;
+
+            auto down_decay = std::lerp(1.0f, 0.99f, phaser_shape_);
+            auto down_window = 1.0f - window_val;
+            auto out_gain = std::lerp(down_window, up_window, shaped_cos_val01);
+
+            auto gain = std::lerp(1.0f, out_gain, phaser_depth_);
+            partials.gains[i] *= gain;
         }
     }
 }

@@ -16,6 +16,9 @@ void DualSaw::Init(float sample_rate) {
 }
 
 void DualSaw::Process(Partials& partials) {
+    //partials.gains.fill(1.0f);
+    //return;
+
     auto sign = beating_rate_ >= 0.0f ? 0.5f : -0.5f;
     auto second_ratio = static_cast<int>(ratio_);
 
@@ -43,7 +46,7 @@ void DualSaw::Process(Partials& partials) {
     }
 }
 
-void DualSaw::OnUpdateTick(const SynthParam& param, int skip) {
+void DualSaw::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
     ratio_ = param::FloatParam<param::DualSaw_Ratio>::GetNumber(param.timber.arg0);
     beating_rate_ = param::FloatParam<param::DualSaw_BeatingRate>::GetNumber(param.timber.arg1);
     saw_square_ = param::FloatParam<param::DualSaw_SawSquare>::GetNumber(param.timber.arg2);

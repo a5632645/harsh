@@ -6,6 +6,7 @@
 #include "DissonanceLayout.h"
 #include "timber_layout.h"
 #include "filter_layout.h"
+#include "effect_layout.h"
 
 namespace mana {
 class SynthLayout {
@@ -22,5 +23,8 @@ private:
     DissonanceLayout dissonance_layout_;
     TimberLayout timber_layout_;
     FilterLayout filter_layout_;
+    EffectLayout effect_layout0_;
+    EffectLayout effect_layout1_;
+    EffectLayout effect_layout2_;
 };
 }

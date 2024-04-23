@@ -9,7 +9,7 @@ public:
     // 通过 IProcessor 继承
     void Init(float sample_rate) override;
     void Process(Partials & partials) override;
-    void OnUpdateTick(const SynthParam& params, int skip) override;
+    void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override;
     void OnNoteOn(int note) override;
     void OnNoteOff() override;
 private:
@@ -19,6 +19,7 @@ private:
     // ===============================================================
     // sub processor
     // ===============================================================
+    void DoLowPassFilter(Partials& partials);
     float cutoff_semitone_;
     float normalized_cutoff_;
     float resonance_;
@@ -30,7 +31,6 @@ private:
     // ===============================================================
     // comb filter
     // ===============================================================
-    std::array<float, kNumPartials> latched_gains_{};
     void SetCombCutoff(float cutoff, float pitch);
     void DoCombFilter(Partials& partials);
 

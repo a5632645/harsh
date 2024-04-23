@@ -13,11 +13,11 @@ void ParamBank::UpdateParamOutput() {
 Parameter& ParamBank::AddOrCreateIfNull(std::string_view id,
                                         float default_value) {
     auto e = std::make_shared<Parameter>(id, default_value);
-    parameters_[id] = e;
+    parameters_[std::string(id)] = e;
     return *e;
 }
 
 Parameter* ParamBank::GetParamPtr(std::string_view id) const {
-    return parameters_.at(id).get();
+    return parameters_.at(std::string(id)).get();
 }
 }

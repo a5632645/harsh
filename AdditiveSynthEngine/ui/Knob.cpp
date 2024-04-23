@@ -19,12 +19,19 @@ Knob::Knob() {
 }
 
 void Knob::display() {
+    if (!enable_) {
+        if (s_currentKnob == this) {
+            s_currentKnob = nullptr;
+        }
+        return;
+    }
+
     // logic
     auto const mousePosition = GetMousePosition();
     bool const isNowDown = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     if (isNowDown && m_isPressed && s_currentKnob == this) {
         auto const deltaY = m_lastMousePosition.y - mousePosition.y;
-        m_counter += deltaY;
+        m_counter += static_cast<int>(deltaY);
         auto const valueInc = m_counter / m_sensitivity;
         m_counter %= m_sensitivity;
         m_value += valueInc * m_step;
@@ -206,5 +213,9 @@ Knob& Knob::set_parameter(Parameter* parameter) {
 
 float Knob::get_value() const {
     return m_value;
+}
+
+void Knob::SetEnable(bool enable) {
+    enable_ = enable;
 }
 }
