@@ -11,6 +11,8 @@ template<typename DetailParam>
     DetailParam::kMin; DetailParam::kMax; DetailParam::kDefault; DetailParam::kTextPrecision;
 }
 struct FloatParam {
+    using TargetParam = DetailParam;
+
     static constexpr bool kHasStuff = requires {DetailParam::kStuff; };
     static constexpr bool kHasArgIdx = requires {DetailParam::kArgIdx; };
 
@@ -43,6 +45,8 @@ template<typename DetailParam, typename EnumType>
     EnumType::kNumEnums; DetailParam::kNames;
 }
 struct FloatChoiceParam {
+    using TargetParam = DetailParam;
+
     static constexpr int kMaxIndex = static_cast<int>(EnumType::kNumEnums) - 1;
 
     static int GetChoiceIndex(float nor) {
@@ -78,6 +82,8 @@ template<typename DetailParam, typename EnumType>
     EnumType::kNumEnums; DetailParam::kNames;
 }
 struct IntChoiceParam {
+    using TargetParam = DetailParam;
+
     static constexpr int GetChoiceIndex(int x) {
         return std::min(x, static_cast<int>(EnumType::kNumEnums) - 1);
     }

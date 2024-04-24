@@ -8,13 +8,15 @@ struct EffectType {
     enum class EffectTypeEnum {
         kOctaver = 0,
         kReverb,
+        kChorus,
         kNumEnums
     };
 
     static constexpr auto kName = "type"sv;
     static constexpr std::array kNames{
             "octaver"sv,
-            "reverb"sv
+            "reverb"sv,
+            "chorus"sv
     };
 };
 
@@ -86,5 +88,47 @@ struct Reverb_Damp { //arg3
     static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 1.0f;
     static constexpr auto kTextPrecision = 2;
+};
+
+// =========================================================
+// down sample
+// =========================================================
+struct Chorus_Amount {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "amount"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 1.0f;
+    static constexpr auto kTextPrecision = 2;
+};
+
+struct Chorus_Depth {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "depth"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 10.0f;
+    static constexpr auto kDefault = 10.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "ms";
+};
+
+struct Chorus_Offset {
+    static constexpr int kArgIdx = 2;
+    static constexpr auto kName = "offset"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 10.0f;
+    static constexpr auto kDefault = 10.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "ms";
+};
+
+struct Chorus_Speed {
+    static constexpr int kArgIdx = 3;
+    static constexpr auto kName = "speed"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "hz"sv;
 };
 }

@@ -64,7 +64,7 @@ add_executable (AdditiveSynthEngine
 "engine/dissonance/dissonance.cpp"
 "engine/dissonance/string.h"
 "engine/dissonance/string.cpp"
- "layout/filter_layout.h" "layout/filter_layout.cpp" "engine/effect/effect.h" "engine/effect/effect.cpp" "param/effect_param.h" "engine/effect/octaver.h" "layout/effect_layout.h" "layout/effect_layout.cpp" "engine/effect/reverb.h")
+ "layout/filter_layout.h" "layout/filter_layout.cpp" "engine/effect/effect.h" "engine/effect/effect.cpp" "param/effect_param.h" "engine/effect/octaver.h" "layout/effect_layout.h" "layout/effect_layout.cpp" "engine/effect/reverb.h"  "engine/effect/chrous.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)

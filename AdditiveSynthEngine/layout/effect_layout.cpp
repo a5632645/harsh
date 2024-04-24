@@ -80,6 +80,19 @@ void EffectLayout::OnEffectTypeChanged(int c) {
     case kReverb:
         SetKnobInfos(kReverbTitles, kReverbTextGetters);
         break;
+    case kChorus:
+        SetKnobInfos<4>({
+            param::Chorus_Amount::kName,
+            param::Chorus_Depth::kName,
+            param::Chorus_Offset::kName,
+            param::Chorus_Speed::kName }
+            , {
+            param::FloatParam<param::Chorus_Amount>::GetText,
+            param::FloatParam<param::Chorus_Depth>::GetText,
+            param::FloatParam<param::Chorus_Offset>::GetText,
+            param::FloatParam<param::Chorus_Speed>::GetText
+            });
+        break;
     default:
         break;
     }

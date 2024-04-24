@@ -7,7 +7,7 @@
 namespace mana {
 class Effect : public IProcessor {
 public:
-    Effect(size_t idx) : effect_idx_(idx) {}
+    Effect(int idx) : effect_idx_(idx) {}
     // 通过 IProcessor 继承
     void Init(float sample_rate) override;
     void Process(Partials & partials) override;
@@ -15,7 +15,7 @@ public:
     void OnNoteOn(int note) override;
     void OnNoteOff() override;
 private:
-    const size_t effect_idx_;
+    const int effect_idx_;
 
     bool is_enable_{};
     param::EffectType::EffectTypeEnum effect_type_{};
