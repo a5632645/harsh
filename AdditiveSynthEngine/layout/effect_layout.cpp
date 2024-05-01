@@ -2,6 +2,7 @@
 
 #include "param/param.h"
 #include "param/effect_param.h"
+#include "layout/gui_param_pack.h"
 
 namespace mana {
 constexpr std::array kOctaveTitles{
@@ -81,17 +82,25 @@ void EffectLayout::OnEffectTypeChanged(int c) {
         SetKnobInfos(kReverbTitles, kReverbTextGetters);
         break;
     case kChorus:
-        SetKnobInfos<4>({
-            param::Chorus_Amount::kName,
-            param::Chorus_Depth::kName,
-            param::Chorus_Offset::kName,
-            param::Chorus_Speed::kName }
-            , {
-            param::FloatParam<param::Chorus_Amount>::GetText,
-            param::FloatParam<param::Chorus_Depth>::GetText,
-            param::FloatParam<param::Chorus_Offset>::GetText,
-            param::FloatParam<param::Chorus_Speed>::GetText
-            });
+        SetGuiKnobs(arg_knobs_,
+                    param::FloatParam<param::Chorus_Amount>{},
+                    param::FloatParam<param::Chorus_Depth>{},
+                    param::FloatParam<param::Chorus_Offset>{},
+                    param::FloatParam<param::Chorus_Speed>{});
+            break;
+    case kPhaser:
+        SetGuiKnobs(arg_knobs_,
+                    param::FloatParam<param::Phaser_BarberRate>{},
+                    param::FloatParam<param::Phaser_Cycles>{},
+                    param::FloatParam<param::Phaser_Mix>{},
+                    param::FloatParam<param::Phaser_Pinch>{},
+                    param::FloatChoiceParam<param::Phaser_Mode, param::Phaser_Mode::Mode>{},
+                    param::FloatChoiceParam<param::Phaser_Shape, param::Phaser_Shape::Shapes>{});
+        break;
+    case kScramble:
+        SetGuiKnobs(arg_knobs_,
+                    param::FloatParam<param::Scramble_Range>{},
+                    param::FloatParam<param::Scramble_Rate>{});
         break;
     default:
         break;

@@ -17,6 +17,7 @@ public:
 
     Knob& set_title(std::string_view name);
     Knob& set_range(float min, float max, float step, float default_value);
+    Knob& SetDefaultValue(float dv);
     Knob& set_sensitivity(int sensitivity);
     Knob& set_fore_color(Color fore_color);
     Knob& set_bg_color(Color bg_color);

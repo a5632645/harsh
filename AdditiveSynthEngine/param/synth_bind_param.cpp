@@ -11,13 +11,13 @@ void Synth::BindParam() {
         .on_output_changed = [this](float v) {synth_param_.standard.pitch_bend = v; };
 
     param_bank_.AddOrCreateIfNull("timber.arg0", param::FloatParam<param::DualSaw_Ratio>::kNorDefault)
-        .on_output_changed = [this](float v) {synth_param_.timber.arg0 = v; };
+        .on_output_changed = [this](float v) {synth_param_.timber.args[0] = v; };
     param_bank_.AddOrCreateIfNull("timber.arg1", param::FloatParam<param::DualSaw_BeatingRate>::kNorDefault)
-        .on_output_changed = [this](float v) {synth_param_.timber.arg1 = v; };
+        .on_output_changed = [this](float v) {synth_param_.timber.args[1] = v; };
     param_bank_.AddOrCreateIfNull("timber.arg2", param::FloatParam<param::DualSaw_SawSquare>::kNorDefault)
-        .on_output_changed = [this](float v) {synth_param_.timber.arg2 = v; };
+        .on_output_changed = [this](float v) {synth_param_.timber.args[2] = v; };
     param_bank_.AddOrCreateIfNull("timber.arg3", 0.0f)
-        .on_output_changed = [this](float v) {synth_param_.timber.arg3 = v; };
+        .on_output_changed = [this](float v) {synth_param_.timber.args[3] = v; };
 
     param_bank_.AddOrCreateIfNull("dissonance.arg0", param::FloatParam<param::StringDissStretch>::kNorDefault)
         .on_output_changed = [this](float v) {synth_param_.dissonance.arg0 = v; };

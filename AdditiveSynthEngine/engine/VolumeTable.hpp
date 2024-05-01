@@ -8,6 +8,16 @@ constexpr std::array<float, N> makeArray(std::index_sequence<Is...>) {
     return { (Is + 1.0F)... };
 };
 
+template<size_t N, typename Func>
+constexpr std::array<float, N> MakeNormalizeTable(Func func) {
+    std::array<float, N> res;
+    for (size_t i = 0; i < N; ++i) {
+        auto pos = static_cast<float>(i) / static_cast<float>(N);
+        res[i] = func(pos);
+    }
+    return res;
+}
+
 template<size_t N, typename Fun>
 constexpr std::array<float, N> makeHarmonicArray(Fun fun) {
     auto a = makeArray<N>(std::make_index_sequence<N>());

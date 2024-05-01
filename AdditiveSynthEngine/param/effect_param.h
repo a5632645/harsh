@@ -9,6 +9,8 @@ struct EffectType {
         kOctaver = 0,
         kReverb,
         kChorus,
+        kPhaser,
+        kScramble,
         kNumEnums
     };
 
@@ -16,8 +18,12 @@ struct EffectType {
     static constexpr std::array kNames{
             "octaver"sv,
             "reverb"sv,
-            "chorus"sv
+            "chorus"sv,
+            "phaser"sv,
+            "scramble"sv
     };
+
+    static_assert(static_cast<size_t>(EffectTypeEnum::kNumEnums) == kNames.size());
 };
 
 // =========================================================
@@ -91,7 +97,7 @@ struct Reverb_Damp { //arg3
 };
 
 // =========================================================
-// down sample
+// chorus
 // =========================================================
 struct Chorus_Amount {
     static constexpr int kArgIdx = 0;
@@ -130,5 +136,107 @@ struct Chorus_Speed {
     static constexpr auto kDefault = 0.0f;
     static constexpr auto kTextPrecision = 1;
     static constexpr auto kStuff = "hz"sv;
+};
+
+// =========================================================
+// phaser
+// =========================================================
+struct Phaser_Cycles {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "cycles"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 1;
+};
+
+struct Phaser_Shape {
+    enum class Shapes {
+        kBox = 0,
+        kParabola,
+        kSine,
+        kTri,
+        kDeep,
+        kNumEnums
+    };
+
+    static constexpr std::array kNames{
+        "box"sv,
+        "parabola"sv,
+        "sine"sv,
+        "tri"sv,
+        "deep"sv
+    };
+
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "shape"sv;
+};
+
+struct Phaser_Mix {
+    static constexpr int kArgIdx = 2;
+    static constexpr auto kName = "mix"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 1.0f;
+    static constexpr auto kTextPrecision = 2;
+};
+
+struct Phaser_Pinch {
+    static constexpr int kArgIdx = 3;
+    static constexpr auto kName = "pinch"sv;
+    static constexpr auto kMin = -1.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 2;
+};
+
+struct Phaser_BarberRate {
+    static constexpr int kArgIdx = 4;
+    static constexpr auto kName = "rate"sv;
+    static constexpr auto kMin = -10.0f;
+    static constexpr auto kMax = 10.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "hz"sv;
+};
+
+struct Phaser_Mode {
+    enum class Mode {
+        kSemitone = 0,
+        kHz,
+        kHarmonic,
+        kNumEnums
+    };
+
+    static constexpr std::array kNames{
+        "semitone"sv,
+        "hz"sv,
+        "harmonic"sv
+    };
+
+    static constexpr int kArgIdx = 5;
+    static constexpr auto kName = "mode"sv;
+};
+
+// =========================================================
+// scramble
+// =========================================================
+struct Scramble_Rate {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "rate"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 10.0f;
+    static constexpr auto kDefault = 1.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "hz"sv;
+};
+
+struct Scramble_Range {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "range"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.2f;
+    static constexpr auto kTextPrecision = 2;
 };
 }

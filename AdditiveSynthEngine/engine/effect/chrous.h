@@ -22,7 +22,7 @@ public:
             auto gain_cpx = std::complex(1.0f, 0.0f)
                 + std::polar(1.0f, voice1_delay_samples * partials.freqs[i])
                 + std::polar(1.0f, voice2_delay_samples * partials.freqs[i]);
-            auto wet_gain = std::abs(gain_cpx) / 4.0f;
+            auto wet_gain = std::abs(gain_cpx);
             partials.gains[i] = std::lerp(partials.gains[i], partials.gains[i] * wet_gain, amount_);
         }
     }
@@ -31,7 +31,7 @@ public:
         amount_ = param::FloatParam<param::Chorus_Amount>::GetNumber(params.effects[module_idx].args);
         depth_num_samples_ = param::FloatParam<param::Chorus_Depth>::GetNumber(params.effects[module_idx].args) * sample_rate_ / 1000.0f;
         offset_num_samples_ = param::FloatParam<param::Chorus_Offset>::GetNumber(params.effects[module_idx].args) * sample_rate_ / 1000.0f;
-        speed_ = param::FloatParam<param::Chorus_Speed>::GetNumber(params.effects[module_idx].args);
+        lfo_rate_ = param::FloatParam<param::Chorus_Speed>::GetNumber(params.effects[module_idx].args);
         UpdateLfo(skip);
     }
     void OnNoteOn(int note) override {}
@@ -39,7 +39,7 @@ public:
 private:
     void UpdateLfo(int skip) {
         float val{};
-        float phase_inc = skip * speed_ / sample_rate_;
+        float phase_inc = skip * lfo_rate_ / sample_rate_;
         lfo_phase_ += phase_inc;
         lfo_phase_ = std::modf(lfo_phase_, &val);
         voice_phase_ = std::sin(std::numbers::pi_v<float> *lfo_phase_);
@@ -49,7 +49,7 @@ private:
     float amount_;
     float depth_num_samples_;
     float offset_num_samples_;
-    float speed_;
+    float lfo_rate_;
     float sample_rate_;
     float lfo_phase_;
     float voice_phase_;

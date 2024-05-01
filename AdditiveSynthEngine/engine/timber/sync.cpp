@@ -77,13 +77,13 @@ void Sync::Process(Partials& partials) {
 
 void Sync::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
     auto [a, b, c] = param::FloatChoiceParam<param::Sync_WaveShape, param::Sync_WaveShape::WaveShape>::GetInterpIndex(
-        params.timber.arg0
+        params.timber.args[param::Sync_WaveShape::kArgIdx]
     );
     first_shape_ = a;
     second_shape_ = b;
     fraction_ = c;
 
-    auto semitone = param::FloatParam<param::Sync_Sync>::GetNumber(params.timber.arg1);
+    auto semitone = param::FloatParam<param::Sync_Sync>::GetNumber(params.timber.args);
     sync_ratio_ = std::exp2(semitone / 12.0f);
 }
 

@@ -7,10 +7,10 @@
 #include "effect/effect.h"
 
 namespace mana {
-Oscillor::Oscillor() {
+Oscillor::Oscillor(Synth& synth) {
     AddProcessor(std::make_shared<FreqProcessor>());
     AddProcessor(std::make_shared<Dissonance>());
-    AddProcessor(std::make_shared<Timber>());
+    AddProcessor(std::make_shared<Timber>(synth));
     AddProcessor(std::make_shared<Filter>());
     AddProcessor(std::make_shared<Effect>(0));
     AddProcessor(std::make_shared<Effect>(1));

@@ -46,13 +46,11 @@ template<typename DetailParam, typename EnumType>
 }
 struct FloatChoiceParam {
     using TargetParam = DetailParam;
-
     static constexpr int kMaxIndex = static_cast<int>(EnumType::kNumEnums) - 1;
 
     static int GetChoiceIndex(float nor) {
         auto f = nor * kMaxIndex;
         return static_cast<int>(std::round(f));
-        //return std::min(static_cast<int>(nor * static_cast<float>(EnumType::kNumEnums)), static_cast<int>(EnumType::kNumEnums) - 1);
     }
 
     static constexpr auto GetInterpIndex(float nor) {
@@ -66,6 +64,11 @@ struct FloatChoiceParam {
         auto fd = static_cast<int>(f);
         auto fu = std::min(kMaxIndex, fd + 1);
         return R{ static_cast<EnumType>(fd), static_cast<EnumType>(fu), f - fd };
+    }
+
+    template<std::ranges::input_range RNG>
+    static constexpr auto GetInterpIndex(RNG&& args) {
+        return GetInterpIndex(args[DetailParam::kArgIdx]);
     }
 
     static constexpr EnumType GetEnum(float nor) {

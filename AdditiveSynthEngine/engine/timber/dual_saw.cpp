@@ -47,9 +47,9 @@ void DualSaw::Process(Partials& partials) {
 }
 
 void DualSaw::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
-    ratio_ = param::FloatParam<param::DualSaw_Ratio>::GetNumber(param.timber.arg0);
-    beating_rate_ = param::FloatParam<param::DualSaw_BeatingRate>::GetNumber(param.timber.arg1);
-    saw_square_ = param::FloatParam<param::DualSaw_SawSquare>::GetNumber(param.timber.arg2);
+    ratio_ = param::FloatParam<param::DualSaw_Ratio>::GetNumber(param.timber.args);
+    beating_rate_ = param::FloatParam<param::DualSaw_BeatingRate>::GetNumber(param.timber.args);
+    saw_square_ = param::FloatParam<param::DualSaw_SawSquare>::GetNumber(param.timber.args);
 
     auto inc = std::abs(beating_rate_) * skip / sample_rate_;
     beating_phase_ += inc;

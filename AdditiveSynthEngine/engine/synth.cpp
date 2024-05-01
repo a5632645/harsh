@@ -1,8 +1,13 @@
 #include "synth.h"
 
+#include <AudioFFT.h>
+#include "window.h"
+
 namespace mana {
 Synth::Synth() {
-    m_oscillators.resize(kNumOscillors);
+    for (int i = 0; i < kNumOscillors; ++i) {
+        m_oscillators.emplace_back(*this);
+    }
     BindParam();
 }
 
@@ -73,5 +78,83 @@ const Oscillor& Synth::GetDisplayOscillor() const {
     }
 
     return m_oscillators[last_played];
+}
+
+static float PhaseWrap(float p) {
+    while (p > std::numbers::pi_v<float>) {
+        p -= std::numbers::pi_v<float> *2.0f;
+    }
+    while (p < -std::numbers::pi_v<float>) {
+        p += std::numbers::pi_v<float> *2.0f;
+    }
+    return p;
+}
+
+void Synth::CreateResynthsisFrames(const std::vector<float>& sample) {
+    audiofft::AudioFFT fft;
+    Window<float> window;
+    fft.init(kFFtSize);
+    window.Init(kFFtSize);
+
+    auto num_frame = static_cast<size_t>((sample.size() - static_cast<float>(kFFtSize)) / static_cast<float>(kFFtHop));
+    ResynthsisFrames audio_frames;
+    audio_frames.frames.reserve(num_frame);
+
+    auto read_pos = 0;
+    const auto num_bin = audiofft::AudioFFT::ComplexSize(kFFtSize);
+    std::vector<float> phases(num_bin);
+    std::vector<float> real(num_bin);
+    std::vector<float> imag(num_bin);
+    std::vector<float> fft_buffer(kFFtSize, 0.0f);
+    while (num_frame--) {
+        if (read_pos + kFFtSize <= sample.size()) {
+            // directly fft from sample
+            auto it = sample.begin() + read_pos;
+            std::copy(it, it + kFFtSize, fft_buffer.begin());
+        }
+        else {
+            // fill zero
+            const auto num_samples_can_read = sample.size() - read_pos;
+            for (int i = 0; i < num_samples_can_read; ++i) {
+                fft_buffer[i] = sample.at(read_pos + i);
+            }
+        }
+
+        window.ApplyWindow(fft_buffer);
+        fft.fft(fft_buffer.data(), real.data(), imag.data());
+
+        ResynthsisFrames::FftFrame new_frame;
+        if (audio_frames.frames.empty()) {
+            for (int i = 0; i < kNumPartials; ++i) {
+                const auto c = std::complex(real[i + 1], imag[i + 1]);
+                new_frame.gains[i] = std::abs(c) / kHarmonics;
+                new_frame.freq_diffs[i] = 0.0f;
+                phases[i] = std::arg(c);
+            }
+        }
+        else {
+            const auto& last_frame = audio_frames.frames.back();
+            for (int i = 0; i < kNumPartials; ++i) {
+                const auto c = std::complex(real[i + 1], imag[i + 1]);
+                new_frame.gains[i] = std::abs(c) / kHarmonics;
+                auto this_frame_phase = std::arg(c);
+
+                // calculate instant frequency
+                const auto bin_frequency = static_cast<float>(i + 1) * std::numbers::pi_v<float> *2.0f / static_cast<float>(kFFtSize);
+                const auto target_phase = bin_frequency * kFFtHop + phases[i];
+                const auto phase_diff = PhaseWrap(this_frame_phase - target_phase);
+                const auto instant_freq = phase_diff * 2.0f / (kFFtHop * std::numbers::pi_v<float>) + (1.0f + i) / static_cast<float>(kFFtSize / 2);
+                const auto c3_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
+                new_frame.freq_diffs[i] = instant_freq - c3_freq * (1.0f + i);
+                phases[i] = this_frame_phase;
+            }
+        }
+        audio_frames.frames.emplace_back(std::move(new_frame));
+        read_pos += kFFtHop;
+    }
+
+    timber_resynthsis_frames_.frames.swap(audio_frames.frames);
+    timber_resynthsis_frames_.data_sample_rate = 48000.0f;
+    timber_resynthsis_frames_.data_series_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
 }
 }

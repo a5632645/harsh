@@ -3,12 +3,16 @@
 #include "octaver.h"
 #include "reverb.h"
 #include "chrous.h"
+#include "phaser.h"
+#include "scramble.h"
 
 namespace mana {
 void Effect::Init(float sample_rate) {
     processers_[param::EffectType::EffectTypeEnum::kOctaver] = std::make_unique<Octaver>();
     processers_[param::EffectType::EffectTypeEnum::kReverb] = std::make_unique<Reverb>();
     processers_[param::EffectType::EffectTypeEnum::kChorus] = std::make_unique<Chorus>();
+    processers_[param::EffectType::EffectTypeEnum::kPhaser] = std::make_unique<Phaser>();
+    processers_[param::EffectType::EffectTypeEnum::kScramble] = std::make_unique<Scramble>();
 
     for (auto&&[k, v] : processers_) {
         v->Init(sample_rate);

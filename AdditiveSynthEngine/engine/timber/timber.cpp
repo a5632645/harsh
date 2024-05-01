@@ -24,6 +24,9 @@ void Timber::Process(Partials& partials) {
     case kSync:
         sync_.Process(partials);
         break;
+    case kResynthsis:
+        resynthesis_.Process(partials);
+        break;
     }
 }
 
@@ -34,6 +37,7 @@ void Timber::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
 
     dual_saw_.OnUpdateTick(params, skip, module_idx);
     sync_.OnUpdateTick(params, skip, module_idx);
+    resynthesis_.OnUpdateTick(params, skip, module_idx);
 }
 
 void Timber::OnNoteOn(int note) {

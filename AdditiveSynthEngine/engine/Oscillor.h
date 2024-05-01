@@ -10,9 +10,13 @@
 #include "IProcessor.h"
 
 namespace mana {
+class Synth;
+}
+
+namespace mana {
 class Oscillor {
 public:
-    Oscillor();
+    Oscillor(Synth& synth);
 
     void Init(size_t bufferSize, float sampleRate);
 

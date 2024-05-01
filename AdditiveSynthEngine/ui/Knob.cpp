@@ -161,6 +161,11 @@ Knob& Knob::set_range(float min, float max, float step, float default_value) {
     return *this;
 }
 
+Knob& Knob::SetDefaultValue(float dv) {
+    m_default_alue = dv;
+    return *this;
+}
+
 Knob& Knob::set_sensitivity(int sensitivity) {
     m_sensitivity = sensitivity;
     return *this;
