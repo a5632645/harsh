@@ -1,7 +1,7 @@
 #include "SynthLayout.h"
 
 #include "param/standard_param.h"
-#include "param/timber.h"
+#include "param/timber_param.h"
 #include "param/param.h"
 
 namespace mana {
@@ -12,7 +12,8 @@ SynthLayout::SynthLayout(Synth& synth)
     , filter_layout_(synth)
     , effect_layout0_(synth, 0)
     , effect_layout1_(synth, 1)
-    , effect_layout2_(synth, 2) {
+    , effect_layout2_(synth, 2)
+    , resynthsis_layout_(synth) {
     const auto& bank = synth.GetParamBank();
 
     pitch_bend_.set_parameter(bank.GetParamPtr("standard.pitch_bend"));
@@ -30,6 +31,7 @@ void SynthLayout::paint() {
     effect_layout0_.Paint();
     effect_layout1_.Paint();
     effect_layout2_.Paint();
+    resynthsis_layout_.Paint();
 }
 
 void SynthLayout::SetBounds(int x, int y, int w, int h) {
@@ -41,5 +43,6 @@ void SynthLayout::SetBounds(int x, int y, int w, int h) {
     effect_layout0_.SetBounds(0, 156, 150, 156);
     effect_layout1_.SetBounds(150, 156, 150, 156);
     effect_layout2_.SetBounds(300, 156, 150, 156);
+    resynthsis_layout_.SetBounds(0, 156 * 2 + 30, 300, 70);
 }
 }

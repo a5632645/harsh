@@ -5,7 +5,7 @@
 #include "Oscillor.h"
 #include "modulation/ParamBank.h"
 #include "param/synth_param.h"
-#include "engine/resynthsis_data.h"
+#include "resynthsis/resynthsis_data.h"
 
 namespace mana {
 class Synth {
@@ -29,17 +29,24 @@ public:
     const Oscillor& GetDisplayOscillor() const;
     const ParamBank& GetParamBank() const { return param_bank_; }
     SynthParam& GetSynthParam() { return synth_param_; }
-    ResynthsisFrames& GetResynthsisFrames() { return timber_resynthsis_frames_; }
+
+    ResynthsisFrames& GetResynthsisFrames() { return resynthsis_frames_; }
+    bool IsResynthsisAvailable() const { return !resynthsis_frames_.frames.empty(); }
     void CreateResynthsisFrames(const std::vector<float>& audio_in);
 private:
     void BindParam();
 
+    ResynthsisFrames resynthsis_frames_;
+
     ParamBank param_bank_;
+
     SynthParam synth_param_;
-    ResynthsisFrames timber_resynthsis_frames_;
+
     std::vector<float> audio_buffer_;
+
     std::vector<Oscillor> m_oscillators;
     size_t m_rrPosition{};
+
     float sample_rate_{};
 };
 }

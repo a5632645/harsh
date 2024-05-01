@@ -24,8 +24,8 @@ public:
     }
 
     void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
-        scramble_range_ = param::FloatParam<param::Scramble_Range>::GetNumber(params.effects[module_idx].args);
-        lfo_rate_ = param::FloatParam<param::Scramble_Rate>::GetNumber(params.effects[module_idx].args);
+        scramble_range_ = param::Scramble_Range::GetNumber(params.effects[module_idx].args);
+        lfo_rate_ = param::Scramble_Rate::GetNumber(params.effects[module_idx].args);
         UpdateLfoAndIndexTable(skip);
     }
     void OnNoteOn(int note) override {}
@@ -34,7 +34,7 @@ private:
     void UpdateLfoAndIndexTable(int skip) {
         float phase_inc = skip * lfo_rate_ / sample_rate_;
         lfo_phase_ += phase_inc;
-        
+
         if (lfo_phase_ >= 1.0f) {
             lfo_phase_ -= 1.0f;
 
@@ -64,8 +64,8 @@ private:
     float lfo_rate_{};
     float sample_rate_{};
     float lfo_phase_{ 1.0f };
-    std::array<int, kNumPartials> idx_table0_{kInitTable};
-    std::array<int, kNumPartials> idx_table1_{kInitTable};
+    std::array<int, kNumPartials> idx_table0_{ kInitTable };
+    std::array<int, kNumPartials> idx_table1_{ kInitTable };
     std::array<float, kNumPartials> saved_gains_{};
     std::random_device rand_generator_;
 };

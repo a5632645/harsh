@@ -9,7 +9,7 @@ void FreqProcessor::Init(float sample_rate) {
 }
 
 void FreqProcessor::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
-    base_pitch_ = note_pitch_ + param::FloatParam<param::PitchBend>::GetNumber(param.standard.pitch_bend);
+    base_pitch_ = note_pitch_ + param::PitchBend::GetNumber(param.standard.pitch_bend);
     base_frequency_ = std::exp2(base_pitch_ / 12.0f) * 8.1758f * reciprocal_nyquist_rate_;
 }
 
@@ -22,8 +22,6 @@ void FreqProcessor::OnNoteOff() {
 }
 
 void FreqProcessor::Process(Partials& partials) {
-    float freq = base_frequency_;
-
     partials.base_frequency = base_frequency_;
     partials.base_pitch = base_pitch_;
 }

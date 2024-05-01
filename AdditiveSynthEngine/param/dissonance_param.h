@@ -4,8 +4,8 @@
 #include "param/param.h"
 
 namespace mana::param {
-struct DissonanceType {
-    enum class DissonaceTypeEnum {
+struct DissonanceType : IntChoiceParam<DissonanceType> {
+    enum class ParamEnum {
         kString = 0,
         kHarmonicStretch,
         kSemitoneSpace,
@@ -13,13 +13,14 @@ struct DissonanceType {
     };
 
     static constexpr auto kName = "type"sv;
-    static constexpr auto kNames = std::to_array({
-            "string"sv,"harmonic"sv,"st space"sv
-                                                 });
+    static constexpr std::array kNames = {
+        "string"sv,"harmonic"sv,"st space"sv
+    };
 };
 
 // harmonic stretch
-struct HarmonicStrech {
+struct HarmonicStrech : FloatParam<HarmonicStrech> {
+    static constexpr int kArgIdx = 0;
     static constexpr auto kName = "stretch"sv;
     static constexpr auto kMin = 1.0f;
     static constexpr auto kMax = 4.0f;
@@ -30,7 +31,8 @@ struct HarmonicStrech {
 // =========================================================
 // semitone space
 // =========================================================
-struct SemitoneSpace {
+struct SemitoneSpace : FloatParam<SemitoneSpace> {
+    static constexpr int kArgIdx = 0;
     static constexpr auto kName = "pitch"sv;
     static constexpr auto kMin = 0.0f;
     static constexpr auto kMax = 24.0f;
@@ -41,7 +43,8 @@ struct SemitoneSpace {
 // =========================================================
 // string
 // =========================================================
-struct StringDissStretch {
+struct StringDissStretch : FloatParam<StringDissStretch> {
+    static constexpr int kArgIdx = 0;
     static constexpr auto kName = "string"sv;
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 0.1f;
@@ -49,8 +52,8 @@ struct StringDissStretch {
     static constexpr int kTextPrecision = 5;
 };
 
-struct StringMultiRatio {
-    enum class RatioEnum {
+struct StringMultiRatio : FloatChoiceParam<StringMultiRatio> {
+    enum class ParamEnum {
         k1 = 0,
         k10,
         k100,
@@ -59,9 +62,10 @@ struct StringMultiRatio {
         kNumEnums
     };
 
-    static constexpr auto kNames = std::to_array({
-        "1.0", "0.1", "0.01", "0.001", "0.0001"
-                                                 });
+    static constexpr std::array kNames = {
+        "1.0"sv, "0.1"sv, "0.01"sv, "0.001"sv, "0.0001"sv
+    };
     static constexpr auto kName = "scale"sv;
+    static constexpr int kArgIdx = 1;
 };
 }

@@ -1,24 +1,20 @@
 #pragma once
 
 #include "engine/IProcessor.h"
-#include "param/timber.h"
+#include "param/timber_param.h"
 #include "sync.h"
 #include "dual_saw.h"
-#include "resynthsis.h"
 
 namespace mana {
 class Timber : public IProcessor {
 public:
-    Timber(Synth& synth) : resynthesis_(synth) {}
-
-    // 通过 IProcessor 继承
     void Init(float sample_rate) override;
     void Process(Partials & partials) override;
     void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override;
     void OnNoteOn(int note) override;
     void OnNoteOff() override;
 private:
-    param::TimberType::TimberEnum timber_type_;
+    param::TimberType::ParamEnum timber_type_;
 
     bool is_note_on_{};
     // =====================
@@ -26,6 +22,5 @@ private:
     // =====================
     DualSaw dual_saw_;
     Sync sync_;
-    Resynthesis resynthesis_;
 };
 }

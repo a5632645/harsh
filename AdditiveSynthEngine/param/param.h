@@ -7,30 +7,29 @@ namespace mana::param {
 using namespace std::string_view_literals;
 
 template<typename DetailParam>
-    requires requires {
-    DetailParam::kMin; DetailParam::kMax; DetailParam::kDefault; DetailParam::kTextPrecision;
-}
 struct FloatParam {
-    using TargetParam = DetailParam;
-
-    static constexpr bool kHasStuff = requires {DetailParam::kStuff; };
-    static constexpr bool kHasArgIdx = requires {DetailParam::kArgIdx; };
-
-    static constexpr float kNorDefault = (DetailParam::kDefault - DetailParam::kMin) / (DetailParam::kMax - DetailParam::kMin);
+    static constexpr float GetNormalDefault() {
+        static_assert(requires {DetailParam::kMin; DetailParam::kMax; DetailParam::kDefault; });
+        return (DetailParam::kDefault - DetailParam::kMin) / (DetailParam::kMax - DetailParam::kMin);
+    }
 
     static constexpr float GetNumber(float nor) {
+        static_assert(requires {DetailParam::kMin; DetailParam::kMax; });
         return std::lerp(DetailParam::kMin, DetailParam::kMax, nor);
     }
 
     template<size_t N>
     static constexpr float GetNumber(const std::array<float, N>& arr) {
-        static_assert(kHasArgIdx, "must has arg index.");
-        static_assert(DetailParam::kArgIdx < N, "must valid arg idx");
+        constexpr bool kHasArgIdx = requires {DetailParam::kArgIdx; };
+        static_assert(kHasArgIdx, "must have an arg index.");
+        static_assert(DetailParam::kArgIdx < N, "arg idx out of bounds.");
 
         return GetNumber(arr[DetailParam::kArgIdx]);
     }
 
     static std::string GetText(float nor) {
+        constexpr bool kHasStuff = requires {DetailParam::kStuff; DetailParam::kTextPrecision; };
+
         if constexpr (kHasStuff) {
             return std::format("{0:.{1}f} {2}", GetNumber(nor), DetailParam::kTextPrecision, DetailParam::kStuff);
         }
@@ -40,62 +39,86 @@ struct FloatParam {
     }
 };
 
-template<typename DetailParam, typename EnumType>
-    requires requires {
-    EnumType::kNumEnums; DetailParam::kNames;
-}
+template<typename DetailParam>
 struct FloatChoiceParam {
-    using TargetParam = DetailParam;
-    static constexpr int kMaxIndex = static_cast<int>(EnumType::kNumEnums) - 1;
+    static constexpr float GetNormalDefault() {
+        return 0.0f;
+    }
+
+    static constexpr int GetMaxChoiceIndex() {
+        using EnumType = typename DetailParam::ParamEnum;
+
+        static_assert(requires{EnumType::kNumEnums; });
+        return static_cast<int>(EnumType::kNumEnums) - 1;;
+    }
 
     static int GetChoiceIndex(float nor) {
-        auto f = nor * kMaxIndex;
+        auto f = nor * GetMaxChoiceIndex();
         return static_cast<int>(std::round(f));
     }
 
+    template<std::ranges::input_range RNG>
+    static constexpr auto GetChoiceIndex(RNG&& args) {
+        static_assert(requires{DetailParam::kArgIdx; });
+        return GetChoiceIndex(args[DetailParam::kArgIdx]);
+    }
+
     static constexpr auto GetInterpIndex(float nor) {
+        using EnumType = typename DetailParam::ParamEnum;
         struct R {
             EnumType first;
             EnumType second;
             float frac;
         };
 
-        auto f = nor * kMaxIndex;
+        auto f = nor * GetMaxChoiceIndex();
         auto fd = static_cast<int>(f);
-        auto fu = std::min(kMaxIndex, fd + 1);
+        auto fu = std::min(GetMaxChoiceIndex(), fd + 1);
         return R{ static_cast<EnumType>(fd), static_cast<EnumType>(fu), f - fd };
     }
 
     template<std::ranges::input_range RNG>
     static constexpr auto GetInterpIndex(RNG&& args) {
+        static_assert(requires{DetailParam::kArgIdx; });
         return GetInterpIndex(args[DetailParam::kArgIdx]);
     }
 
-    static constexpr EnumType GetEnum(float nor) {
+    static constexpr auto GetEnum(float nor) {
+        using EnumType = typename DetailParam::ParamEnum;
+
         return static_cast<EnumType>(GetChoiceIndex(nor));
     }
 
     static constexpr std::string GetText(float nor) {
+        using EnumType = typename DetailParam::ParamEnum;
+
+        static_assert(requires{DetailParam::kNames; });
+        static_assert(static_cast<size_t>(EnumType::kNumEnums) == std::size(DetailParam::kNames));
+
         return std::string{ DetailParam::kNames[GetChoiceIndex(nor)] };
     }
 };
 
-template<typename DetailParam, typename EnumType>
-    requires requires {
-    EnumType::kNumEnums; DetailParam::kNames;
-}
+template<typename DetailParam>
 struct IntChoiceParam {
-    using TargetParam = DetailParam;
-
     static constexpr int GetChoiceIndex(int x) {
+        using EnumType = typename DetailParam::ParamEnum;
+        static_assert(requires{EnumType::kNumEnums; });
+
         return std::min(x, static_cast<int>(EnumType::kNumEnums) - 1);
     }
 
-    static constexpr EnumType GetEnum(int x) {
+    static constexpr auto GetEnum(int x) {
+        using EnumType = typename DetailParam::ParamEnum;
+
         return static_cast<EnumType>(GetChoiceIndex(x));
     }
 
     static constexpr std::string GetText(int x) {
+        using EnumType = typename DetailParam::ParamEnum;
+        static_assert(requires{DetailParam::kNames; });
+        static_assert(static_cast<size_t>(EnumType::kNumEnums) == std::size(DetailParam::kNames));
+
         return DetailParam::kNames[GetChoiceIndex(x)];
     }
 };

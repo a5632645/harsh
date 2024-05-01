@@ -32,9 +32,9 @@ public:
     }
 
     void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
-        amount_ = param::FloatParam<param::Octaver_Amount>::GetNumber(params.effects[module_idx].args);
-        width_ = param::FloatParam<param::Octaver_Width>::GetNumber(params.effects[module_idx].args);
-        decay_ = param::FloatParam<param::Octaver_Decay>::GetNumber(params.effects[module_idx].args);
+        amount_ = param::Octaver_Amount::GetNumber(params.effects[module_idx].args);
+        width_ = param::Octaver_Width::GetNumber(params.effects[module_idx].args);
+        decay_ = param::Octaver_Decay::GetNumber(params.effects[module_idx].args);
         gain_ = std::lerp(1.0f, 1.0f / (CalcAndCountTotalGain() + 1.0f), amount_);
     }
     void OnNoteOn(int note) override {}

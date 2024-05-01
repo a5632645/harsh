@@ -2,7 +2,7 @@
 
 #include "engine/IProcessor.h"
 #include "param/synth_param.h"
-#include "param/timber.h"
+#include "param/timber_param.h"
 
 namespace mana {
 class Sync : public IProcessor {
@@ -15,8 +15,8 @@ public:
     void OnNoteOff() override;
 
 private:
-    param::Sync_WaveShape::WaveShape first_shape_;
-    param::Sync_WaveShape::WaveShape second_shape_;
+    param::Sync_WaveShape::ParamEnum first_shape_;
+    param::Sync_WaveShape::ParamEnum second_shape_;
     float fraction_;
     float sync_ratio_;
 };

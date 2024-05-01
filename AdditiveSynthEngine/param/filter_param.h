@@ -1,28 +1,28 @@
 #pragma once
 
-#include <string_view>
-#include <array>
+#include "param/param.h"
 
 namespace mana::param {
 using namespace std::string_view_literals;
 
-struct Filter_Type {
-    enum class TypeEnum {
+struct Filter_Type : IntChoiceParam<Filter_Type> {
+    enum class ParamEnum {
         kLowpass = 0,
         kCombFilter,
         kPhaser,
         kNumEnums
     };
 
-    static constexpr auto kNames = std::to_array({
+    static constexpr std::array kNames{
         "lowpass"sv, "comb"sv, "phaser"sv
-                                                 });
+    };
 };
 
 // ============================================================
 // low pass
 // ============================================================
-struct Filter_Cutoff { // arg0
+struct Filter_Cutoff : FloatParam<Filter_Cutoff> {
+    static constexpr int kArgIdx = 0;
     static constexpr float kMin = 0.1f;
     static constexpr float kMax = 140.0f;
     static constexpr float kDefault = 65.0f;
@@ -31,7 +31,8 @@ struct Filter_Cutoff { // arg0
     static constexpr auto kStuff = "st"sv;
 };
 
-struct Filter_Resonance { // arg1
+struct Filter_Resonance : FloatParam<Filter_Resonance> {
+    static constexpr int kArgIdx = 1;
     static constexpr auto kName = "resonance"sv;
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 20.0f;
@@ -40,7 +41,8 @@ struct Filter_Resonance { // arg1
     static constexpr auto kStuff = "dB"sv;
 };
 
-struct Filter_Slope { // arg2
+struct Filter_Slope : FloatParam<Filter_Slope> {
+    static constexpr int kArgIdx = 2;
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 80.0f;
     static constexpr float kDefault = 20.0f;
@@ -49,7 +51,8 @@ struct Filter_Slope { // arg2
     static constexpr auto kStuff = "dB"sv;
 };
 
-struct Filter_KeyTracking { // arg3
+struct Filter_KeyTracking : FloatParam<Filter_KeyTracking> {
+    static constexpr int kArgIdx = 3;
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 1.0f;
     static constexpr float kDefault = 0.0f;
@@ -60,7 +63,7 @@ struct Filter_KeyTracking { // arg3
 // ============================================================
 // comb filter
 // ============================================================
-struct Filter_CombShape { // arg1
+struct Filter_CombShape : FloatParam<Filter_CombShape> {
     static constexpr int kArgIdx = 1;
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 1.0f;
@@ -69,7 +72,7 @@ struct Filter_CombShape { // arg1
     static constexpr auto kName = "shape"sv;
 };
 
-struct Filter_CombPhase { // arg2
+struct Filter_CombPhase : FloatParam<Filter_CombPhase> {
     static constexpr int kArgIdx = 2;
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 1.0f;
@@ -78,7 +81,7 @@ struct Filter_CombPhase { // arg2
     static constexpr auto kName = "phase"sv;
 };
 
-struct Filter_CombDepth { // arg4
+struct Filter_CombDepth : FloatParam<Filter_CombDepth> {
     static constexpr int kArgIdx = 4;
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 1.0f;
@@ -87,7 +90,7 @@ struct Filter_CombDepth { // arg4
     static constexpr auto kName = "depth"sv;
 };
 
-struct Filter_CombPhaser { // arg5
+struct Filter_CombPhaser : FloatParam<Filter_CombPhaser> {
     static constexpr int kArgIdx = 5;
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 1.0f;
@@ -99,7 +102,7 @@ struct Filter_CombPhaser { // arg5
 // ============================================================
 // phaser
 // ============================================================
-struct Filter_PhaserNotches { // arg3
+struct Filter_PhaserNotches : FloatParam<Filter_PhaserNotches> {
     static constexpr int kArgIdx = 3;
     static constexpr float kMin = 1.0f;
     static constexpr float kMax = 8.0f;
@@ -108,7 +111,7 @@ struct Filter_PhaserNotches { // arg3
     static constexpr auto kName = "notch"sv;
 };
 
-struct Filter_PhaserWidth { // arg5
+struct Filter_PhaserWidth : FloatParam<Filter_PhaserWidth> {
     static constexpr int kArgIdx = 5;
     static constexpr float kMin = 0.1f;
     static constexpr float kMax = 120.0f;

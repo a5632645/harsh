@@ -15,11 +15,6 @@ private:
     void OnFilterTypeChanged(int c);
     SynthParam& synth_param_;
     WrapDropBox filter_type_;
-    Knob arg0_;
-    Knob arg1_;
-    Knob arg2_;
-    Knob arg3_;
-    Knob arg4_;
-    Knob arg5_;
+    std::array<Knob, 6> arg_knobs_;
 };
 }

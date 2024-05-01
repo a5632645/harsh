@@ -1,7 +1,7 @@
 #include "synth.h"
 
-#include <AudioFFT.h>
-#include "window.h"
+#include "resynthsis/window.h"
+#include "AudioFFT.h"
 
 namespace mana {
 Synth::Synth() {
@@ -80,7 +80,7 @@ const Oscillor& Synth::GetDisplayOscillor() const {
     return m_oscillators[last_played];
 }
 
-static float PhaseWrap(float p) {
+static constexpr float PhaseWrap(float p) {
     while (p > std::numbers::pi_v<float>) {
         p -= std::numbers::pi_v<float> *2.0f;
     }
@@ -96,6 +96,7 @@ void Synth::CreateResynthsisFrames(const std::vector<float>& sample) {
     fft.init(kFFtSize);
     window.Init(kFFtSize);
 
+    const auto c1_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
     auto num_frame = static_cast<size_t>((sample.size() - static_cast<float>(kFFtSize)) / static_cast<float>(kFFtHop));
     ResynthsisFrames audio_frames;
     audio_frames.frames.reserve(num_frame);
@@ -144,8 +145,7 @@ void Synth::CreateResynthsisFrames(const std::vector<float>& sample) {
                 const auto target_phase = bin_frequency * kFFtHop + phases[i];
                 const auto phase_diff = PhaseWrap(this_frame_phase - target_phase);
                 const auto instant_freq = phase_diff * 2.0f / (kFFtHop * std::numbers::pi_v<float>) + (1.0f + i) / static_cast<float>(kFFtSize / 2);
-                const auto c3_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
-                new_frame.freq_diffs[i] = instant_freq - c3_freq * (1.0f + i);
+                new_frame.freq_diffs[i] = instant_freq - c1_freq * (1.0f + i);
                 phases[i] = this_frame_phase;
             }
         }
@@ -153,8 +153,8 @@ void Synth::CreateResynthsisFrames(const std::vector<float>& sample) {
         read_pos += kFFtHop;
     }
 
-    timber_resynthsis_frames_.frames.swap(audio_frames.frames);
-    timber_resynthsis_frames_.data_sample_rate = 48000.0f;
-    timber_resynthsis_frames_.data_series_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
+    resynthsis_frames_.frames.swap(audio_frames.frames);
+    resynthsis_frames_.data_sample_rate = 48000.0f;
+    resynthsis_frames_.data_series_freq = c1_freq;
 }
 }

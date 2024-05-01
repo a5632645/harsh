@@ -5,32 +5,6 @@
 #include "layout/gui_param_pack.h"
 
 namespace mana {
-constexpr std::array kOctaveTitles{
-    param::Octaver_Amount::kName,
-    param::Octaver_Width::kName,
-    param::Octaver_Decay::kName
-};
-constexpr std::array kOctaveTextGetters{
-    param::FloatParam<param::Octaver_Amount>::GetText,
-    param::FloatParam<param::Octaver_Width>::GetText,
-    param::FloatParam<param::Octaver_Decay>::GetText
-};
-
-constexpr std::array kReverbTitles{
-    param::Reverb_Amount::kName,
-    param::Reverb_Decay::kName,
-    param::Reverb_Attack::kName,
-    param::Reverb_Damp::kName
-};
-constexpr std::array kReverbTextGetters{
-    param::FloatParam<param::Reverb_Amount>::GetText,
-    param::FloatParam<param::Reverb_Decay>::GetText,
-    param::FloatParam<param::Reverb_Attack>::GetText,
-    param::FloatParam<param::Reverb_Damp>::GetText
-};
-}
-
-namespace mana {
 EffectLayout::EffectLayout(Synth& synth, int effect_idx)
     : synth_param_(synth.GetSynthParam())
     , effect_idx(effect_idx) {
@@ -57,8 +31,12 @@ void EffectLayout::Paint() {
 }
 
 void EffectLayout::SetBounds(int x, int y, int w, int h) {
-    is_enable_.SetBounds(rgc::Bounds(x, y, 12, 12));
-    effect_type_.SetBounds(rgc::Bounds(x, y + 12, w, 16));
+    auto x_f = static_cast<float>(x);
+    auto y_f = static_cast<float>(y);
+    auto w_f = static_cast<float>(w);
+
+    is_enable_.SetBounds(rgc::Bounds(x_f, y_f, 12, 12));
+    effect_type_.SetBounds(rgc::Bounds(x_f, y_f + 12, w_f, 16));
     auto first_y = y + 12 + 16;
     arg_knobs_[0].set_bound(x, first_y, 50, 70);
     arg_knobs_[1].set_bound(x + 50, first_y, 50, 70);
@@ -72,35 +50,42 @@ void EffectLayout::SetBounds(int x, int y, int w, int h) {
 void EffectLayout::OnEffectTypeChanged(int c) {
     synth_param_.effects[effect_idx].effect_type = c;
 
-    auto type = param::IntChoiceParam<param::EffectType, param::EffectType::EffectTypeEnum>::GetEnum(c);
-    using enum param::EffectType::EffectTypeEnum;
+    auto type = param::EffectType::GetEnum(c);
+    using enum param::EffectType::ParamEnum;
     switch (type) {
     case kOctaver:
-        SetKnobInfos(kOctaveTitles, kOctaveTextGetters);
+        SetGuiKnobs(arg_knobs_,
+                    param::Octaver_Amount{},
+                    param::Octaver_Decay{},
+                    param::Octaver_Width{});
         break;
     case kReverb:
-        SetKnobInfos(kReverbTitles, kReverbTextGetters);
+        SetGuiKnobs(arg_knobs_,
+                    param::Reverb_Amount{},
+                    param::Reverb_Attack{},
+                    param::Reverb_Damp{},
+                    param::Reverb_Decay{});
         break;
     case kChorus:
         SetGuiKnobs(arg_knobs_,
-                    param::FloatParam<param::Chorus_Amount>{},
-                    param::FloatParam<param::Chorus_Depth>{},
-                    param::FloatParam<param::Chorus_Offset>{},
-                    param::FloatParam<param::Chorus_Speed>{});
-            break;
+                    param::Chorus_Amount{},
+                    param::Chorus_Depth{},
+                    param::Chorus_Offset{},
+                    param::Chorus_Speed{});
+        break;
     case kPhaser:
         SetGuiKnobs(arg_knobs_,
-                    param::FloatParam<param::Phaser_BarberRate>{},
-                    param::FloatParam<param::Phaser_Cycles>{},
-                    param::FloatParam<param::Phaser_Mix>{},
-                    param::FloatParam<param::Phaser_Pinch>{},
-                    param::FloatChoiceParam<param::Phaser_Mode, param::Phaser_Mode::Mode>{},
-                    param::FloatChoiceParam<param::Phaser_Shape, param::Phaser_Shape::Shapes>{});
+                    param::Phaser_BarberRate{},
+                    param::Phaser_Cycles{},
+                    param::Phaser_Mix{},
+                    param::Phaser_Pinch{},
+                    param::Phaser_Mode{},
+                    param::Phaser_Shape{});
         break;
     case kScramble:
         SetGuiKnobs(arg_knobs_,
-                    param::FloatParam<param::Scramble_Range>{},
-                    param::FloatParam<param::Scramble_Rate>{});
+                    param::Scramble_Range{},
+                    param::Scramble_Rate{});
         break;
     default:
         break;

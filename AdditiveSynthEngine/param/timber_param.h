@@ -2,28 +2,27 @@
 
 #include <string_view>
 #include <array>
+#include "param.h"
 
 namespace mana::param {
 using namespace std::string_view_literals;
 
-struct TimberType {
-    enum class TimberEnum {
+struct TimberType : IntChoiceParam<TimberType> {
+    enum class ParamEnum {
         kDualSaw = 0,
         kSync,
-        kResynthsis,
         kNumEnums
     };
 
     static constexpr std::array kNames{
         "dual_saw"sv,
-        "sync"sv,
-        "resynthsis"sv
+        "sync"sv
     };
 };
 // =========================================================
 // dual saw
 // =========================================================
-struct DualSaw_Ratio {
+struct DualSaw_Ratio : FloatParam<DualSaw_Ratio> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "ratio"sv;
     static constexpr float kMin = 1.0f;
@@ -32,7 +31,7 @@ struct DualSaw_Ratio {
     static constexpr int kTextPrecision = 0;
 };
 
-struct DualSaw_BeatingRate {
+struct DualSaw_BeatingRate : FloatParam<DualSaw_BeatingRate> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "beating"sv;
     static constexpr float kMin = -2.0f;
@@ -41,7 +40,7 @@ struct DualSaw_BeatingRate {
     static constexpr int kTextPrecision = 3;
 };
 
-struct DualSaw_SawSquare {
+struct DualSaw_SawSquare : FloatParam<DualSaw_SawSquare> {
     static constexpr int kArgIdx = 2;
     static constexpr auto kName = "saw_square"sv;
     static constexpr float kMin = 0.0f;
@@ -53,8 +52,8 @@ struct DualSaw_SawSquare {
 // =========================================================
 // sync
 // =========================================================
-struct Sync_WaveShape {
-    enum class WaveShape {
+struct Sync_WaveShape : FloatChoiceParam<Sync_WaveShape> {
+    enum class ParamEnum {
         kSine = 0,
         kTriangle,
         kSquare,
@@ -69,7 +68,7 @@ struct Sync_WaveShape {
     static constexpr auto kName = "shape"sv;
 };
 
-struct Sync_Sync {
+struct Sync_Sync : FloatParam<Sync_Sync> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "sync"sv;
     static constexpr float kMin = 0.0f;
@@ -77,44 +76,5 @@ struct Sync_Sync {
     static constexpr float kDefault = 0.0f;
     static constexpr auto kStuff = "st"sv;
     static constexpr int kTextPrecision = 1;
-};
-
-// =========================================================
-// resynthsis
-// =========================================================
-struct Resynthsis_FormantMix {
-    static constexpr int kArgIdx = 0;
-    static constexpr auto kName = "mix"sv;
-    static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 1.0f;
-    static constexpr float kDefault = 0.0f;
-    static constexpr int kTextPrecision = 2;
-};
-
-struct Resynthsis_FormantShift {
-    static constexpr int kArgIdx = 1;
-    static constexpr auto kName = "shift"sv;
-    static constexpr float kMin = -24.0f;
-    static constexpr float kMax = 24.0f;
-    static constexpr float kDefault = 0.0f;
-    static constexpr int kTextPrecision = 1;
-};
-
-struct Resynthsis_FreqScale {
-    static constexpr int kArgIdx = 2;
-    static constexpr auto kName = "scale"sv;
-    static constexpr float kMin = -1.0f;
-    static constexpr float kMax = 1.0f;
-    static constexpr float kDefault = 0.0f;
-    static constexpr int kTextPrecision = 2;
-};
-
-struct Resynthsis_FramePos {
-    static constexpr int kArgIdx = 3;
-    static constexpr auto kName = "pos"sv;
-    static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 1.0f;
-    static constexpr float kDefault = 0.0f;
-    static constexpr int kTextPrecision = 2;
 };
 }

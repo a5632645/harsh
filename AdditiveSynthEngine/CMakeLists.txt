@@ -11,8 +11,8 @@ add_executable (AdditiveSynthEngine
 "engine/synth.cpp"
 
 "engine/IProcessor.h"
-"engine/standard/phase.h"
-"engine/standard/phase.cpp"
+
+
 "engine/standard/freq.h"
 "engine/standard/freq.cpp"
 
@@ -25,7 +25,7 @@ add_executable (AdditiveSynthEngine
 "engine/modulation/Modulation.h"
 "engine/modulation/Modulation.cpp"
 
-"engine/timber/timber.h"
+"param/timber_param.h"
 "engine/timber/timber.cpp"
 "engine/timber/dual_saw.h"
 "engine/timber/dual_saw.cpp"
@@ -38,7 +38,6 @@ add_executable (AdditiveSynthEngine
 "param/standard_param.h"
 "param/dissonance_param.h"
 
-"param/timber.h"
 "param/filter_param.h"
 
 "ui/WrapDropBox.h"
@@ -62,9 +61,25 @@ add_executable (AdditiveSynthEngine
 "engine/filter/filter.cpp"
 "engine/dissonance/dissonance.h"
 "engine/dissonance/dissonance.cpp"
-"engine/dissonance/string.h"
-"engine/dissonance/string.cpp"
- "layout/filter_layout.h" "layout/filter_layout.cpp" "engine/effect/effect.h" "engine/effect/effect.cpp" "param/effect_param.h" "engine/effect/octaver.h" "layout/effect_layout.h" "layout/effect_layout.cpp" "engine/effect/reverb.h"  "engine/effect/chrous.h"  "engine/timber/resynthsis.h" "engine/timber/resynthsis.cpp" "engine/resynthsis_data.h" "window.h" "layout/gui_param_pack.h" "engine/effect/phaser.h" "engine/effect/scramble.h")
+
+
+ "layout/filter_layout.h"
+ "layout/filter_layout.cpp"
+ "engine/effect/effect.h"
+ "engine/effect/effect.cpp"
+ "param/effect_param.h"
+ "engine/effect/octaver.h"
+ "layout/effect_layout.h"
+ "layout/effect_layout.cpp"
+ "engine/effect/reverb.h"
+ "engine/effect/chrous.h"
+ "engine/resynthsis/resynthsis.h"
+ "engine/resynthsis/resynthsis.cpp"
+ "engine/resynthsis/resynthsis_data.h"
+ "engine/resynthsis/window.h"
+ "layout/gui_param_pack.h"
+ "engine/effect/phaser.h"
+ "engine/effect/scramble.h" "param/resynthsis_param.h" "layout/resynthsis_layout.h" "layout/resynthsis_layout.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)

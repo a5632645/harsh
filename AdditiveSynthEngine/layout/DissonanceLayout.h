@@ -16,7 +16,6 @@ private:
     rgc::CheckBox is_enable_;
     SynthParam& synth_param_;
     WrapDropBox type_;
-    Knob arg0_;
-    Knob arg1_;
+    std::array<Knob, 2> arg_knobs_;
 };
 }

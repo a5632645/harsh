@@ -4,7 +4,7 @@
 #include <cmath>
 #include "engine/VolumeTable.hpp"
 #include <engine/EngineConfig.h>
-#include "param/timber.h"
+#include "param/timber_param.h"
 #include "param/param.h"
 
 namespace mana {
@@ -47,9 +47,9 @@ void DualSaw::Process(Partials& partials) {
 }
 
 void DualSaw::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
-    ratio_ = param::FloatParam<param::DualSaw_Ratio>::GetNumber(param.timber.args);
-    beating_rate_ = param::FloatParam<param::DualSaw_BeatingRate>::GetNumber(param.timber.args);
-    saw_square_ = param::FloatParam<param::DualSaw_SawSquare>::GetNumber(param.timber.args);
+    ratio_ = param::DualSaw_Ratio::GetNumber(param.timber.args);
+    beating_rate_ = param::DualSaw_BeatingRate::GetNumber(param.timber.args);
+    saw_square_ = param::DualSaw_SawSquare::GetNumber(param.timber.args);
 
     auto inc = std::abs(beating_rate_) * skip / sample_rate_;
     beating_phase_ += inc;

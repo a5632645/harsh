@@ -2,6 +2,7 @@
 
 #include "param/param.h"
 #include "param/dissonance_param.h"
+#include "layout/gui_param_pack.h"
 
 namespace mana {
 DissonanceLayout::DissonanceLayout(Synth& synth)
@@ -10,49 +11,51 @@ DissonanceLayout::DissonanceLayout(Synth& synth)
     type_.on_choice_changed = [this](int c) {OnDissonanceTypeChanged(c); };
     OnDissonanceTypeChanged(synth_param_.dissonance.dissonance_type);
 
-    arg0_.set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg0"));
-    arg1_.set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg1"));
+    arg_knobs_[0].set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg0"));
+    arg_knobs_[1].set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg1"));
 
     is_enable_.SetText("dissonance");
     is_enable_.SetChecked(synth_param_.dissonance.is_enable);
 }
 
 void DissonanceLayout::Paint() {
-    arg0_.display();
-    arg1_.display();
+    for (auto& k : arg_knobs_) {
+        k.display();
+    }
     synth_param_.dissonance.is_enable = is_enable_.Show();
     type_.show();
 }
 
 void DissonanceLayout::SetBounds(int x, int y, int w, int h) {
-    is_enable_.SetBounds(rgc::Bounds(x, y, 12, 12));
-    type_.SetBounds(rgc::Bounds(x, y + 12, w, 12));
-    arg0_.set_bound(x, y + 24, 50, 70);
-    arg1_.set_bound(x + 50, y + 24, 50, 70);
+    auto x_f = static_cast<float>(x);
+    auto y_f = static_cast<float>(y);
+    auto w_f = static_cast<float>(w);
+
+    is_enable_.SetBounds(rgc::Bounds(x_f, y_f, 12.0f, 12.0f));
+    type_.SetBounds(rgc::Bounds(x_f, y_f + 12.0f, w_f, 12.0f));
+    arg_knobs_[0].set_bound(x, y + 24, 50, 70);
+    arg_knobs_[1].set_bound(x + 50, y + 24, 50, 70);
 }
 
 void DissonanceLayout::OnDissonanceTypeChanged(int c) {
     synth_param_.dissonance.dissonance_type = c;
 
-    auto type = param::IntChoiceParam<param::DissonanceType, param::DissonanceType::DissonaceTypeEnum>::GetEnum(c);
+    auto type = param::DissonanceType::GetEnum(c);
 
-    using enum param::DissonanceType::DissonaceTypeEnum;
+    using enum param::DissonanceType::ParamEnum;
     switch (type) {
     case kString:
-        arg0_.set_title(param::StringDissStretch::kName);
-        arg1_.set_title(param::StringMultiRatio::kName);
-
-        arg0_.value_to_text_function = param::FloatParam<param::StringDissStretch>::GetText;
-        arg1_.value_to_text_function =
-            param::FloatChoiceParam<param::StringMultiRatio, param::StringMultiRatio::RatioEnum>::GetText;
+        SetGuiKnobs(arg_knobs_,
+                    param::StringDissStretch{},
+                    param::StringMultiRatio{});
         break;
     case kHarmonicStretch:
-        arg0_.set_title(param::HarmonicStrech::kName);
-        arg0_.value_to_text_function = param::FloatParam<param::HarmonicStrech>::GetText;
+        SetGuiKnobs(arg_knobs_,
+                    param::HarmonicStrech{});
         break;
     case kSemitoneSpace:
-        arg0_.set_title(param::SemitoneSpace::kName);
-        arg0_.value_to_text_function = param::FloatParam<param::SemitoneSpace>::GetText;
+        SetGuiKnobs(arg_knobs_,
+                    param::SemitoneSpace{});
         break;
     default:
         break;

@@ -13,7 +13,7 @@ public:
     void OnNoteOn(int note) override;
     void OnNoteOff() override;
 private:
-    param::Filter_Type::TypeEnum filter_type_;
+    param::Filter_Type::ParamEnum filter_type_;
     float sample_rate_;
 
     // ===============================================================

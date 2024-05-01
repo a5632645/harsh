@@ -70,7 +70,7 @@ public:
         if (!IsPlaying()) return;
 
         for (size_t i = 0; i < length; ++i) {
-            audio_buffer_[i] = sine_bank_.process_once();
+            audio_buffer_[i] = sine_bank_.SrTick();
         }
     }
 
@@ -79,7 +79,9 @@ public:
     }
 
 private:
-    void AddProcessor(std::shared_ptr<IProcessor> processor);
+    IProcessor* AddProcessor(std::shared_ptr<IProcessor>&& processor) {
+        return processors_.emplace_back(std::move(processor)).get();
+    }
 
     std::vector<float> audio_buffer_;
     SineBank sine_bank_;
@@ -94,6 +96,7 @@ private:
 
     // component
     std::vector<std::shared_ptr<IProcessor>> processors_;
+    IProcessor* p_resynthsis_{};
 
     // Helper
     DSP_INIT_DEFINE;

@@ -44,10 +44,10 @@ public:
     void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
         system_rate_ = sample_rate_ / static_cast<float>(skip);
 
-        amount_ = param::FloatParam<param::Reverb_Amount>::GetNumber(params.effects[module_idx].args);
-        decay_ = param::FloatParam<param::Reverb_Decay>::GetNumber(params.effects[module_idx].args);
-        attack_ = param::FloatParam<param::Reverb_Attack>::GetNumber(params.effects[module_idx].args);
-        damp_ = param::FloatParam<param::Reverb_Damp>::GetNumber(params.effects[module_idx].args);
+        amount_ = param::Reverb_Amount::GetNumber(params.effects[module_idx].args);
+        decay_ = param::Reverb_Decay::GetNumber(params.effects[module_idx].args);
+        attack_ = param::Reverb_Attack::GetNumber(params.effects[module_idx].args);
+        damp_ = param::Reverb_Damp::GetNumber(params.effects[module_idx].args);
 
         attack_a_ = Calc1stSmoothFilterCoeff(attack_ / 1000.0f, system_rate_);
         decay_a_ = Calc1stSmoothFilterCoeff(decay_ / 1000.0f, system_rate_);

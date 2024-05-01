@@ -2,7 +2,7 @@
 
 #include <numbers>
 #include "param/param.h"
-#include "param/timber.h"
+#include "param/timber_param.h"
 #include "engine/VolumeTable.hpp"
 
 namespace mana {
@@ -24,23 +24,23 @@ static constexpr auto kTriTable = makeHarmonicArray<kNumPartials>([](float x) {
 static constexpr auto kSawTable = VolumeTable<kNumPartials>::SAW_TABLE;
 static constexpr auto kSquareTable = VolumeTable<kNumPartials>::PULSE_TABLE;
 
-static constexpr float GetPartialGain(param::Sync_WaveShape::WaveShape a, int idx) {
+static constexpr float GetPartialGain(param::Sync_WaveShape::ParamEnum a, int idx) {
     switch (a) {
-    case mana::param::Sync_WaveShape::WaveShape::kSine:
+    case mana::param::Sync_WaveShape::ParamEnum::kSine:
         return kSineTable[idx];
-    case mana::param::Sync_WaveShape::WaveShape::kTriangle:
+    case mana::param::Sync_WaveShape::ParamEnum::kTriangle:
         return kTriTable[idx];
-    case mana::param::Sync_WaveShape::WaveShape::kSaw:
+    case mana::param::Sync_WaveShape::ParamEnum::kSaw:
         return kSawTable[idx];
-    case mana::param::Sync_WaveShape::WaveShape::kSquare:
+    case mana::param::Sync_WaveShape::ParamEnum::kSquare:
         return kSquareTable[idx];
     default:
         return 0.0f;
     }
 }
 
-static constexpr float GetPartialGainFrac(param::Sync_WaveShape::WaveShape a,
-                                          param::Sync_WaveShape::WaveShape b,
+static constexpr float GetPartialGainFrac(param::Sync_WaveShape::ParamEnum a,
+                                          param::Sync_WaveShape::ParamEnum b,
                                           float frac,
                                           int idx) {
     auto a_gain = GetPartialGain(a, idx);
@@ -76,14 +76,14 @@ void Sync::Process(Partials& partials) {
 }
 
 void Sync::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
-    auto [a, b, c] = param::FloatChoiceParam<param::Sync_WaveShape, param::Sync_WaveShape::WaveShape>::GetInterpIndex(
+    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(
         params.timber.args[param::Sync_WaveShape::kArgIdx]
     );
     first_shape_ = a;
     second_shape_ = b;
     fraction_ = c;
 
-    auto semitone = param::FloatParam<param::Sync_Sync>::GetNumber(params.timber.args);
+    auto semitone = param::Sync_Sync::GetNumber(params.timber.args);
     sync_ratio_ = std::exp2(semitone / 12.0f);
 }
 

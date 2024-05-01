@@ -14,44 +14,44 @@ void Filter::Process(Partials& partials) {
     final_cutoff_semitone_ = std::lerp(cutoff_semitone_, partials.base_pitch, key_track_);
 
     switch (filter_type_) {
-    case param::Filter_Type::TypeEnum::kLowpass:
+    case param::Filter_Type::ParamEnum::kLowpass:
         DoLowPassFilter(partials);
         break;
-    case param::Filter_Type::TypeEnum::kCombFilter:
+    case param::Filter_Type::ParamEnum::kCombFilter:
         SetCombCutoff(std::lerp(normalized_cutoff_, partials.base_frequency * std::exp2(cutoff_semitone_ / 12.0f), key_track_),
                       cutoff_semitone_);
         DoCombFilter(partials);
         break;
-    case param::Filter_Type::TypeEnum::kPhaser:
+    case param::Filter_Type::ParamEnum::kPhaser:
         DoPhaserFilter(partials);
         break;
     }
 }
 
 void Filter::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
-    filter_type_ = param::IntChoiceParam<param::Filter_Type, param::Filter_Type::TypeEnum>::GetEnum(
+    filter_type_ = param::Filter_Type::GetEnum(
         params.filter.filter_type
     );
 
-    cutoff_semitone_ = param::FloatParam<param::Filter_Cutoff>::GetNumber(params.filter.arg0);
+    cutoff_semitone_ = param::Filter_Cutoff::GetNumber(params.filter.args);
     normalized_cutoff_ = std::exp2(cutoff_semitone_ / 12.0f) * 8.1758f * 2.0f / sample_rate_;
-    slope_ = param::FloatParam<param::Filter_Slope>::GetNumber(params.filter.arg2);
-    key_track_ = param::FloatParam<param::Filter_KeyTracking>::GetNumber(params.filter.arg3);
-    resonance_ = std::exp(0.11512925464970228420089957273422f * param::FloatParam<param::Filter_Resonance>::GetNumber(params.filter.arg4));
+    slope_ = param::Filter_Slope::GetNumber(params.filter.args);
+    key_track_ = param::Filter_KeyTracking::GetNumber(params.filter.args);
+    resonance_ = std::exp(0.11512925464970228420089957273422f * param::Filter_Resonance::GetNumber(params.filter.args));
 
     // comb
-    comb_shape_ = param::FloatParam<param::Filter_CombShape>::GetNumber(params.filter.arg1);
-    comb_phase_ = param::FloatParam<param::Filter_CombPhase>::GetNumber(params.filter.arg2) * std::numbers::pi_v<float> *2.0f;
-    comb_depth_ = param::FloatParam<param::Filter_CombDepth>::GetNumber(params.filter.arg4);
-    comb_phaser_ = param::FloatParam<param::Filter_CombPhaser>::GetNumber(params.filter.arg5);
+    comb_shape_ = param::Filter_CombShape::GetNumber(params.filter.args);
+    comb_phase_ = param::Filter_CombPhase::GetNumber(params.filter.args) * std::numbers::pi_v<float> *2.0f;
+    comb_depth_ = param::Filter_CombDepth::GetNumber(params.filter.args);
+    comb_phaser_ = param::Filter_CombPhaser::GetNumber(params.filter.args);
 
     // phaser
-    phaser_width_ = param::FloatParam<param::Filter_PhaserWidth>::GetNumber(params.filter.arg5);
+    phaser_width_ = param::Filter_PhaserWidth::GetNumber(params.filter.args);
     phaser_cycles_ = std::numbers::pi_v<float> *2.0f / phaser_width_ * phaser_notches_;
-    phaser_depth_ = param::FloatParam<param::Filter_PhaserDepth>::GetNumber(params.filter.arg4);
-    phaser_notches_ = param::FloatParam<param::Filter_PhaserNotches>::GetNumber(params.filter.arg3);
-    phaser_phase_ = param::FloatParam<param::Filter_PhaserPhase>::GetNumber(params.filter.arg2) * std::numbers::pi_v<float>*2.0f;
-    phaser_shape_ = param::FloatParam<param::Filter_PhaserShape>::GetNumber(params.filter.arg1);
+    phaser_depth_ = param::Filter_PhaserDepth::GetNumber(params.filter.args);
+    phaser_notches_ = param::Filter_PhaserNotches::GetNumber(params.filter.args);
+    phaser_phase_ = param::Filter_PhaserPhase::GetNumber(params.filter.args) * std::numbers::pi_v<float>*2.0f;
+    phaser_shape_ = param::Filter_PhaserShape::GetNumber(params.filter.args);
     phaser_begin_pitch_ = cutoff_semitone_ - phaser_width_ * 0.5f;
     phaser_end_pitch_ = cutoff_semitone_ + phaser_width_ * 0.5f;
 }

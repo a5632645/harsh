@@ -15,7 +15,7 @@ static void ThisAudioCallback(void* buffer, unsigned int frames) {
     synth_.update_state(frames);
     synth_.Render(frames);
     std::ranges::copy(synth_.getBuffer(), static_cast<float*>(buffer));
-    synth_layout_.GetOsciiloscope().PushBuffer(synth_.getBuffer());
+    synth_layout_.GetOscilloscope().PushBuffer(synth_.getBuffer());
 }
 
 int main(void) {

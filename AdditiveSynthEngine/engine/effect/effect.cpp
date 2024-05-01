@@ -8,11 +8,11 @@
 
 namespace mana {
 void Effect::Init(float sample_rate) {
-    processers_[param::EffectType::EffectTypeEnum::kOctaver] = std::make_unique<Octaver>();
-    processers_[param::EffectType::EffectTypeEnum::kReverb] = std::make_unique<Reverb>();
-    processers_[param::EffectType::EffectTypeEnum::kChorus] = std::make_unique<Chorus>();
-    processers_[param::EffectType::EffectTypeEnum::kPhaser] = std::make_unique<Phaser>();
-    processers_[param::EffectType::EffectTypeEnum::kScramble] = std::make_unique<Scramble>();
+    processers_[param::EffectType::ParamEnum::kOctaver] = std::make_unique<Octaver>();
+    processers_[param::EffectType::ParamEnum::kReverb] = std::make_unique<Reverb>();
+    processers_[param::EffectType::ParamEnum::kChorus] = std::make_unique<Chorus>();
+    processers_[param::EffectType::ParamEnum::kPhaser] = std::make_unique<Phaser>();
+    processers_[param::EffectType::ParamEnum::kScramble] = std::make_unique<Scramble>();
 
     for (auto&&[k, v] : processers_) {
         v->Init(sample_rate);
@@ -27,7 +27,7 @@ void Effect::Process(Partials& partials) {
 
 void Effect::OnUpdateTick(const SynthParam& params, int skip, int /*module_idx*/) {
     is_enable_ = params.effects[effect_idx_].is_enable;
-    effect_type_ = param::IntChoiceParam<param::EffectType, param::EffectType::EffectTypeEnum>::GetEnum(
+    effect_type_ = param::EffectType::GetEnum(
         params.effects[effect_idx_].effect_type);
     p_processor_ = processers_.at(effect_type_).get();
 

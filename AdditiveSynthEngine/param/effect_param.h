@@ -1,11 +1,10 @@
 #pragma once
 
-#include <array>
 #include "param/param.h"
 
 namespace mana::param {
-struct EffectType {
-    enum class EffectTypeEnum {
+struct EffectType : IntChoiceParam<EffectType> {
+    enum class ParamEnum {
         kOctaver = 0,
         kReverb,
         kChorus,
@@ -22,14 +21,12 @@ struct EffectType {
             "phaser"sv,
             "scramble"sv
     };
-
-    static_assert(static_cast<size_t>(EffectTypeEnum::kNumEnums) == kNames.size());
 };
 
 // =========================================================
 // octaver
 // =========================================================
-struct Octaver_Amount { // arg0
+struct Octaver_Amount : FloatParam<Octaver_Amount> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "amount"sv;
     static constexpr auto kMin = 0.0f;
@@ -38,7 +35,7 @@ struct Octaver_Amount { // arg0
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Octaver_Width { // arg1
+struct Octaver_Width : FloatParam<Octaver_Width> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "width"sv;
     static constexpr auto kMin = 0.0f;
@@ -47,7 +44,7 @@ struct Octaver_Width { // arg1
     static constexpr auto kTextPrecision = 1;
 };
 
-struct Octaver_Decay { //arg2
+struct Octaver_Decay : FloatParam<Octaver_Decay> {
     static constexpr int kArgIdx = 2;
     static constexpr auto kName = "decay"sv;
     static constexpr auto kMin = -6.0f;
@@ -60,7 +57,7 @@ struct Octaver_Decay { //arg2
 // =========================================================
 // reverb
 // =========================================================
-struct Reverb_Amount { // arg0
+struct Reverb_Amount : FloatParam<Reverb_Amount> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "amount"sv;
     static constexpr auto kMin = 0.0f;
@@ -69,7 +66,7 @@ struct Reverb_Amount { // arg0
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Reverb_Decay { // arg1
+struct Reverb_Decay : FloatParam<Reverb_Decay> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "decay"sv;
     static constexpr auto kMin = 0.0f;
@@ -78,7 +75,7 @@ struct Reverb_Decay { // arg1
     static constexpr auto kTextPrecision = 0;
 };
 
-struct Reverb_Attack { //arg2
+struct Reverb_Attack : FloatParam<Reverb_Attack> {
     static constexpr int kArgIdx = 2;
     static constexpr auto kName = "attack"sv;
     static constexpr auto kMin = 0.0f;
@@ -87,7 +84,7 @@ struct Reverb_Attack { //arg2
     static constexpr auto kTextPrecision = 0;
 };
 
-struct Reverb_Damp { //arg3
+struct Reverb_Damp : FloatParam<Reverb_Damp> {
     static constexpr int kArgIdx = 3;
     static constexpr auto kName = "damp"sv;
     static constexpr auto kMin = 0.0f;
@@ -99,7 +96,7 @@ struct Reverb_Damp { //arg3
 // =========================================================
 // chorus
 // =========================================================
-struct Chorus_Amount {
+struct Chorus_Amount : FloatParam<Chorus_Amount> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "amount"sv;
     static constexpr auto kMin = 0.0f;
@@ -108,7 +105,7 @@ struct Chorus_Amount {
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Chorus_Depth {
+struct Chorus_Depth : FloatParam<Chorus_Depth> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "depth"sv;
     static constexpr auto kMin = 0.0f;
@@ -118,7 +115,7 @@ struct Chorus_Depth {
     static constexpr auto kStuff = "ms";
 };
 
-struct Chorus_Offset {
+struct Chorus_Offset : FloatParam<Chorus_Offset> {
     static constexpr int kArgIdx = 2;
     static constexpr auto kName = "offset"sv;
     static constexpr auto kMin = 0.0f;
@@ -128,7 +125,7 @@ struct Chorus_Offset {
     static constexpr auto kStuff = "ms";
 };
 
-struct Chorus_Speed {
+struct Chorus_Speed : FloatParam<Chorus_Speed> {
     static constexpr int kArgIdx = 3;
     static constexpr auto kName = "speed"sv;
     static constexpr auto kMin = 0.0f;
@@ -141,7 +138,7 @@ struct Chorus_Speed {
 // =========================================================
 // phaser
 // =========================================================
-struct Phaser_Cycles {
+struct Phaser_Cycles : FloatParam<Phaser_Cycles> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "cycles"sv;
     static constexpr auto kMin = 0.0f;
@@ -150,8 +147,8 @@ struct Phaser_Cycles {
     static constexpr auto kTextPrecision = 1;
 };
 
-struct Phaser_Shape {
-    enum class Shapes {
+struct Phaser_Shape : FloatChoiceParam<Phaser_Shape> {
+    enum class ParamEnum {
         kBox = 0,
         kParabola,
         kSine,
@@ -172,7 +169,7 @@ struct Phaser_Shape {
     static constexpr auto kName = "shape"sv;
 };
 
-struct Phaser_Mix {
+struct Phaser_Mix : FloatParam<Phaser_Mix> {
     static constexpr int kArgIdx = 2;
     static constexpr auto kName = "mix"sv;
     static constexpr auto kMin = 0.0f;
@@ -181,7 +178,7 @@ struct Phaser_Mix {
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Phaser_Pinch {
+struct Phaser_Pinch : FloatParam<Phaser_Pinch> {
     static constexpr int kArgIdx = 3;
     static constexpr auto kName = "pinch"sv;
     static constexpr auto kMin = -1.0f;
@@ -190,7 +187,7 @@ struct Phaser_Pinch {
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Phaser_BarberRate {
+struct Phaser_BarberRate : FloatParam<Phaser_BarberRate> {
     static constexpr int kArgIdx = 4;
     static constexpr auto kName = "rate"sv;
     static constexpr auto kMin = -10.0f;
@@ -200,8 +197,8 @@ struct Phaser_BarberRate {
     static constexpr auto kStuff = "hz"sv;
 };
 
-struct Phaser_Mode {
-    enum class Mode {
+struct Phaser_Mode : FloatChoiceParam<Phaser_Mode> {
+    enum class ParamEnum {
         kSemitone = 0,
         kHz,
         kHarmonic,
@@ -221,17 +218,17 @@ struct Phaser_Mode {
 // =========================================================
 // scramble
 // =========================================================
-struct Scramble_Rate {
+struct Scramble_Rate : FloatParam<Scramble_Rate> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "rate"sv;
     static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = 10.0f;
+    static constexpr auto kMax = 25.0f;
     static constexpr auto kDefault = 1.0f;
     static constexpr auto kTextPrecision = 1;
     static constexpr auto kStuff = "hz"sv;
 };
 
-struct Scramble_Range {
+struct Scramble_Range : FloatParam<Scramble_Range> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "range"sv;
     static constexpr auto kMin = 0.0f;

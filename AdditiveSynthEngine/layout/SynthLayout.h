@@ -7,6 +7,7 @@
 #include "timber_layout.h"
 #include "filter_layout.h"
 #include "effect_layout.h"
+#include "resynthsis_layout.h"
 
 namespace mana {
 class SynthLayout {
@@ -15,7 +16,7 @@ public:
 
     void paint();
     void SetBounds(int x, int y, int w, int h);
-    Oscilloscope& GetOsciiloscope() { return scope_; }
+    Oscilloscope& GetOscilloscope() { return scope_; }
 private:
     Knob pitch_bend_;
     Oscilloscope scope_;
@@ -26,5 +27,6 @@ private:
     EffectLayout effect_layout0_;
     EffectLayout effect_layout1_;
     EffectLayout effect_layout2_;
+    ResynthsisLayout resynthsis_layout_;
 };
 }

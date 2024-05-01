@@ -2,12 +2,10 @@
 
 #include "engine/IProcessor.h"
 #include "param/dissonance_param.h"
-#include "string.h"
 
 namespace mana {
 class Dissonance : public IProcessor {
 public:
-    // 通过 IProcessor 继承
     void Init(float sample_rate) override;
     void Process(Partials & partials) override;
     void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override;
@@ -15,9 +13,15 @@ public:
     void OnNoteOff() override;
 private:
     bool is_enable_;
-    param::DissonanceType::DissonaceTypeEnum type_;
-    StringDissonance decay_;
+    param::DissonanceType::ParamEnum type_;
+
+    // string
+    float string_stretch_factor_;
+
+    // harm stretch
     float harmonic_stretch_ratio_;
+
+    // st space
     float st_space_semitone_;
 };
 }

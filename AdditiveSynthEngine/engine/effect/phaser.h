@@ -30,9 +30,9 @@ constexpr float SingeCycleDeep(float x) {
 }
 static constexpr auto kDeepTable = MakeNormalizeTable<kNumPartials>([](float v) {return SingeCycleDeep(v - 0.5f); });
 
-static float PhaserShapeVal(param::Phaser_Shape::Shapes s, float nor_x) {
+static float PhaserShapeVal(param::Phaser_Shape::ParamEnum s, float nor_x) {
     auto nor_sym_x = nor_x - 0.5f;
-    using enum param::Phaser_Shape::Shapes;
+    using enum param::Phaser_Shape::ParamEnum;
     switch (s) {
     case kBox:
         return SingeCycleBox(nor_sym_x);
@@ -74,7 +74,7 @@ public:
         auto cycle01 = param::FloatParam<param::Phaser_Cycles>::GetNumber(params.effects[module_idx].args);
         cycles_ = cycle01 * cycle01 * kNumPartials / 2;
         {
-            auto [fs, ss, f] = param::FloatChoiceParam<param::Phaser_Shape, param::Phaser_Shape::Shapes>::GetInterpIndex(params.effects[module_idx].args);
+            auto [fs, ss, f] = param::Phaser_Shape::GetInterpIndex(params.effects[module_idx].args);
             first_shape_ = fs;
             second_shape_ = ss;
             shape_fraction_ = f;
@@ -83,7 +83,7 @@ public:
         pinch_ = param::FloatParam<param::Phaser_Pinch>::GetNumber(params.effects[module_idx].args);
         barber_rate_ = param::FloatParam<param::Phaser_BarberRate>::GetNumber(params.effects[module_idx].args);
         {
-            auto [fm, sm, f] = param::FloatChoiceParam<param::Phaser_Mode, param::Phaser_Mode::Mode>::GetInterpIndex(params.effects[module_idx].args);
+            auto [fm, sm, f] = param::Phaser_Mode::GetInterpIndex(params.effects[module_idx].args);
             first_mode_ = fm;
             second_mode_ = sm;
             mode_fraction_ = f;
@@ -100,16 +100,16 @@ private:
         lfo_phase_ = std::modf(lfo_phase_, &val);
     }
 
-    float GetPhase(param::Phaser_Mode::Mode mode, int harmonic_no, float freq, float pitch) {
+    float GetPhase(param::Phaser_Mode::ParamEnum mode, int harmonic_no, float freq, float pitch) {
         float nor_phase = {};
         switch (mode) {
-        case mana::param::Phaser_Mode::Mode::kSemitone:
+        case mana::param::Phaser_Mode::ParamEnum::kSemitone:
             nor_phase = std::clamp(pitch, 0.0f, 140.0f) / 140.0f;
             break;
-        case mana::param::Phaser_Mode::Mode::kHz:
+        case mana::param::Phaser_Mode::ParamEnum::kHz:
             nor_phase = std::clamp(freq, 0.0f, 1.0f);
             break;
-        case mana::param::Phaser_Mode::Mode::kHarmonic:
+        case mana::param::Phaser_Mode::ParamEnum::kHarmonic:
             nor_phase = harmonic_no / static_cast<float>(kNumPartials);
             break;
         default:
@@ -129,14 +129,14 @@ private:
     }
 
     float cycles_;
-    param::Phaser_Shape::Shapes first_shape_;
-    param::Phaser_Shape::Shapes second_shape_;
+    param::Phaser_Shape::ParamEnum first_shape_;
+    param::Phaser_Shape::ParamEnum second_shape_;
     float shape_fraction_;
     float mix_;
     float pinch_;
     float barber_rate_;
-    param::Phaser_Mode::Mode first_mode_;
-    param::Phaser_Mode::Mode second_mode_;
+    param::Phaser_Mode::ParamEnum first_mode_;
+    param::Phaser_Mode::ParamEnum second_mode_;
     float mode_fraction_;
 
     float sample_rate_;

@@ -18,8 +18,8 @@ private:
     const int effect_idx_;
 
     bool is_enable_{};
-    param::EffectType::EffectTypeEnum effect_type_{};
-    std::unordered_map<param::EffectType::EffectTypeEnum, std::unique_ptr<IProcessor>> processers_;
+    param::EffectType::ParamEnum effect_type_{};
+    std::unordered_map<param::EffectType::ParamEnum, std::unique_ptr<IProcessor>> processers_;
     IProcessor* p_processor_{};
 };
 }
