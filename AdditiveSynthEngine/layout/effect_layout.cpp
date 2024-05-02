@@ -87,7 +87,15 @@ void EffectLayout::OnEffectTypeChanged(int c) {
                     param::Scramble_Range{},
                     param::Scramble_Rate{});
         break;
+    case kBlur:
+        SetGuiKnobs(arg_knobs_,
+                    param::Blur_BinAttack{},
+                    param::Blur_BinRelease{},
+                    param::Blur_TimeAttack{},
+                    param::Blur_TimeRelease{});
+        break;
     default:
+        SetGuiKnobs(arg_knobs_);
         break;
     }
 }

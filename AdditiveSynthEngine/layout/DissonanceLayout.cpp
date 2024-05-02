@@ -1,5 +1,6 @@
 #include "DissonanceLayout.h"
 
+#include <cassert>
 #include "param/param.h"
 #include "param/dissonance_param.h"
 #include "layout/gui_param_pack.h"
@@ -57,7 +58,19 @@ void DissonanceLayout::OnDissonanceTypeChanged(int c) {
         SetGuiKnobs(arg_knobs_,
                     param::SemitoneSpace{});
         break;
+    case kStaticError:
+        SetGuiKnobs(arg_knobs_,
+                    param::ErrorRamp{},
+                    param::ErrorRange{});
+        break;
+    case kFakeUnison:
+    case kFakeUnison2:
+        SetGuiKnobs(arg_knobs_,
+                    param::FakeUnisonRatio0{},
+                    param::FakeUnisonRatio1{});
+        break;
     default:
+        assert(false);
         break;
     }
 }

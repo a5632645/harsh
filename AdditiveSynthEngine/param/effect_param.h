@@ -10,6 +10,7 @@ struct EffectType : IntChoiceParam<EffectType> {
         kChorus,
         kPhaser,
         kScramble,
+        kBlur,
         kNumEnums
     };
 
@@ -19,7 +20,8 @@ struct EffectType : IntChoiceParam<EffectType> {
             "reverb"sv,
             "chorus"sv,
             "phaser"sv,
-            "scramble"sv
+            "scramble"sv,
+            "blur"sv,
     };
 };
 
@@ -235,5 +237,46 @@ struct Scramble_Range : FloatParam<Scramble_Range> {
     static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 0.2f;
     static constexpr auto kTextPrecision = 2;
+};
+
+// =========================================================
+// blur
+// =========================================================
+struct Blur_TimeAttack : FloatParam<Blur_TimeAttack> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "t.att"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 2000.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "ms";
+};
+
+struct Blur_TimeRelease : FloatParam<Blur_TimeRelease> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "t.rel"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 2000.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "ms";
+};
+
+struct Blur_BinAttack : FloatParam<Blur_BinAttack> {
+    static constexpr int kArgIdx = 2;
+    static constexpr auto kName = "b.att"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 0.99f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 3;
+};
+
+struct Blur_BinRelease : FloatParam<Blur_BinRelease> {
+    static constexpr int kArgIdx = 3;
+    static constexpr auto kName = "b.rel"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 0.99f;
+    static constexpr auto kDefault = 1.0f;
+    static constexpr auto kTextPrecision = 3;
 };
 }

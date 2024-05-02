@@ -6,6 +6,7 @@ namespace mana {
 struct SynthParam {
     struct {
         float pitch_bend;
+        float output_gain;
     } standard;
 
     struct {
@@ -20,6 +21,7 @@ struct SynthParam {
     } dissonance;
 
     struct {
+        bool is_enable;
         std::array<float, 7> args;
     } resynthsis;
 
@@ -34,6 +36,6 @@ struct SynthParam {
         int effect_type;
         std::array<float, 6> args;
     };
-    std::array<EffectParams, 3 > effects;
+    std::array<EffectParams, 5 > effects;
 };
 }

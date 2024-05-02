@@ -2,18 +2,19 @@
 
 #include "engine/synth.h"
 #include "ui/Knob.h"
-#include "raygui-cpp.h"
 
 namespace mana {
-class ResynthsisLayout {
+class StandardLayout {
 public:
-    ResynthsisLayout(Synth& synth);
+    StandardLayout(Synth& synth);
 
     void Paint();
     void SetBounds(int x, int y, int w, int h);
 private:
     Synth& synth_;
-    rgc::CheckBox is_enable_;
-    std::array<Knob, 7> arg_knobs_;
+    SynthParam& synth_param_;
+
+    Knob pitch_bend_;
+    Knob output_gain_;
 };
 }

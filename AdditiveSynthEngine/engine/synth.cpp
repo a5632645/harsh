@@ -1,6 +1,7 @@
 #include "synth.h"
 
 #include "resynthsis/window.h"
+#include "param/standard_param.h"
 #include "AudioFFT.h"
 
 namespace mana {
@@ -45,7 +46,7 @@ void Synth::Render(size_t numFrame) {
         std::ranges::transform(audio_buffer_, o.getBuffer(), audio_buffer_.begin(), std::plus<float>());
     }
 
-    std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [](float v) {return v * 0.2f; });
+    std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [this](float v) {return v * output_gain_; });
 }
 
 void Synth::Init(size_t bufferSize, float sampleRate) {
@@ -58,8 +59,15 @@ void Synth::Init(size_t bufferSize, float sampleRate) {
     }
 }
 
+static float Db2Gain(float db) {
+    return std::exp(0.11512925464970228420089957273422f * db);
+}
+
 void Synth::update_state(int step) {
     param_bank_.UpdateParamOutput();
+
+    output_gain_ = Db2Gain(param::OutputGain::GetNumber(synth_param_.standard.output_gain));
+
     for (Oscillor& o : m_oscillators) {
         o.update_state(synth_param_, step);
     }
@@ -96,7 +104,7 @@ void Synth::CreateResynthsisFrames(const std::vector<float>& sample) {
     fft.init(kFFtSize);
     window.Init(kFFtSize);
 
-    const auto c1_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
+    const auto g1_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
     auto num_frame = static_cast<size_t>((sample.size() - static_cast<float>(kFFtSize)) / static_cast<float>(kFFtHop));
     ResynthsisFrames audio_frames;
     audio_frames.frames.reserve(num_frame);
@@ -145,7 +153,7 @@ void Synth::CreateResynthsisFrames(const std::vector<float>& sample) {
                 const auto target_phase = bin_frequency * kFFtHop + phases[i];
                 const auto phase_diff = PhaseWrap(this_frame_phase - target_phase);
                 const auto instant_freq = phase_diff * 2.0f / (kFFtHop * std::numbers::pi_v<float>) + (1.0f + i) / static_cast<float>(kFFtSize / 2);
-                new_frame.freq_diffs[i] = instant_freq - c1_freq * (1.0f + i);
+                new_frame.freq_diffs[i] = instant_freq - g1_freq * (1.0f + i);
                 phases[i] = this_frame_phase;
             }
         }
@@ -155,6 +163,6 @@ void Synth::CreateResynthsisFrames(const std::vector<float>& sample) {
 
     resynthsis_frames_.frames.swap(audio_frames.frames);
     resynthsis_frames_.data_sample_rate = 48000.0f;
-    resynthsis_frames_.data_series_freq = c1_freq;
+    resynthsis_frames_.data_series_freq = g1_freq;
 }
 }

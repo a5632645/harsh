@@ -4,8 +4,8 @@ namespace mana::param {
 struct Resynthsis_FreqScale : FloatParam<Resynthsis_FreqScale> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "f.scale"sv;
-    static constexpr auto kMin = -2.0f;
-    static constexpr auto kMax = 2.0f;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 1.0f;
     static constexpr auto kTextPrecision = 2;
 };
@@ -50,19 +50,9 @@ struct Resynthsis_FormantShift : FloatParam<Resynthsis_FormantShift> {
 struct Resynthsis_GainMix : FloatParam<Resynthsis_GainMix> {
     static constexpr int kArgIdx = 5;
     static constexpr auto kName = "g.mix"sv;
-    static constexpr auto kMin = -1.0f;
+    static constexpr auto kMin = 0.0f;
     static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 1.0f;
     static constexpr auto kTextPrecision = 2;
-};
-
-struct Resynthsis_MakeUp : FloatParam<Resynthsis_MakeUp> {
-    static constexpr int kArgIdx = 6;
-    static constexpr auto kName = "makeup"sv;
-    static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = 40.0f;
-    static constexpr auto kDefault = 0.0f;
-    static constexpr auto kTextPrecision = 1;
-    static constexpr auto kStuff = "dB";
 };
 }

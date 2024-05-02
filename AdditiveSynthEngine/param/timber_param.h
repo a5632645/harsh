@@ -34,10 +34,11 @@ struct DualSaw_Ratio : FloatParam<DualSaw_Ratio> {
 struct DualSaw_BeatingRate : FloatParam<DualSaw_BeatingRate> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "beating"sv;
-    static constexpr float kMin = -2.0f;
-    static constexpr float kMax = 2.0f;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 10.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr int kTextPrecision = 3;
+    static constexpr auto kStuff = "hz"sv;
 };
 
 struct DualSaw_SawSquare : FloatParam<DualSaw_SawSquare> {

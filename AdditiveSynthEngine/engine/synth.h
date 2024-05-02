@@ -48,5 +48,6 @@ private:
     size_t m_rrPosition{};
 
     float sample_rate_{};
+    float output_gain_{};
 };
 }

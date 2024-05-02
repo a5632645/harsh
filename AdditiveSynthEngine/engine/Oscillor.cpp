@@ -17,6 +17,8 @@ Oscillor::Oscillor(Synth& synth) {
     AddProcessor(std::make_shared<Effect>(0));
     AddProcessor(std::make_shared<Effect>(1));
     AddProcessor(std::make_shared<Effect>(2));
+    AddProcessor(std::make_shared<Effect>(3));
+    AddProcessor(std::make_shared<Effect>(4));
 }
 
 void Oscillor::Init(size_t bufferSize, float sampleRate) {

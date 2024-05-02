@@ -59,8 +59,8 @@ public:
 
     void Process(Partials& partials) override {
         for (int i = 0; i < kNumPartials; ++i) {
-            auto nor_phase = std::lerp(GetPhase(first_mode_, i, partials.freqs[i] - partials.freqs.front(), partials.pitches[i] - partials.pitches.front()),
-                                       GetPhase(second_mode_, i, partials.freqs[i] - partials.freqs.front(), partials.pitches[i] - partials.pitches.front()),
+            auto nor_phase = std::lerp(GetPhase(first_mode_, i, partials.freqs[i], partials.pitches[i]),
+                                       GetPhase(second_mode_, i, partials.freqs[i], partials.pitches[i]),
                                        mode_fraction_);
             auto org_gain = std::lerp(PhaserShapeVal(first_shape_, nor_phase),
                                       PhaserShapeVal(second_shape_, nor_phase),

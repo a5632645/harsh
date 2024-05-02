@@ -13,36 +13,37 @@ SynthLayout::SynthLayout(Synth& synth)
     , effect_layout0_(synth, 0)
     , effect_layout1_(synth, 1)
     , effect_layout2_(synth, 2)
-    , resynthsis_layout_(synth) {
-    const auto& bank = synth.GetParamBank();
-
-    pitch_bend_.set_parameter(bank.GetParamPtr("standard.pitch_bend"));
-
-    pitch_bend_.set_title(param::PitchBend::kName);
-    pitch_bend_.value_to_text_function = param::FloatParam<param::PitchBend>::GetText;
+    , effect_layout3_(synth, 3)
+    , effect_layout4_(synth, 4)
+    , resynthsis_layout_(synth)
+    , standard_layout_(synth) {
 }
 
 void SynthLayout::paint() {
     timber_layout_.Paint();
-    pitch_bend_.display();
+    standard_layout_.Paint();
     scope_.Paint();
     dissonance_layout_.Paint();
     filter_layout_.Paint();
     effect_layout0_.Paint();
     effect_layout1_.Paint();
     effect_layout2_.Paint();
+    effect_layout3_.Paint();
+    effect_layout4_.Paint();
     resynthsis_layout_.Paint();
 }
 
 void SynthLayout::SetBounds(int x, int y, int w, int h) {
     timber_layout_.SetBounds(0, 0, 200, 12 + 70);
-    pitch_bend_.set_bound(200, 0, 50, 70);
     scope_.SetBounds(x, y, w, h);
     dissonance_layout_.SetBounds(250, 0, 100, 152);
     filter_layout_.SetBounds(350, 0, 150, 156);
     effect_layout0_.SetBounds(0, 156, 150, 156);
     effect_layout1_.SetBounds(150, 156, 150, 156);
     effect_layout2_.SetBounds(300, 156, 150, 156);
+    effect_layout3_.SetBounds(450, 156, 150, 156);
+    effect_layout4_.SetBounds(600, 156, 150, 156);
     resynthsis_layout_.SetBounds(0, 156 * 2 + 30, 300, 70);
+    standard_layout_.SetBounds(w - 100, y, 100, 70);
 }
 }

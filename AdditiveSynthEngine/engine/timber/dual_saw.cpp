@@ -16,10 +16,6 @@ void DualSaw::Init(float sample_rate) {
 }
 
 void DualSaw::Process(Partials& partials) {
-    //partials.gains.fill(1.0f);
-    //return;
-
-    auto sign = beating_rate_ >= 0.0f ? 0.5f : -0.5f;
     auto second_ratio = static_cast<int>(ratio_);
 
     if (second_ratio != 1) {
@@ -40,7 +36,7 @@ void DualSaw::Process(Partials& partials) {
             gain = kSawHarmonicGains[i] * saw_square_;
         }
 
-        auto beating_gain = 0.5f + sign * std::cos((i + 1.0f) * kTwoPi * beating_phase_);
+        auto beating_gain = 0.5f + 0.5f * std::cos((i + 1.0f) * kTwoPi * beating_phase_);
         partials.gains[second_partial_idx] = beating_gain * gain;
         second_partial_idx += second_ratio;
     }
@@ -51,14 +47,9 @@ void DualSaw::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
     beating_rate_ = param::DualSaw_BeatingRate::GetNumber(param.timber.args);
     saw_square_ = param::DualSaw_SawSquare::GetNumber(param.timber.args);
 
-    auto inc = std::abs(beating_rate_) * skip / sample_rate_;
+    auto inc = beating_rate_ * skip / sample_rate_;
     beating_phase_ += inc;
-    if (beating_phase_ > 1.0f) {
-        beating_phase_ -= 1.0f;
-    }
-    if (beating_phase_ < 0.0f) {
-        beating_phase_ += 1.0f;
-    }
+    beating_phase_ -= static_cast<float>(static_cast<int>(beating_phase_));
 }
 
 void DualSaw::OnNoteOn(int note) {

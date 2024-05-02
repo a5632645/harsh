@@ -17,17 +17,25 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
                 param::Resynthsis_FrameOffset{},
                 param::Resynthsis_FrameSpeed{},
                 param::Resynthsis_FreqScale{},
-                param::Resynthsis_GainMix{},
-                param::Resynthsis_MakeUp{});
+                param::Resynthsis_GainMix{});
+
+    is_enable_.SetText("resynthsis");
+    is_enable_.SetChecked(synth.GetSynthParam().resynthsis.is_enable);
 }
 
 void ResynthsisLayout::Paint() {
+    synth_.GetSynthParam().resynthsis.is_enable = is_enable_.Show();
     std::ranges::for_each(arg_knobs_, &Knob::display);
 }
 
 void ResynthsisLayout::SetBounds(int x, int y, int w, int h) {
+    auto x_f = static_cast<float>(x);
+    auto y_f = static_cast<float>(y);
+    auto w_f = static_cast<float>(w);
+    is_enable_.SetBounds(rgc::Bounds(x_f, y_f, 12.0f, 12.0f));
+
     for (int i = 0; auto & k : arg_knobs_) {
-        k.set_bound(x + 50 * i, y, 50, 70);
+        k.set_bound(x + 50 * i, y + 12, 50, 70);
         ++i;
     }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <random>
 #include "engine/IProcessor.h"
 #include "param/dissonance_param.h"
 
@@ -23,5 +24,16 @@ private:
 
     // st space
     float st_space_semitone_;
+
+    // static noise
+    void DoSyncNoise(Partials& partials);
+    std::random_device random_;
+    std::array<float, kNumPartials> static_noise_{};
+    float error_range_;
+    float error_ramp_;
+
+    // fake unison
+    float ratio2x_ratio_;
+    float ratio3x_ratio_;
 };
 }
