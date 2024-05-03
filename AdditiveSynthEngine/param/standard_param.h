@@ -20,4 +20,61 @@ struct OutputGain : FloatParam<OutputGain> {
     static constexpr auto kStuff = "dB"sv;
     static constexpr int kTextPrecision = 1;
 };
+
+struct PhaseType : IntChoiceParam<PhaseType> {
+    static constexpr auto kName = "out.gain"sv;
+
+    enum class ParamEnum {
+        kResetOnce = 0,
+        kContinue,
+        kDispersion,
+        kSpectralRandom,
+        kPowDistribute,
+        kNumEnums
+    };
+
+    static constexpr std::array kNames{
+        "reset once"sv,
+        "continue"sv,
+        "dispersion"sv,
+        "sp.random"sv,
+        "pow dist"sv,
+    };
+};
+
+struct PhaseDispersion_Amount : FloatParam<PhaseDispersion_Amount> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "amount"sv;
+    static constexpr float kMin = -1.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 2;
+};
+
+struct PhaseDispersion_Warp : FloatParam<PhaseDispersion_Warp> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "warp"sv;
+    static constexpr float kMin = -1.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 2;
+};
+
+struct PhaseSpRandom_Amount : FloatParam<PhaseSpRandom_Amount> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "amount"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 2;
+};
+
+struct PhasePowDist_Pow : FloatParam<PhasePowDist_Pow> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "pow"sv;
+    static constexpr float kMin = 1.01f;
+    static constexpr float kMax = 2.99f;
+    static constexpr float kDefault = 1.3f;
+    static constexpr int kTextPrecision = 2;
+};
 }

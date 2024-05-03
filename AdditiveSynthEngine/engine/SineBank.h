@@ -64,7 +64,7 @@ public:
     void ResetState() {
         processed_partials_ = 0;
         active_partials_ = 0;
-        phase_table_.fill(std::complex(1.0f, 0.0f));
+        //phase_table_.fill(std::complex(1.0f, 0.0f));
     }
 
     void SetNumMaxActivePartials(size_t number) {

@@ -10,6 +10,11 @@ struct SynthParam {
     } standard;
 
     struct {
+        int phase_type;
+        std::array<float, 2> args;
+    } phase;
+
+    struct {
         int timber_type;
         std::array<float, 4> args;
     } timber;

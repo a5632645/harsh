@@ -12,39 +12,8 @@
 static mana::Synth synth_;
 static mana::KeyBoard keyboard_;
 static mana::SynthLayout synth_layout_{ synth_ };
-static struct spinlock {
-    std::atomic<bool> lock_ = { 0 };
-
-    void lock() noexcept {
-        for (;;) {
-            // Optimistically assume the lock is free on the first try
-            if (!lock_.exchange(true, std::memory_order_acquire)) {
-                return;
-            }
-            // Wait for lock to be released without generating cache misses
-            while (lock_.load(std::memory_order_relaxed)) {
-                // Issue X86 PAUSE or ARM YIELD instruction to reduce contention between
-                // hyper-threads
-                //__builtin_ia32_pause();
-            }
-        }
-    }
-
-    bool try_lock() noexcept {
-        // First do a relaxed load to check if lock is free in order to prevent
-        // unnecessary cache misses if someone does while(!try_lock())
-        return !lock_.load(std::memory_order_relaxed) &&
-            !lock_.exchange(true, std::memory_order_acquire);
-    }
-
-    void unlock() noexcept {
-        lock_.store(false, std::memory_order_release);
-    }
-} audio_lock_;
 
 static void ThisAudioCallback(void* buffer, unsigned int frames) {
-    std::scoped_lock _{ audio_lock_ };
-
     synth_.update_state(frames);
     synth_.Render(frames);
     std::ranges::copy(synth_.getBuffer(), static_cast<float*>(buffer));
@@ -77,8 +46,6 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
         {
-            std::scoped_lock _{ audio_lock_ };
-
             keyboard_.checkInFrame();
             synth_layout_.paint();
 

@@ -220,13 +220,13 @@ struct Phaser_Mode : FloatChoiceParam<Phaser_Mode> {
 // =========================================================
 // scramble
 // =========================================================
-struct Scramble_Rate : FloatParam<Scramble_Rate> {
+struct Scramble_Rate : FloatParam < Scramble_Rate, [](float v) {return v * v * v; } > {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "rate"sv;
     static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = 25.0f;
+    static constexpr auto kMax = 100.0f;
     static constexpr auto kDefault = 1.0f;
-    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kTextPrecision = 2;
     static constexpr auto kStuff = "hz"sv;
 };
 

@@ -12,6 +12,7 @@ struct DissonanceType : IntChoiceParam<DissonanceType> {
         kStaticError,
         kFakeUnison,
         kFakeUnison2,
+        kDispersion,
         kNumEnums
     };
 
@@ -23,6 +24,7 @@ struct DissonanceType : IntChoiceParam<DissonanceType> {
         "static error"sv,
         "fake unison"sv,
         "fake unison2"sv,
+        "dispersion"sv,
     };
 };
 
@@ -99,7 +101,7 @@ struct ErrorRange : FloatParam<ErrorRange> {
 };
 
 // =========================================================
-// error
+// fake unison
 // =========================================================
 struct FakeUnisonRatio0 : FloatParam<FakeUnisonRatio0> {
     static constexpr int kArgIdx = 0;
@@ -119,5 +121,26 @@ struct FakeUnisonRatio1 : FloatParam<FakeUnisonRatio1> {
     static constexpr auto kDefault = 0.0f;
     static constexpr auto kTextPrecision = 1;
     static constexpr auto kStuff = "st";
+};
+
+// =========================================================
+// dispersion
+// =========================================================
+struct Dispersion_Amount : FloatParam<Dispersion_Amount> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "amount"sv;
+    static constexpr auto kMin = -4.0f;
+    static constexpr auto kMax = 4.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 1;
+};
+
+struct Dispersion_Warp : FloatParam<Dispersion_Warp> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "warp"sv;
+    static constexpr auto kMin = -1.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 2;
 };
 }

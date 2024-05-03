@@ -1,6 +1,5 @@
 #include "Modulation.h"
 #include "Parameter.h"
-#include "utli/Signal.h"
 
 namespace mana {
 Modulation::Modulation(std::shared_ptr<Modulator> modulator, std::shared_ptr<Parameter> param) :
@@ -17,10 +16,11 @@ void Modulation::set_bipolar(bool bipolar) {
 }
 
 float Modulation::get_output_value() const {
-    if (m_bipolar) {
-        return m_modulator->get_output_value() * m_amount;
+    auto v = m_modulator->get_output_value();
+    if (!m_bipolar) {
+        v = 0.5f * v + 0.5f;
     }
-    return Signal::scale_down(m_modulator->get_output_value()) * m_amount;
+    return v * m_amount;
 }
 
 float Modulation::get_amount() const {

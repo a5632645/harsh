@@ -6,6 +6,7 @@
 #include "engine/IProcessor.h"
 #include "param/effect_param.h"
 #include "param/param.h"
+#include "utli/convert.h"
 
 namespace mana {
 class Reverb : public IProcessor {
@@ -20,7 +21,7 @@ public:
             auto abs_gain = std::abs(partials.gains[i]);
 
             // calc decay var
-            auto decay = Db2Gain((30.0f - partials.pitches[i]) * damp_ * 0.01f) * decay_a_;
+            auto decay = utli::DbToGain((30.0f - partials.pitches[i]) * damp_ * 0.01f) * decay_a_;
             decay = std::min(1.0f, decay);
 
             // do 1st smoothing
@@ -49,8 +50,8 @@ public:
         attack_ = param::Reverb_Attack::GetNumber(params.effects[module_idx].args);
         damp_ = param::Reverb_Damp::GetNumber(params.effects[module_idx].args);
 
-        attack_a_ = Calc1stSmoothFilterCoeff(attack_ / 1000.0f, system_rate_);
-        decay_a_ = Calc1stSmoothFilterCoeff(decay_ / 1000.0f, system_rate_);
+        attack_a_ = utli::Calc1stSmoothFilterCoeff(attack_ / 1000.0f, system_rate_);
+        decay_a_ = utli::Calc1stSmoothFilterCoeff(decay_ / 1000.0f, system_rate_);
         if (decay_ == param::Reverb_Decay::kMax) {
             decay_a_ = 1.0f;
         }
@@ -58,17 +59,6 @@ public:
     void OnNoteOn(int note) override {}
     void OnNoteOff() override {}
 private:
-    static float Db2Gain(float db) {
-        return std::exp(0.11512925464970228420089957273422f * db);
-    }
-
-    inline static float Calc1stSmoothFilterCoeff(float time_second, float system_rate) {
-        if (time_second < 1.0f / 1000.0f) {
-            return 0.0f;
-        }
-        return std::exp(-1.0f / (system_rate * time_second));
-    }
-
     std::random_device random_dev_{};
     std::uniform_real_distribution<float> urnd_;
     std::array<float, kNumPartials> latched_gains{};

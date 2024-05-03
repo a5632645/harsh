@@ -1,5 +1,7 @@
 #include "dissonance.h"
 
+#include "utli/warp.h"
+
 static float RatioToPitch(float ratio, float base_pitch) {
     ratio = std::max(ratio, 0.0001f);
     return base_pitch + 12.0f * std::log2(ratio);
@@ -46,6 +48,34 @@ static void DoStringDiss(Partials& partials, float string_val) {
 }
 
 // =========================================================
+// dispersion
+// =========================================================
+static void DoDispersion(Partials& partials, float amount, float warp) {
+    auto first_ratio = partials.freqs[0] + 1.0f;
+    partials.freqs[0] = first_ratio * partials.base_frequency;
+    partials.pitches[0] = RatioToPitch(first_ratio, partials.base_pitch);
+
+    if (amount < 0.0f) {
+        for (int i = 1; i < kNumPartials; ++i) {
+            auto idx01 = static_cast<float>(i) / static_cast<float>(kNumPartials);
+            auto spread = 1.0f + utli::warp::ParabolaWarp(idx01, warp) * std::abs(amount);
+            auto ratio = (i + 1.0f) / spread;
+            partials.freqs[i] = partials.base_frequency * ratio;
+            partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
+        }
+    }
+    else {
+        for (int i = 1; i < kNumPartials; ++i) {
+            auto idx01 = static_cast<float>(i) / static_cast<float>(kNumPartials);
+            auto spread = 1.0f + utli::warp::ParabolaWarp(idx01, warp) * std::abs(amount);
+            auto ratio = (i + 1.0f) * spread;
+            partials.freqs[i] = partials.base_frequency * ratio;
+            partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
+        }
+    }
+}
+
+// =========================================================
 // noise
 // =========================================================
 void Dissonance::DoSyncNoise(Partials& partials) {
@@ -68,7 +98,7 @@ void Dissonance::DoSyncNoise(Partials& partials) {
 // =========================================================
 // fake unison
 // =========================================================
-void DoFakeUnison(Partials& partials, float ratio0, float ratio1) {
+static void DoFakeUnison(Partials& partials, float ratio0, float ratio1) {
     for (int i = 0; i < kNumPartials; i += 3) {
         auto ratio = i + 1.0f + partials.freqs[i];
         partials.freqs[i] = partials.base_frequency * ratio;
@@ -90,7 +120,7 @@ void DoFakeUnison(Partials& partials, float ratio0, float ratio1) {
     }
 }
 
-void DoFakeUnison2(Partials& partials, float ratio0, float ratio1) {
+static void DoFakeUnison2(Partials& partials, float ratio0, float ratio1) {
     int harmonic_idx = 1;
     for (int i = 0; i < kNumPartials; i += 3) {
         auto ratio = harmonic_idx + partials.freqs[i];
@@ -154,6 +184,9 @@ void Dissonance::Process(Partials& partials) {
     case kFakeUnison2:
         DoFakeUnison2(partials, ratio2x_ratio_, ratio3x_ratio_);
         break;
+    case kDispersion:
+        DoDispersion(partials, dispersion_amount_, dispersion_warp_);
+        break;
     default:
         break;
     }
@@ -181,6 +214,11 @@ void Dissonance::OnUpdateTick(const SynthParam& params, int skip, int module_idx
     {
         ratio2x_ratio_ = std::exp2(param::FakeUnisonRatio0::GetNumber(params.dissonance.args) / 12.0f);
         ratio3x_ratio_ = std::exp2(param::FakeUnisonRatio1::GetNumber(params.dissonance.args) / 12.0f);
+    }
+
+    {
+        dispersion_amount_ = param::Dispersion_Amount::GetNumber(params.dissonance.args);
+        dispersion_warp_ = param::Dispersion_Warp::GetNumber(params.dissonance.args);
     }
 }
 

@@ -35,5 +35,9 @@ private:
     // fake unison
     float ratio2x_ratio_;
     float ratio3x_ratio_;
+
+    // dispersion
+    float dispersion_warp_;
+    float dispersion_amount_;
 };
 }

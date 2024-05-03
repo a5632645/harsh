@@ -2,11 +2,12 @@
 
 #include <string>
 #include <format>
+#include <functional>
 
 namespace mana::param {
 using namespace std::string_view_literals;
 
-template<typename DetailParam>
+template<typename DetailParam, float(*remap_func)(float) = nullptr>
 struct FloatParam {
     static constexpr float GetNormalDefault() {
         static_assert(requires {DetailParam::kMin; DetailParam::kMax; DetailParam::kDefault; });
@@ -15,6 +16,11 @@ struct FloatParam {
 
     static constexpr float GetNumber(float nor) {
         static_assert(requires {DetailParam::kMin; DetailParam::kMax; });
+
+        if constexpr (remap_func != nullptr) {
+            nor = remap_func(nor);
+        }
+
         return std::lerp(DetailParam::kMin, DetailParam::kMax, nor);
     }
 

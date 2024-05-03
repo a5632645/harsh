@@ -37,13 +37,9 @@ private:
     void BindParam();
 
     ResynthsisFrames resynthsis_frames_;
-
     ParamBank param_bank_;
-
     SynthParam synth_param_;
-
     std::vector<float> audio_buffer_;
-
     std::vector<Oscillor> m_oscillators;
     size_t m_rrPosition{};
 

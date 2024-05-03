@@ -37,21 +37,24 @@ private:
 
         if (lfo_phase_ >= 1.0f) {
             lfo_phase_ -= 1.0f;
-
-            std::ranges::copy(idx_table1_, idx_table0_.begin());
-            std::ranges::copy(kInitTable, idx_table1_.begin());
-            int shuffler_range = static_cast<int>(kNumPartials * scramble_range_);
-            if (shuffler_range < 2) {
-                return;
-            }
-
-            int idx_begin = 0;
-            do {
-                auto idx_end = std::min(idx_begin + shuffler_range, kNumPartials);
-                std::shuffle(idx_table1_.begin() + idx_begin, idx_table1_.begin() + idx_end, rand_generator_);
-                idx_begin += shuffler_range;
-            } while (idx_begin < kNumPartials);
+            ShufflerIndexTable();
         }
+    }
+
+    void ShufflerIndexTable() {
+        std::ranges::copy(idx_table1_, idx_table0_.begin());
+        std::ranges::copy(kInitTable, idx_table1_.begin());
+        int shuffler_range = static_cast<int>(kNumPartials * scramble_range_);
+        if (shuffler_range < 2) {
+            return;
+        }
+
+        int idx_begin = 0;
+        do {
+            auto idx_end = std::min(idx_begin + shuffler_range, kNumPartials);
+            std::shuffle(idx_table1_.begin() + idx_begin, idx_table1_.begin() + idx_end, rand_generator_);
+            idx_begin += shuffler_range;
+        } while (idx_begin < kNumPartials);
     }
 
     template<int... Its>

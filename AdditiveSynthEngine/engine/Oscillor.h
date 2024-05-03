@@ -3,7 +3,6 @@
 #include <vector>
 #include "partials.h"
 #include "SineBank.h"
-#include "utli/DebugMarco.h"
 #include "param/synth_param.h"
 #include <algorithm>
 #include <memory>
@@ -97,8 +96,5 @@ private:
     // component
     std::vector<std::shared_ptr<IProcessor>> processors_;
     IProcessor* p_resynthsis_{};
-
-    // Helper
-    DSP_INIT_DEFINE;
 };
 }

@@ -69,8 +69,13 @@ void DissonanceLayout::OnDissonanceTypeChanged(int c) {
                     param::FakeUnisonRatio0{},
                     param::FakeUnisonRatio1{});
         break;
+    case kDispersion:
+        SetGuiKnobs(arg_knobs_,
+                    param::Dispersion_Amount{},
+                    param::Dispersion_Warp{});
+        break;
     default:
-        assert(false);
+        assert(false && "unkown type");
         break;
     }
 }

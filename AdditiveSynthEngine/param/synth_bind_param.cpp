@@ -12,6 +12,11 @@ void Synth::BindParam() {
     param_bank_.AddOrCreateIfNull("standard.output_gain", param::PitchBend::GetNormalDefault())
         .on_output_changed = [this](float v) {synth_param_.standard.output_gain = v; };
 
+    for (int arg_idx = 0; arg_idx < 2; ++arg_idx) {
+        param_bank_.AddOrCreateIfNull(std::format("standard.phase.arg{}", arg_idx), 0.0f)
+            .on_output_changed = [this, arg_idx](float v) {synth_param_.phase.args[arg_idx] = v; };
+    }
+
     for (int arg_idx = 0; arg_idx < 4; ++arg_idx) {
         param_bank_.AddOrCreateIfNull(std::format("timber.arg{}", arg_idx), 0.0f)
             .on_output_changed = [this, arg_idx](float v) {synth_param_.timber.args[arg_idx] = v; };

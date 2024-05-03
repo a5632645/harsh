@@ -1,6 +1,7 @@
 #include "Oscillor.h"
 
 #include "standard/freq.h"
+#include "standard/phase.h"
 #include "timber/timber.h"
 #include "dissonance/dissonance.h"
 #include "resynthsis/resynthsis.h"
@@ -10,6 +11,7 @@
 namespace mana {
 Oscillor::Oscillor(Synth& synth) {
     AddProcessor(std::make_shared<FreqProcessor>());
+    AddProcessor(std::make_shared<PhaseProcessor>());
     AddProcessor(std::make_shared<Dissonance>());
     AddProcessor(std::make_shared<Timber>());
     p_resynthsis_ = AddProcessor(std::make_shared<Resynthesis>(synth));
@@ -22,8 +24,6 @@ Oscillor::Oscillor(Synth& synth) {
 }
 
 void Oscillor::Init(size_t bufferSize, float sampleRate) {
-    DSP_INIT;
-
     audio_buffer_.resize(bufferSize);
     sample_rate_ = sampleRate;
 

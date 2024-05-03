@@ -79,7 +79,14 @@ add_executable (AdditiveSynthEngine
  "engine/resynthsis/window.h"
  "layout/gui_param_pack.h"
  "engine/effect/phaser.h"
- "engine/effect/scramble.h" "param/resynthsis_param.h" "layout/resynthsis_layout.h" "layout/resynthsis_layout.cpp" "utli/NoiseGenerator.h" "layout/standard_layout.h" "layout/standard_layout.cpp"  "engine/effect/Blur.h")
+ "engine/effect/scramble.h"
+ "param/resynthsis_param.h"
+ "layout/resynthsis_layout.h"
+ "layout/resynthsis_layout.cpp"
+ "utli/NoiseGenerator.h"
+ "layout/standard_layout.h"
+ "layout/standard_layout.cpp"
+ "engine/effect/Blur.h" "utli/spin_lock.h" "utli/convert.h" "engine/standard/phase.h" "engine/standard/phase.cpp" "utli/warp.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)
@@ -90,3 +97,4 @@ target_link_libraries(AdditiveSynthEngine PUBLIC raylib)
 target_link_libraries(AdditiveSynthEngine PUBLIC raygui_cpp)
 target_link_libraries(AdditiveSynthEngine PUBLIC AudioFFT)
 target_link_libraries(AdditiveSynthEngine PUBLIC AudioFile)
+target_link_libraries(AdditiveSynthEngine PUBLIC gcem)
