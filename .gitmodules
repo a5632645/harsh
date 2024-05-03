@@ -1,3 +1,18 @@
 [submodule "gcem"]
 	path = gcem
 	url = https://github.com/kthohr/gcem.git
+[submodule "AudioFFT"]
+	path = AudioFFT
+	url = https://github.com/HiFi-LoFi/AudioFFT.git
+[submodule "AudioFile"]
+	path = AudioFile
+	url = https://github.com/adamstark/AudioFile.git
+[submodule "raylib"]
+	path = raylib
+	url = https://github.com/raysan5/raylib.git
+[submodule "raylib-cpp"]
+	path = raylib-cpp
+	url = https://github.com/RobLoach/raylib-cpp.git
+[submodule "raygui-cpp"]
+	path = raygui-cpp
+	url = https://github.com/scastd/raygui-cpp.git
