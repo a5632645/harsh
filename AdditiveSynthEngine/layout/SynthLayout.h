@@ -19,6 +19,8 @@ public:
     void SetBounds(int x, int y, int w, int h);
     Oscilloscope& GetOscilloscope() { return scope_; }
 private:
+    Synth& synth_;
+
     Oscilloscope scope_;
 
     StandardLayout standard_layout_;

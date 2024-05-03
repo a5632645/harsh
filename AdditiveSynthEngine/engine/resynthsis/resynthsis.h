@@ -17,11 +17,14 @@ public:
     void Process(Partials& partials) override;
     void OnUpdateTick(const SynthParam& param, int skip, int module_idx) override;
     void OnNoteOn(int note) override;
-    void OnNoteOff() override {}
+    void OnNoteOff() override {
+        is_running_ = false;
+    }
 
     void PreGetFreqDiffsInRatio(Partials& partials);
 
 private:
+    bool IsWork() const;
     std::array<float, kNumPartials> GetFormantGains(Partials& partials,
                                                     const ResynthsisFrames::FftFrame& frame) const;
 
@@ -31,6 +34,7 @@ private:
     float frame_player_pos_{};
 
     // parameters
+    bool is_running_{};
     bool is_enable_{};
     float formant_mix_{};
     float formant_shift_{};

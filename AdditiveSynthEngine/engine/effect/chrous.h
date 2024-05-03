@@ -22,7 +22,7 @@ public:
             auto gain_cpx = std::complex(1.0f, 0.0f)
                 + std::polar(1.0f, voice1_delay_samples * partials.freqs[i])
                 + std::polar(1.0f, voice2_delay_samples * partials.freqs[i]);
-            auto wet_gain = std::abs(gain_cpx) / 3.0f;
+            auto wet_gain = std::abs(gain_cpx) / 2.0f;
             partials.gains[i] = std::lerp(partials.gains[i], partials.gains[i] * wet_gain, amount_);
         }
     }

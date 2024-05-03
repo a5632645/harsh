@@ -64,7 +64,7 @@ int main(void) {
     // init synth
     synth_.Init(480, 48000.0f);
     synth_layout_.SetBounds(0, 0, 800, 600);
-    synth_.CreateResynthsisFrames(AudioFile<float>{R"(C:\Users\Kawai\Desktop\o.wav)"}.samples.front());
+    //synth_.CreateResynthsisFrames(AudioFile<float>{R"(C:\Users\Kawai\Desktop\o.wav)"}.samples.front());
 
     // link keyboard and synth
     keyboard_.onNoteOn = [](int n) {synth_.NoteOn(n, 1.0f); };

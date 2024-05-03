@@ -32,7 +32,7 @@ public:
 
     ResynthsisFrames& GetResynthsisFrames() { return resynthsis_frames_; }
     bool IsResynthsisAvailable() const { return !resynthsis_frames_.frames.empty(); }
-    void CreateResynthsisFrames(const std::vector<float>& audio_in);
+    void CreateResynthsisFrames(const std::vector<float>& audio_in, float sample_rate);
 private:
     void BindParam();
 

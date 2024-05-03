@@ -20,7 +20,8 @@ public:
 
     void LoadPartials(Partials& partials) {
         // find particles
-        const size_t num_processed = count_process_particles(partials);
+        //const size_t num_processed = count_process_particles(partials);
+        size_t num_processed = kNumPartials;
         processed_partials_ = std::max(processed_partials_, num_processed);
         active_partials_ = std::min(processed_partials_, max_active_partials_);
 
@@ -81,14 +82,14 @@ private:
     //    }
     //}
 
-    size_t count_process_particles(const Partials& particles) {
-        for (size_t i = kNumPartials - 1; i > 0; --i) {
-            if (particles.freqs[i] <= 0.0f || particles.freqs[i] > 1.0f) {
-                return i + 1;
-            }
-        }
-        return kNumPartials;
-    }
+    //size_t count_process_particles(const Partials& particles) {
+    //    for (size_t i = kNumPartials - 1; i > 0; --i) {
+    //        if (particles.freqs[i] <= 0.0f || particles.freqs[i] > 1.0f) {
+    //            return i + 1;
+    //        }
+    //    }
+    //    return kNumPartials;
+    //}
 
     std::array<float, kNumPartials> target_volume_table_{};
     std::array<float, kNumPartials> volume_table_{};

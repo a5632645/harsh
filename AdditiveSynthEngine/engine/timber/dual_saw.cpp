@@ -8,7 +8,9 @@
 #include "param/param.h"
 
 namespace mana {
-static constexpr auto kSawHarmonicGains = VolumeTable<kNumPartials>::SAW_TABLE;
+static constexpr auto kSawHarmonicGains = makeHarmonicArray<kNumPartials>([](float v) {
+    return  1.0f / v / std::numbers::pi_v<float>;
+});
 static constexpr auto kTwoPi = std::numbers::pi_v<float> *2.0f;
 
 void DualSaw::Init(float sample_rate) {
@@ -18,15 +20,13 @@ void DualSaw::Init(float sample_rate) {
 void DualSaw::Process(Partials& partials) {
     auto second_ratio = static_cast<int>(ratio_);
 
-    if (second_ratio != 1) {
-        for (int i = 0; i < kNumPartials; ++i) {
-            // odd
-            partials.gains[i] = kSawHarmonicGains[i];
+    for (int i = 0; i < kNumPartials; ++i) {
+        // odd
+        partials.gains[i] = kSawHarmonicGains[i];
 
-            ++i;
-            // even
-            partials.gains[i] = kSawHarmonicGains[i] * saw_square_;
-        }
+        ++i;
+        // even
+        partials.gains[i] = kSawHarmonicGains[i] * saw_square_;
     }
 
     int second_partial_idx = second_ratio - 1;
@@ -37,7 +37,8 @@ void DualSaw::Process(Partials& partials) {
         }
 
         auto beating_gain = 0.5f + 0.5f * std::cos((i + 1.0f) * kTwoPi * beating_phase_);
-        partials.gains[second_partial_idx] = beating_gain * gain;
+        partials.gains[second_partial_idx] += gain;
+        partials.gains[second_partial_idx] *= beating_gain;
         second_partial_idx += second_ratio;
     }
 }

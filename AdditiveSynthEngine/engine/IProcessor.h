@@ -9,10 +9,10 @@ public:
     IProcessor() = default;
     virtual ~IProcessor() = default;
 
-    IProcessor(const IProcessor&) = delete;
-    IProcessor& operator=(const IProcessor&) = delete;
-    IProcessor(IProcessor&&) = delete;
-    IProcessor& operator=(IProcessor&&) = delete;
+    IProcessor(const IProcessor&) = default;
+    IProcessor& operator=(const IProcessor&) = default;
+    IProcessor(IProcessor&&) = default;
+    IProcessor& operator=(IProcessor&&) = default;
 
     virtual void Init(float sample_rate) = 0;
     virtual void Process(Partials& partials) = 0;

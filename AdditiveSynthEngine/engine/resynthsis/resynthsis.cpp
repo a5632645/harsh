@@ -9,7 +9,7 @@ void Resynthesis::Init(float sample_rate) {
 }
 
 void Resynthesis::Process(Partials& partials) {
-    if (!(synth_.IsResynthsisAvailable() && is_enable_)) {
+    if (!IsWork()) {
         return;
     }
 
@@ -45,7 +45,7 @@ void Resynthesis::OnUpdateTick(const SynthParam& params, int skip, int module_id
     gain_mix_ = param::Resynthsis_GainMix::GetNumber(params.resynthsis.args);
     is_enable_ = params.resynthsis.is_enable;
 
-    if (!(synth_.IsResynthsisAvailable() && is_enable_)) return;
+    if (!IsWork()) return;
 
     auto pos_inc = frame_speed_ * (float)skip / kFFtHop / synth_.GetResynthsisFrames().frames.size();
     frame_player_pos_ += pos_inc;
@@ -63,7 +63,7 @@ void Resynthesis::OnUpdateTick(const SynthParam& params, int skip, int module_id
 }
 
 void Resynthesis::PreGetFreqDiffsInRatio(Partials& partials) {
-    if (!synth_.IsResynthsisAvailable() || !is_enable_ || freq_scale_ == float{}) {
+    if (!IsWork() || freq_scale_ == float{}) {
         partials.freqs.fill(0.0f);
         return;
     }
@@ -73,6 +73,10 @@ void Resynthesis::PreGetFreqDiffsInRatio(Partials& partials) {
     auto ratio_scale = freq_scale_ / synth_.GetResynthsisFrames().data_series_freq;
     std::ranges::transform(frame.freq_diffs, partials.freqs.begin(),
                            [ratio_scale](float fre_diff) {return ratio_scale * fre_diff; });
+}
+
+bool Resynthesis::IsWork() const {
+    return is_running_ && is_enable_ && synth_.IsResynthsisAvailable();
 }
 
 std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
@@ -101,5 +105,6 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
 
 void Resynthesis::OnNoteOn(int /*note*/) {
     frame_player_pos_ = float{};
+    is_running_ = true;
 }
 }
