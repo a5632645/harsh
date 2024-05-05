@@ -98,7 +98,11 @@ static constexpr float PhaseWrap(float p) {
     return p;
 }
 
-void Synth::CreateResynthsisFrames(const std::vector<float>& sample, float sample_rate) {
+void Synth::SetResynthsisFrames(ResynthsisFrames new_frame) {
+    resynthsis_frames_ = std::move(new_frame);
+}
+
+ResynthsisFrames Synth::CreateResynthsisFrames(const std::vector<float>& sample, float sample_rate) {
     audiofft::AudioFFT fft;
     Window<float> window;
     fft.init(kFFtSize);
@@ -162,8 +166,8 @@ void Synth::CreateResynthsisFrames(const std::vector<float>& sample, float sampl
         read_pos += kFFtHop;
     }
 
-    resynthsis_frames_.frames.swap(audio_frames.frames);
-    resynthsis_frames_.data_sample_rate = sample_rate;
-    resynthsis_frames_.data_series_freq = c2_freq;
+    audio_frames.data_sample_rate = sample_rate;
+    audio_frames.data_series_freq = c2_freq;
+    return audio_frames;
 }
 }

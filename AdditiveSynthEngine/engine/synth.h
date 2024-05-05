@@ -31,9 +31,10 @@ public:
     const ParamBank& GetParamBank() const { return param_bank_; }
     SynthParam& GetSynthParam() { return synth_param_; }
 
+    void SetResynthsisFrames(ResynthsisFrames new_frame);
     ResynthsisFrames& GetResynthsisFrames() { return resynthsis_frames_; }
     bool IsResynthsisAvailable() const { return !resynthsis_frames_.frames.empty(); }
-    void CreateResynthsisFrames(const std::vector<float>& audio_in, float sample_rate);
+    ResynthsisFrames CreateResynthsisFrames(const std::vector<float>& audio_in, float sample_rate);
     utli::SpinLock& GetSynthLock() { return synth_lock_; }
 private:
     void BindParam();

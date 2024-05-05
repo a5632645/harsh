@@ -33,28 +33,6 @@ void SynthLayout::paint() {
     effect_layout3_.Paint();
     effect_layout4_.Paint();
     resynthsis_layout_.Paint();
-
-    if (IsFileDropped()) {
-        FilePathList files = ::LoadDroppedFiles();
-        std::vector<std::string> output(files.paths, files.paths + files.count);
-        ::UnloadDroppedFiles(files);
-
-        auto audio_file = std::ranges::find_if(output, [](const std::string& file_name) {
-            return file_name.find(".wav") != std::string::npos;
-        });
-        if (audio_file == output.end()) {
-            return;
-        }
-
-        AudioFile<float> audio_file_;
-        if (!audio_file_.load(*audio_file) || audio_file_.samples.empty()) {
-            std::cerr << std::format(R"([resynthsis]: load file "{}" *failed*)", *audio_file) << std::endl;
-            return;
-        }
-
-        synth_.CreateResynthsisFrames(audio_file_.samples.at(0), audio_file_.getSampleRate());
-        std::clog << std::format(R"([resynthsis]: load file "{}" *success*))", *audio_file) << std::endl;
-    }
 }
 
 void SynthLayout::SetBounds(int x, int y, int w, int h) {
