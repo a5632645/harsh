@@ -17,10 +17,20 @@ void Synth::BindParam() {
             .on_output_changed = [this, arg_idx](float v) {synth_param_.phase.args[arg_idx] = v; };
     }
 
-    for (int arg_idx = 0; arg_idx < 4; ++arg_idx) {
-        param_bank_.AddOrCreateIfNull(std::format("timber.arg{}", arg_idx), 0.0f)
-            .on_output_changed = [this, arg_idx](float v) {synth_param_.timber.args[arg_idx] = v; };
+    for (int osc_idx = 0; osc_idx < 2; ++osc_idx) {
+        for (int arg_idx = 0; arg_idx < 4; ++arg_idx) {
+            param_bank_.AddOrCreateIfNull(std::format("timber.osc{}.arg{}", osc_idx, arg_idx), 0.0f)
+                .on_output_changed = [this, arg_idx, osc_idx](float v) {synth_param_.timber.osc_args[osc_idx].args[arg_idx] = v; };
+        }
     }
+    param_bank_.AddOrCreateIfNull("timber.osc2_shift", 0.0f)
+        .on_output_changed = [this](float v) {synth_param_.timber.osc2_shift = v; };
+    param_bank_.AddOrCreateIfNull("timber.osc2_beating", 0.0f)
+        .on_output_changed = [this](float v) {synth_param_.timber.osc2_beating = v; };
+    param_bank_.AddOrCreateIfNull("timber.osc1_gain", 1.0f)
+        .on_output_changed = [this](float v) {synth_param_.timber.osc1_gain = v; };
+    param_bank_.AddOrCreateIfNull("timber.osc2_gain", 0.0f)
+        .on_output_changed = [this](float v) {synth_param_.timber.osc2_gain = v; };
 
     for (int arg_idx = 0; arg_idx < 2; ++arg_idx) {
         param_bank_.AddOrCreateIfNull(std::format("dissonance.arg{}", arg_idx), 0.0f)

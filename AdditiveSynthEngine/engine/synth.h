@@ -6,6 +6,7 @@
 #include "modulation/ParamBank.h"
 #include "param/synth_param.h"
 #include "resynthsis/resynthsis_data.h"
+#include "utli/spin_lock.h"
 
 namespace mana {
 class Synth {
@@ -33,9 +34,10 @@ public:
     ResynthsisFrames& GetResynthsisFrames() { return resynthsis_frames_; }
     bool IsResynthsisAvailable() const { return !resynthsis_frames_.frames.empty(); }
     void CreateResynthsisFrames(const std::vector<float>& audio_in, float sample_rate);
+    utli::SpinLock& GetSynthLock() { return synth_lock_; }
 private:
     void BindParam();
-
+    utli::SpinLock synth_lock_;
     ResynthsisFrames resynthsis_frames_;
     ParamBank param_bank_;
     SynthParam synth_param_;

@@ -14,9 +14,16 @@ struct SynthParam {
         std::array<float, 2> args;
     } phase;
 
-    struct {
+    struct OscParam {
         int timber_type;
         std::array<float, 4> args;
+    };
+    struct {
+        std::array<OscParam, 2> osc_args;
+        float osc2_shift;
+        float osc2_beating;
+        float osc1_gain;
+        float osc2_gain;
     } timber;
 
     struct {

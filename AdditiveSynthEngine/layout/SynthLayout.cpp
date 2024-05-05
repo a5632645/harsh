@@ -22,9 +22,9 @@ SynthLayout::SynthLayout(Synth& synth)
 }
 
 void SynthLayout::paint() {
+    scope_.Paint();
     timber_layout_.Paint();
     standard_layout_.Paint();
-    scope_.Paint();
     dissonance_layout_.Paint();
     filter_layout_.Paint();
     effect_layout0_.Paint();
@@ -62,12 +62,12 @@ void SynthLayout::SetBounds(int x, int y, int w, int h) {
     scope_.SetBounds(x, y, w, h);
     dissonance_layout_.SetBounds(250, 0, 100, 152);
     filter_layout_.SetBounds(350, 0, 150, 156);
-    effect_layout0_.SetBounds(0, 156, 150, 156);
-    effect_layout1_.SetBounds(150, 156, 150, 156);
-    effect_layout2_.SetBounds(300, 156, 150, 156);
-    effect_layout3_.SetBounds(450, 156, 150, 156);
-    effect_layout4_.SetBounds(600, 156, 150, 156);
-    resynthsis_layout_.SetBounds(0, 156 * 2 + 30, 300, 70);
+    effect_layout0_.SetBounds(0, 156 + 16, 150, 156);
+    effect_layout1_.SetBounds(150, 156 + 16, 150, 156);
+    effect_layout2_.SetBounds(300, 156 + 16, 150, 156);
+    effect_layout3_.SetBounds(450, 156 + 16, 150, 156);
+    effect_layout4_.SetBounds(600, 156 + 16, 150, 156);
+    resynthsis_layout_.SetBounds(0, 156 * 2 + 30 + 16, 300, 70);
     standard_layout_.SetBounds(w - 100, y, 100, 70);
 }
 }

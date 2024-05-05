@@ -58,7 +58,7 @@ static float Sinc(float x) {
 void Sync::Init(float sample_rate) {
 }
 
-void Sync::Process(Partials& partials) {
+void Sync::Process(TimberFrame& frame) {
     for (int partial_idx = 0; partial_idx < kNumPartials; ++partial_idx) {
         auto gain = 0.0f;
 
@@ -71,19 +71,17 @@ void Sync::Process(Partials& partials) {
             gain += GetPartialGainFrac(first_shape_, second_shape_, fraction_, idx)
                 * Sinc((partial_idx + 1) - (idx + 1) * sync_ratio_);
         }
-        partials.gains[partial_idx] = gain;
+        frame.gains[partial_idx] = gain;
     }
 }
 
 void Sync::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
-    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(
-        params.timber.args[param::Sync_WaveShape::kArgIdx]
-    );
+    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(params.timber.osc_args[module_idx].args);
     first_shape_ = a;
     second_shape_ = b;
     fraction_ = c;
 
-    auto semitone = param::Sync_Sync::GetNumber(params.timber.args);
+    auto semitone = param::Sync_Sync::GetNumber(params.timber.osc_args[module_idx].args);
     sync_ratio_ = std::exp2(semitone / 12.0f);
 }
 

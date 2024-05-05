@@ -15,7 +15,7 @@ mana::FilterLayout::FilterLayout(Synth & synth)
     }
 
     // init
-    OnFilterTypeChanged(synth_param_.timber.timber_type);
+    OnFilterTypeChanged(synth_param_.filter.filter_type);
 }
 
 void FilterLayout::Paint() {

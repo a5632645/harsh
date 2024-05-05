@@ -1,18 +1,16 @@
 #pragma once
 
-#include "engine/IProcessor.h"
 #include "param/synth_param.h"
+#include "timber_frame.h"
 
 namespace mana {
-class DualSaw : public IProcessor {
+class DualSaw {
 public:
-    // 通过 IProcessor 继承
-    void Init(float sample_rate) override;
-    void Process(Partials& partials) override;
-    void OnUpdateTick(const SynthParam& param, int skip, int module_idx) override;
-    void OnNoteOn(int note) override;
-    void OnNoteOff() override;
-
+    void Init(float sample_rate);
+    void Process(TimberFrame& frame);
+    void OnUpdateTick(const SynthParam& param, int skip, int module_idx);
+    void OnNoteOn(int note);
+    void OnNoteOff();
 private:
     float ratio_{};
     float beating_rate_{};

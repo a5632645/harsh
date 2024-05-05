@@ -140,7 +140,7 @@ struct Chorus_Speed : FloatParam<Chorus_Speed> {
 // =========================================================
 // phaser
 // =========================================================
-struct Phaser_Cycles : FloatParam<Phaser_Cycles> {
+struct Phaser_Cycles : FloatParam < Phaser_Cycles, [](float v) {return v * v; } > {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "cycles"sv;
     static constexpr auto kMin = 0.0f;
@@ -189,7 +189,7 @@ struct Phaser_Pinch : FloatParam<Phaser_Pinch> {
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Phaser_BarberRate : FloatParam<Phaser_BarberRate> {
+struct Phaser_BarberRate : FloatParam < Phaser_BarberRate> {
     static constexpr int kArgIdx = 4;
     static constexpr auto kName = "rate"sv;
     static constexpr auto kMin = -10.0f;

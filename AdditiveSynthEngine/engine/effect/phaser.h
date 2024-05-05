@@ -59,12 +59,15 @@ public:
 
     void Process(Partials& partials) override {
         for (int i = 0; i < kNumPartials; ++i) {
-            auto nor_phase = std::lerp(GetPhase(first_mode_, i, partials.freqs[i], partials.pitches[i]),
-                                       GetPhase(second_mode_, i, partials.freqs[i], partials.pitches[i]),
-                                       mode_fraction_);
-            auto org_gain = std::lerp(PhaserShapeVal(first_shape_, nor_phase),
-                                      PhaserShapeVal(second_shape_, nor_phase),
-                                      shape_fraction_);
+            auto mode1_ph = GetPhase(first_mode_, i, partials.freqs[i], partials.pitches[i]);
+            auto mode2_ph = GetPhase(second_mode_, i, partials.freqs[i], partials.pitches[i]);
+            auto mode1_gain = std::lerp(PhaserShapeVal(first_shape_, mode1_ph),
+                                        PhaserShapeVal(second_shape_, mode1_ph),
+                                        shape_fraction_);
+            auto mode2_gain = std::lerp(PhaserShapeVal(first_shape_, mode2_ph),
+                                        PhaserShapeVal(second_shape_, mode2_ph),
+                                        shape_fraction_);
+            auto org_gain = std::lerp(mode1_gain, mode2_gain, mode_fraction_);
             auto gain = std::lerp(1.0f, 0.5f + 0.5f * org_gain, mix_);
             partials.gains[i] *= gain;
         }
@@ -72,7 +75,7 @@ public:
 
     void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
         auto cycle01 = param::FloatParam<param::Phaser_Cycles>::GetNumber(params.effects[module_idx].args);
-        cycles_ = cycle01 * cycle01 * kNumPartials / 2;
+        cycles_ = cycle01 * kNumPartials / 2;
         {
             auto [fs, ss, f] = param::Phaser_Shape::GetInterpIndex(params.effects[module_idx].args);
             first_shape_ = fs;

@@ -7,23 +7,29 @@
 
 namespace mana {
 TimberLayout::TimberLayout(Synth& synth)
-    : synth_param_(synth.GetSynthParam()) {
-    timber_type_.SetChoices(param::TimberType::kNames);
-    timber_type_.on_choice_changed = [this](int c) {OnTimberTypeChanged(c); };
+    : synth_param_(synth.GetSynthParam())
+    , osc1_layout_(synth, 0)
+    , osc2_layout_(synth, 1) {
+    osc2_beating_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_beating"));
+    osc2_shift_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_shift"));
+    osc1_gain_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc1_gain"));
+    osc2_gain_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_gain"));
 
-    for (int i = 0; auto & k : arg_knobs_) {
-        k.set_parameter(synth.GetParamBank().GetParamPtr(std::format("timber.arg{}", i++)));
-    }
-
-    // init
-    OnTimberTypeChanged(synth_param_.timber.timber_type);
+    SetSingeKnobInfo(osc2_beating_, param::Timber_Osc2Beating{});
+    SetSingeKnobInfo(osc2_shift_, param::Timber_Osc2Shift{});
+    SetSingeKnobInfo(osc1_gain_, param::Timber_OscGain{});
+    SetSingeKnobInfo(osc2_gain_, param::Timber_OscGain{});
+    osc1_gain_.set_title("osc1_gain");
+    osc2_gain_.set_title("osc2_gain");
 }
 
 void TimberLayout::Paint() {
-    for (auto& knob : arg_knobs_) {
-        knob.display();
-    }
-    timber_type_.show();
+    osc2_beating_.display();
+    osc2_shift_.display();
+    osc1_gain_.display();
+    osc2_gain_.display();
+    osc1_layout_.Paint();
+    osc2_layout_.Paint();
 }
 
 void TimberLayout::SetBounds(int x, int y, int w, int h) {
@@ -31,30 +37,11 @@ void TimberLayout::SetBounds(int x, int y, int w, int h) {
     auto y_f = static_cast<float>(y);
     auto w_f = static_cast<float>(w);
 
-    timber_type_.SetBounds(rgc::Bounds(x_f, y_f, w_f, 12));
-    arg_knobs_[0].set_bound(x, y + 12, 50, 70);
-    arg_knobs_[1].set_bound(x + 50, y + 12, 50, 70);
-    arg_knobs_[2].set_bound(x + 100, y + 12, 50, 70);
-    arg_knobs_[3].set_bound(x + 150, y + 12, 50, 70);
-}
-
-void TimberLayout::OnTimberTypeChanged(int c) {
-    synth_param_.timber.timber_type = c;
-
-    auto type = param::TimberType::GetEnum(c);
-    using enum mana::param::TimberType::ParamEnum;
-    switch (type) {
-    case kDualSaw:
-        SetGuiKnobs(arg_knobs_,
-                    param::DualSaw_Ratio{},
-                    param::DualSaw_BeatingRate{},
-                    param::DualSaw_SawSquare{});
-        break;
-    case kSync:
-        SetGuiKnobs(arg_knobs_,
-                    param::Sync_Sync{},
-                    param::Sync_WaveShape{});
-        break;
-    }
+    osc2_beating_.set_bound(x + 10, y, 30, 50);
+    osc2_shift_.set_bound(x + 10, y + 50, 30, 40);
+    osc1_gain_.set_bound(x + 10, y + 95, 30, 30);
+    osc2_gain_.set_bound(x + 10, y + 130, 30, 30);
+    osc1_layout_.SetBounds(x + 50, y, 200, 70);
+    osc2_layout_.SetBounds(x + 50, y + 70 + 16, 200, 70);
 }
 }

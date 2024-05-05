@@ -19,7 +19,7 @@ EffectLayout::EffectLayout(Synth& synth, int effect_idx)
     is_enable_.SetChecked(synth_param_.effects[effect_idx].is_enable);
 
     // init
-    OnEffectTypeChanged(synth_param_.timber.timber_type);
+    OnEffectTypeChanged(synth_param_.effects[effect_idx].effect_type);
 }
 
 void EffectLayout::Paint() {

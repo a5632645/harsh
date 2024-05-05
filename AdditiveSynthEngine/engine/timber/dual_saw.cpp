@@ -17,16 +17,16 @@ void DualSaw::Init(float sample_rate) {
     sample_rate_ = sample_rate;
 }
 
-void DualSaw::Process(Partials& partials) {
+void DualSaw::Process(TimberFrame& frame) {
     auto second_ratio = static_cast<int>(ratio_);
 
     for (int i = 0; i < kNumPartials; ++i) {
         // odd
-        partials.gains[i] = kSawHarmonicGains[i];
+        frame.gains[i] = kSawHarmonicGains[i];
 
         ++i;
         // even
-        partials.gains[i] = kSawHarmonicGains[i] * saw_square_;
+        frame.gains[i] = kSawHarmonicGains[i] * saw_square_;
     }
 
     int second_partial_idx = second_ratio - 1;
@@ -37,16 +37,16 @@ void DualSaw::Process(Partials& partials) {
         }
 
         auto beating_gain = 0.5f + 0.5f * std::cos((i + 1.0f) * kTwoPi * beating_phase_);
-        partials.gains[second_partial_idx] += gain;
-        partials.gains[second_partial_idx] *= beating_gain;
+        frame.gains[second_partial_idx] += gain;
+        frame.gains[second_partial_idx] *= beating_gain;
         second_partial_idx += second_ratio;
     }
 }
 
 void DualSaw::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
-    ratio_ = param::DualSaw_Ratio::GetNumber(param.timber.args);
-    beating_rate_ = param::DualSaw_BeatingRate::GetNumber(param.timber.args);
-    saw_square_ = param::DualSaw_SawSquare::GetNumber(param.timber.args);
+    ratio_ = param::DualSaw_Ratio::GetNumber(param.timber.osc_args[module_idx].args);
+    beating_rate_ = param::DualSaw_BeatingRate::GetNumber(param.timber.osc_args[module_idx].args);
+    saw_square_ = param::DualSaw_SawSquare::GetNumber(param.timber.osc_args[module_idx].args);
 
     auto inc = beating_rate_ * skip / sample_rate_;
     beating_phase_ += inc;
@@ -54,7 +54,9 @@ void DualSaw::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
 }
 
 void DualSaw::OnNoteOn(int note) {
-    beating_phase_ = 0.0f;
+    if (beating_rate_ == 0.0f) {
+        beating_phase_ = 0.0f;
+    }
 }
 
 void DualSaw::OnNoteOff() {

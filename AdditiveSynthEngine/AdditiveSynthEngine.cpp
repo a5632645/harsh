@@ -14,6 +14,7 @@ static mana::KeyBoard keyboard_;
 static mana::SynthLayout synth_layout_{ synth_ };
 
 static void ThisAudioCallback(void* buffer, unsigned int frames) {
+    std::scoped_lock lock{ synth_.GetSynthLock() };
     synth_.update_state(frames);
     synth_.Render(frames);
     std::ranges::copy(synth_.getBuffer(), static_cast<float*>(buffer));
@@ -46,6 +47,7 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
         {
+            std::scoped_lock lock{ synth_.GetSynthLock() };
             keyboard_.checkInFrame();
             synth_layout_.paint();
 

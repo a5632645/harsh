@@ -19,6 +19,33 @@ struct TimberType : IntChoiceParam<TimberType> {
         "sync"sv
     };
 };
+
+struct Timber_Osc2Shift : FloatParam<Timber_Osc2Shift> {
+    static constexpr auto kName = "ratio"sv;
+    static constexpr float kMin = 1.0f;
+    static constexpr float kMax = 8.0f;
+    static constexpr float kDefault = 1.0f;
+    static constexpr int kTextPrecision = 0;
+};
+
+struct Timber_Osc2Beating : FloatParam<Timber_Osc2Beating> {
+    static constexpr auto kName = "beating"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kStuff = "hz"sv;
+};
+
+struct Timber_OscGain : FloatParam<Timber_OscGain> {
+    static constexpr auto kName = "amp"sv;
+    static constexpr float kMin = -40.0f;
+    static constexpr float kMax = 0.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kStuff = "dB";
+};
+
 // =========================================================
 // dual saw
 // =========================================================
