@@ -39,6 +39,15 @@ static float DbToGain(float db, float min_db) {
     return std::exp(0.11512925464970228420089957273422f * db);
 }
 
+template<float kMinDb>
+static float GainToDb(float gain) {
+    constexpr auto min_gain = cp::DbToGain(kMinDb);
+    if (gain <= min_gain) {
+        return kMinDb;
+    }
+    return 20.0f * log10(gain);
+}
+
 static float PitchToFreq(float pitch) {
     return std::exp2(pitch / 12.0f) * 8.1758f;
 }

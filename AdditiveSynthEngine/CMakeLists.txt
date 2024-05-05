@@ -94,6 +94,7 @@ endif()
 
 # TODO: 如有需要，请添加测试并安装目标。
 target_link_libraries(AdditiveSynthEngine PUBLIC raylib)
+target_link_libraries(AdditiveSynthEngine PUBLIC raylib_cpp)
 target_link_libraries(AdditiveSynthEngine PUBLIC raygui_cpp)
 target_link_libraries(AdditiveSynthEngine PUBLIC AudioFFT)
 target_link_libraries(AdditiveSynthEngine PUBLIC AudioFile)

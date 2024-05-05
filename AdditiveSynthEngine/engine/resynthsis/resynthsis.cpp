@@ -17,16 +17,17 @@ void Resynthesis::Process(Partials& partials) {
     const auto& frame = synth_.GetResynthsisFrames().frames.at(frame_idx);
 
     std::array<float, kNumPartials> gains{};
+    using namespace std::views;
 
     if (formant_mix_ != float{}) {
         auto formant_gains = GetFormantGains(partials, frame);
-        std::ranges::transform(frame.gains, formant_gains, gains.begin(),
+        std::ranges::transform(frame.gains | take(kNumPartials), formant_gains, gains.begin(),
                                [this](float no_shift_gain, float shift_gain) {
             return std::lerp(no_shift_gain, shift_gain, formant_mix_);
         });
     }
     else {
-        std::ranges::copy(frame.gains, gains.begin());
+        std::ranges::copy(frame.gains | take(kNumPartials), gains.begin());
     }
 
     auto gain_dry_wet = gain_mix_;
@@ -47,7 +48,7 @@ void Resynthesis::OnUpdateTick(const SynthParam& params, int skip, int module_id
 
     if (!IsWork()) return;
 
-    auto pos_inc = frame_speed_ * (float)skip / kFFtHop / synth_.GetResynthsisFrames().frames.size();
+    auto pos_inc = frame_speed_ * (float)skip / synth_.GetResynthsisFrames().frame_interval_sample /synth_.GetResynthsisFrames().frames.size();
     frame_player_pos_ += pos_inc;
     while (frame_player_pos_ > 1.0f) {
         frame_player_pos_ -= 1.0f;
@@ -68,10 +69,12 @@ void Resynthesis::PreGetFreqDiffsInRatio(Partials& partials) {
         return;
     }
 
+    using namespace std::views;
+
     auto frame_idx = static_cast<size_t>((synth_.GetResynthsisFrames().frames.size() - 1) * frame_pos_);
     const auto& frame = synth_.GetResynthsisFrames().frames.at(frame_idx);
     auto ratio_scale = freq_scale_ / synth_.GetResynthsisFrames().data_series_freq;
-    std::ranges::transform(frame.freq_diffs, partials.freqs.begin(),
+    std::ranges::transform(frame.freq_diffs | take(kNumPartials), partials.freqs.begin(),
                            [ratio_scale](float fre_diff) {return ratio_scale * fre_diff; });
 }
 
@@ -81,12 +84,12 @@ bool Resynthesis::IsWork() const {
 
 std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
                                                              const ResynthsisFrames::FftFrame& frame) const {
-    constexpr auto fft_fre_begin = 1.0f / (kFFtSize / 2.0f);
-    constexpr auto fft_fre_end = static_cast<float>(kNumPartials) / (kFFtSize / 2.0f);
+    //constexpr auto fft_fre_begin = 1.0f / (kFFtSize / 2.0f);
+    //constexpr auto fft_fre_end = static_cast<float>(kNumPartials) / (kFFtSize / 2.0f);
 
     auto formant_ratio = std::exp2(formant_shift_ / 12.0f);
-    auto formant_begin_fre = formant_ratio * fft_fre_begin;
-    auto formant_end_fre = formant_ratio * fft_fre_end;
+    auto formant_begin_fre = formant_ratio * /*fft_fre_begin*/ 0.0f;
+    auto formant_end_fre = formant_ratio * /*fft_fre_end*/1.0f;
     auto one_div_range = 1.0f / (formant_end_fre - formant_begin_fre);
 
     std::array<float, kNumPartials> output{};

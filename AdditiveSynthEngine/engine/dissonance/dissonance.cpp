@@ -59,7 +59,7 @@ static void DoDispersion(Partials& partials, float amount, float warp) {
         for (int i = 1; i < kNumPartials; ++i) {
             auto idx01 = static_cast<float>(i) / static_cast<float>(kNumPartials);
             auto spread = 1.0f + utli::warp::ParabolaWarp(idx01, warp) * std::abs(amount);
-            auto ratio = (i + 1.0f) / spread;
+            auto ratio = (i + 1.0f + partials.freqs[i]) / spread;
             partials.freqs[i] = partials.base_frequency * ratio;
             partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
         }
@@ -68,7 +68,7 @@ static void DoDispersion(Partials& partials, float amount, float warp) {
         for (int i = 1; i < kNumPartials; ++i) {
             auto idx01 = static_cast<float>(i) / static_cast<float>(kNumPartials);
             auto spread = 1.0f + utli::warp::ParabolaWarp(idx01, warp) * std::abs(amount);
-            auto ratio = (i + 1.0f) * spread;
+            auto ratio = (i + 1.0f + partials.freqs[i]) * spread;
             partials.freqs[i] = partials.base_frequency * ratio;
             partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
         }

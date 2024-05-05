@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <memory>
 #include "IProcessor.h"
+#include "resynthsis/resynthsis.h"
 
 namespace mana {
 class Synth;
@@ -60,6 +61,9 @@ public:
         return partials_;
     }
 
+    Resynthesis& GetResynthsisProcessor() { return *p_resynthsis_; }
+    const Resynthesis& GetResynthsisProcessor() const { return *p_resynthsis_; }
+
     //=============================STREAM================================================
     void update_state(const SynthParam& param, int skip);
 
@@ -95,6 +99,6 @@ private:
 
     // component
     std::vector<std::shared_ptr<IProcessor>> processors_;
-    IProcessor* p_resynthsis_{};
+    Resynthesis* p_resynthsis_{};
 };
 }

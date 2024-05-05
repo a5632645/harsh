@@ -9,6 +9,12 @@
 #include "utli/spin_lock.h"
 
 namespace mana {
+struct SimplePixel {
+    int r;
+    int g;
+    int b;
+};
+
 class Synth {
 public:
     Synth();
@@ -34,7 +40,8 @@ public:
     void SetResynthsisFrames(ResynthsisFrames new_frame);
     ResynthsisFrames& GetResynthsisFrames() { return resynthsis_frames_; }
     bool IsResynthsisAvailable() const { return !resynthsis_frames_.frames.empty(); }
-    ResynthsisFrames CreateResynthsisFrames(const std::vector<float>& audio_in, float sample_rate);
+    ResynthsisFrames CreateResynthsisFramesFromAudio(const std::vector<float>& audio_in, float sample_rate);
+    ResynthsisFrames CreateResynthsisFramesFromImage(const std::vector<std::vector<SimplePixel>>& audio_in);
     utli::SpinLock& GetSynthLock() { return synth_lock_; }
 private:
     void BindParam();

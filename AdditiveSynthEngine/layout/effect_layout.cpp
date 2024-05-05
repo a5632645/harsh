@@ -24,6 +24,10 @@ EffectLayout::EffectLayout(Synth& synth, int effect_idx)
 
 void EffectLayout::Paint() {
     synth_param_.effects[effect_idx].is_enable = is_enable_.Show();
+    if (!is_enable_.IsChecked()) {
+        return;
+    }
+
     for (auto& knob : arg_knobs_) {
         knob.display();
     }

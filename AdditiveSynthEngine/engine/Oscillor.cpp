@@ -14,7 +14,7 @@ Oscillor::Oscillor(Synth& synth) {
     AddProcessor(std::make_shared<PhaseProcessor>());
     AddProcessor(std::make_shared<Dissonance>());
     AddProcessor(std::make_shared<Timber>());
-    p_resynthsis_ = AddProcessor(std::make_shared<Resynthesis>(synth));
+    p_resynthsis_ = static_cast<Resynthesis*>(AddProcessor(std::make_shared<Resynthesis>(synth)));
     AddProcessor(std::make_shared<Filter>());
     AddProcessor(std::make_shared<Effect>(0));
     AddProcessor(std::make_shared<Effect>(1));

@@ -20,10 +20,14 @@ DissonanceLayout::DissonanceLayout(Synth& synth)
 }
 
 void DissonanceLayout::Paint() {
+    synth_param_.dissonance.is_enable = is_enable_.Show();
+    if (!is_enable_.IsChecked()) {
+        return;
+    }
+
     for (auto& k : arg_knobs_) {
         k.display();
     }
-    synth_param_.dissonance.is_enable = is_enable_.Show();
     type_.show();
 }
 

@@ -17,12 +17,10 @@ public:
     void Process(Partials& partials) override;
     void OnUpdateTick(const SynthParam& param, int skip, int module_idx) override;
     void OnNoteOn(int note) override;
-    void OnNoteOff() override {
-        is_running_ = false;
-    }
+    void OnNoteOff() override { is_running_ = false; }
 
     void PreGetFreqDiffsInRatio(Partials& partials);
-
+    float GetPlayerPosition() const { return frame_pos_; }
 private:
     bool IsWork() const;
     std::array<float, kNumPartials> GetFormantGains(Partials& partials,
