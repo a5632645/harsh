@@ -14,6 +14,7 @@ struct Partials {
     std::array<float, kNumPartials> gains{};
     std::array<float, kNumPartials> freqs{};
     std::array<float, kNumPartials> pitches{};
+    std::array<float, kNumPartials> ratios{};
     std::array<std::complex<float>, kNumPartials> phases{};
 };
 }

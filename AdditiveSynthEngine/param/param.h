@@ -37,7 +37,7 @@ struct FloatParam {
         constexpr bool kHasStuff = requires {DetailParam::kStuff; DetailParam::kTextPrecision; };
 
         if constexpr (kHasStuff) {
-            return std::format("{0:.{1}f} {2}", GetNumber(nor), DetailParam::kTextPrecision, DetailParam::kStuff);
+            return std::format("{0:.{1}f}{2}", GetNumber(nor), DetailParam::kTextPrecision, DetailParam::kStuff);
         }
         else {
             return std::format("{0:.{1}f}", GetNumber(nor), DetailParam::kTextPrecision);

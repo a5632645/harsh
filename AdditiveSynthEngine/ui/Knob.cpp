@@ -30,11 +30,20 @@ void Knob::display() {
     auto const mousePosition = GetMousePosition();
     bool const isNowDown = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     if (isNowDown && m_isPressed && s_currentKnob == this) {
+        auto scale = 1.0f;
+        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+            scale *= 0.1f;
+        }
+
+        if (IsKeyDown(KEY_LEFT_ALT)) {
+            scale *= 0.1f;
+        }
+
         auto const deltaY = m_lastMousePosition.y - mousePosition.y;
         m_counter += static_cast<int>(deltaY);
         auto const valueInc = m_counter / m_sensitivity;
         m_counter %= m_sensitivity;
-        m_value += valueInc * m_step;
+        m_value += valueInc * m_step * scale;
         m_lastMousePosition = mousePosition;
         auto newValue = std::clamp(m_value, m_min, m_max);
         m_value = newValue;
@@ -58,7 +67,7 @@ void Knob::display() {
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && CheckCollisionPointRec(mousePosition, m_bounds)) {
         // set to default
-        m_value = m_default_alue;
+        m_value = m_default_value;
         m_counter = 0;
         m_isPressed = false;
         m_parameter->set_current(m_value);
@@ -137,7 +146,7 @@ Knob& Knob::set_range(float min, float max, float step, float default_value) {
     m_min = min;
     m_max = max;
     m_step = step;
-    m_default_alue = default_value;
+    m_default_value = default_value;
 
     auto num = (m_max - m_min) / m_step;
     if (num > 400) {
@@ -162,7 +171,7 @@ Knob& Knob::set_range(float min, float max, float step, float default_value) {
 }
 
 Knob& Knob::SetDefaultValue(float dv) {
-    m_default_alue = dv;
+    m_default_value = dv;
     return *this;
 }
 

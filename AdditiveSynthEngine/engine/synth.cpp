@@ -108,13 +108,13 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     fft.init(kFFtSize);
     window.Init(kFFtSize);
 
-    const auto sample_rate_ratio = sample_rate_ / sample_rate;
+    const auto sample_rate_ratio = sample_rate / sample_rate_;
     const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
     auto num_frame = static_cast<size_t>((sample.size() - static_cast<float>(kFFtSize)) / static_cast<float>(kFFtHop));
     ResynthsisFrames audio_frames;
     audio_frames.frames.reserve(num_frame);
-    audio_frames.frame_interval_sample = sample_rate_ratio * kFFtHop;
-    audio_frames.max_fre_diff = 1.0f / kFFtHop;
+    audio_frames.frame_interval_sample = kFFtHop / sample_rate_ratio;
+    audio_frames.base_freq = c2_freq;
 
     auto read_pos = 0;
     auto max_gain = 0.0f;
@@ -142,16 +142,17 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
 
         ResynthsisFrames::FftFrame new_frame;
         if (audio_frames.frames.empty()) {
-            for (int i = 0; i < /*kNumPartials*/ kFFtSize / 2; ++i) {
+            for (int i = 0; i < kFFtSize / 2; ++i) {
                 const auto c = std::complex(real[i + 1], imag[i + 1]);
                 new_frame.gains[i] = std::abs(c) / (kFFtSize / 2);
                 new_frame.freq_diffs[i] = 0.0f;
+                new_frame.ratio_diffs[i] = 0.0f;
                 phases[i] = std::arg(c);
             }
         }
         else {
             const auto& last_frame = audio_frames.frames.back();
-            for (int i = 0; i < /*kNumPartials*/ kFFtSize / 2; ++i) {
+            for (int i = 0; i < kFFtSize / 2; ++i) {
                 const auto c = std::complex(real[i + 1], imag[i + 1]);
                 new_frame.gains[i] = std::abs(c) / (kFFtSize / 2);
                 auto this_frame_phase = std::arg(c);
@@ -160,8 +161,8 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
                 const auto bin_frequency = static_cast<float>(i + 1) * std::numbers::pi_v<float> *2.0f / static_cast<float>(kFFtSize);
                 const auto target_phase = bin_frequency * kFFtHop + phases[i];
                 const auto phase_diff = PhaseWrap(this_frame_phase - target_phase);
-                const auto instant_freq = phase_diff /** 2.0f*/ / (kFFtHop * std::numbers::pi_v<float>) + (1.0f + i) / static_cast<float>(kFFtSize / 2);
-                new_frame.freq_diffs[i] = instant_freq * sample_rate_ratio - c2_freq * (1.0f + i);
+                const auto instant_freq = phase_diff / (kFFtHop * std::numbers::pi_v<float>) + (1.0f + i) / static_cast<float>(kFFtSize / 2);
+                new_frame.ratio_diffs[i] = instant_freq * sample_rate_ratio / c2_freq - (i + 1.0f);
                 phases[i] = this_frame_phase;
             }
         }
@@ -177,61 +178,50 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         }
     }
 
-    audio_frames.data_sample_rate = sample_rate;
-    audio_frames.data_series_freq = c2_freq;
     return audio_frames;
 }
 
 ResynthsisFrames Synth::CreateResynthsisFramesFromImage(const std::vector<std::vector<SimplePixel>>& image_in) {
-
     ResynthsisFrames image_frame;
 
     /*
     * R nothing
-    * G gain
-    * B fre_diff
+    * G gain       [0,255] map to [-60,0]dB
+    * B ratio_diff [0,255] map to [-1, 1]
+    * simulate harmor's audio convert to image resynthsis mode
     */
     auto w = image_in.size();
     auto h = static_cast<int>(image_in.front().size());
     image_frame.frames.resize(w);
     auto max_gain = 0.0f;
-    image_frame.data_sample_rate = sample_rate_;
-    const auto c3_freq = std::exp2(24.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
-    image_frame.data_series_freq = c3_freq;
-
-    auto loop_val = kNumPartials;
     image_frame.frame_interval_sample = kFFtHop;
-    /*if (h > kNumPartials) {
-        loop_val = kFFtSize / 2;
-        image_frame.frame_interval_sample = kNumPartials;
-    }*/
-    auto max_fre_diff = 1.0f / static_cast<float>(image_frame.frame_interval_sample);
-    image_frame.max_fre_diff = max_fre_diff;
+    const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
+    image_frame.base_freq = c2_freq;
 
     for (int x = 0; x < w; ++x) {
         auto& frame = image_frame.frames[x];
         auto& img_line = image_in[x];
-        for (int y = 0; y < loop_val; ++y) {
-            auto y_nor = static_cast<float>(y) / static_cast<float>(loop_val);
+        for (int y = 0; y < kNumPartials; ++y) {
+            auto y_nor = static_cast<float>(y) / static_cast<float>(kNumPartials);
             auto image_y_idx = std::clamp(static_cast<int>(h - y_nor * h), 0, h - 1);
             auto pixel = img_line[image_y_idx];
 
+            // map g to gain
             auto gain = 0.0f;
             if (pixel.g != 0) {
                 auto db = std::lerp(-60.0f, 0.0f, static_cast<float>(pixel.g) / 255.0f);
                 gain = Db2Gain(db) / (y + 1.0f);
             }
-            auto fre_diff_nor = 2.0f * static_cast<float>(pixel.b) / 255.0f - 1.0f;
-            auto fre_diff = max_fre_diff * fre_diff_nor;
-            //auto gain = static_cast<float>(pixel.g) / 255.0f;
             max_gain = std::max(gain, max_gain);
 
+            // map b to ratio diff
+            auto ratio_diff = 2.0f * static_cast<float>(pixel.b) / 255.0f - 1.0f;
             frame.gains[y] = gain;
-            frame.freq_diffs[y] = fre_diff;
+            frame.ratio_diffs[y] = ratio_diff;
         }
-        for (int y = loop_val; y < kFFtSize / 2; ++y) {
+        for (int y = kNumPartials; y < kFFtSize / 2; ++y) {
             frame.gains[y] = 0.0f;
-            frame.freq_diffs[y] = 0.0f;
+            frame.ratio_diffs[y] = 0.0f;
         }
     }
 

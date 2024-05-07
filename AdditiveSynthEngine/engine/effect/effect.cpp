@@ -6,6 +6,7 @@
 #include "phaser.h"
 #include "scramble.h"
 #include "Blur.h"
+#include "decay.h"
 
 namespace mana {
 void Effect::Init(float sample_rate) {
@@ -15,6 +16,7 @@ void Effect::Init(float sample_rate) {
     processers_[param::EffectType::ParamEnum::kPhaser] = std::make_unique<Phaser>();
     processers_[param::EffectType::ParamEnum::kScramble] = std::make_unique<Scramble>();
     processers_[param::EffectType::ParamEnum::kBlur] = std::make_unique<Blur>();
+    processers_[param::EffectType::ParamEnum::kDecay] = std::make_unique<Decay>();
 
     for (auto&&[k, v] : processers_) {
         v->Init(sample_rate);

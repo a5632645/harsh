@@ -86,16 +86,22 @@ add_executable (AdditiveSynthEngine
  "utli/NoiseGenerator.h"
  "layout/standard_layout.h"
  "layout/standard_layout.cpp"
- "engine/effect/Blur.h" "utli/spin_lock.h" "utli/convert.h" "engine/standard/phase.h" "engine/standard/phase.cpp" "utli/warp.h" "engine/timber/timber_frame.h" "engine/timber/timber_gen.h" "engine/timber/timber_gen.cpp" "layout/osc_layout.h" "layout/osc_layout.cpp" "engine/timber/dynamic_noise.h")
+ "engine/effect/Blur.h" "utli/spin_lock.h" "utli/convert.h" "engine/standard/phase.h" "engine/standard/phase.cpp" "utli/warp.h" "engine/timber/timber_frame.h" "engine/timber/timber_gen.h" "engine/timber/timber_gen.cpp" "layout/osc_layout.h" "layout/osc_layout.cpp" "engine/timber/dynamic_noise.h" "engine/effect/decay.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)
 endif()
 
-# TODO: 如有需要，请添加测试并安装目标。
 target_link_libraries(AdditiveSynthEngine PUBLIC raylib)
 target_link_libraries(AdditiveSynthEngine PUBLIC raylib_cpp)
 target_link_libraries(AdditiveSynthEngine PUBLIC raygui_cpp)
 target_link_libraries(AdditiveSynthEngine PUBLIC AudioFFT)
 target_link_libraries(AdditiveSynthEngine PUBLIC AudioFile)
 target_link_libraries(AdditiveSynthEngine PUBLIC gcem)
+
+include(FetchContent)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+target_link_libraries(AdditiveSynthEngine PRIVATE nlohmann_json::nlohmann_json)

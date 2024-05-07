@@ -25,7 +25,7 @@ struct Resynthsis_FrameSpeed : FloatParam<Resynthsis_FrameSpeed> {
     static constexpr auto kMin = -3.0f;
     static constexpr auto kMax = 3.0f;
     static constexpr auto kDefault = 1.0f;
-    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kTextPrecision = 3;
 };
 
 struct Resynthsis_FormantMix : FloatParam<Resynthsis_FormantMix> {
@@ -40,8 +40,8 @@ struct Resynthsis_FormantMix : FloatParam<Resynthsis_FormantMix> {
 struct Resynthsis_FormantShift : FloatParam<Resynthsis_FormantShift> {
     static constexpr int kArgIdx = 4;
     static constexpr auto kName = "fm.shift"sv;
-    static constexpr auto kMin = -24.0f;
-    static constexpr auto kMax = 24.0f;
+    static constexpr auto kMin = -12.0f;
+    static constexpr auto kMax = 12.0f;
     static constexpr auto kDefault = 0.0f;
     static constexpr auto kTextPrecision = 1;
     static constexpr auto kStuff = "st";

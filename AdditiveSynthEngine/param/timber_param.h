@@ -77,6 +77,15 @@ struct DualSaw_SawSquare : FloatParam<DualSaw_SawSquare> {
     static constexpr int kTextPrecision = 2;
 };
 
+struct DualSaw_SecondAmp : FloatParam<DualSaw_SecondAmp> {
+    static constexpr int kArgIdx = 3;
+    static constexpr auto kName = "sec_amp"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 1.0f;
+    static constexpr int kTextPrecision = 2;
+};
+
 // =========================================================
 // sync
 // =========================================================

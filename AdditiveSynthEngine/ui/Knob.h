@@ -35,7 +35,7 @@ public:
     std::function<std::string(float)> value_to_text_function = EmptyV2Tcaller;
 protected:
     std::string_view m_name{ "unkown" };
-    float m_default_alue{};
+    float m_default_value{};
     float m_value{};
     float m_min{};
     float m_max{};

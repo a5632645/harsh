@@ -63,7 +63,7 @@ int main(void) {
                 auto x_nor = drawing_partials_.pitches[i] / 140.0f;
                 auto y_nor = 0.0f;
                 auto y_gain = std::abs(drawing_partials_.gains[i]);
-                if (y_gain >= 0.00001f) {
+                if (y_gain > 0.0f) {
                     auto y_del = std::clamp(20.0f * std::log10(y_gain), -60.0f, 20.0f);
                     y_nor = (y_del + 60.0f) / 80.0f;
                 }

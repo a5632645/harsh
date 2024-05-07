@@ -42,13 +42,13 @@ void EffectLayout::SetBounds(int x, int y, int w, int h) {
     is_enable_.SetBounds(rgc::Bounds(x_f, y_f, 12, 12));
     effect_type_.SetBounds(rgc::Bounds(x_f, y_f + 12, w_f, 16));
     auto first_y = y + 12 + 16;
-    arg_knobs_[0].set_bound(x, first_y, 50, 70);
-    arg_knobs_[1].set_bound(x + 50, first_y, 50, 70);
-    arg_knobs_[2].set_bound(x + 100, first_y, 50, 70);
+    arg_knobs_[0].set_bound(x, first_y, 50, 50);
+    arg_knobs_[1].set_bound(x + 50, first_y, 50, 50);
+    arg_knobs_[2].set_bound(x + 100, first_y, 50, 50);
     auto second_y = first_y + 70;
-    arg_knobs_[3].set_bound(x, second_y, 50, 70);
-    arg_knobs_[4].set_bound(x + 50, second_y, 50, 70);
-    arg_knobs_[5].set_bound(x + 100, second_y, 50, 70);
+    arg_knobs_[3].set_bound(x, second_y, 50, 50);
+    arg_knobs_[4].set_bound(x + 50, second_y, 50, 50);
+    arg_knobs_[5].set_bound(x + 100, second_y, 50, 50);
 }
 
 void EffectLayout::OnEffectTypeChanged(int c) {
@@ -68,7 +68,8 @@ void EffectLayout::OnEffectTypeChanged(int c) {
                     param::Reverb_Amount{},
                     param::Reverb_Attack{},
                     param::Reverb_Damp{},
-                    param::Reverb_Decay{});
+                    param::Reverb_Decay{},
+                    param::Reverb_Speed{});
         break;
     case kChorus:
         SetGuiKnobs(arg_knobs_,
@@ -97,6 +98,11 @@ void EffectLayout::OnEffectTypeChanged(int c) {
                     param::Blur_BinRelease{},
                     param::Blur_TimeAttack{},
                     param::Blur_TimeRelease{});
+        break;
+    case kDecay:
+        SetGuiKnobs(arg_knobs_,
+                    param::Decay_Slope{},
+                    param::Decay_Time{});
         break;
     default:
         SetGuiKnobs(arg_knobs_);

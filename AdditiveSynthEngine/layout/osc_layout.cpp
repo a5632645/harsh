@@ -32,10 +32,10 @@ void OscLayout::SetBounds(int x, int y, int w, int h) {
     auto w_f = static_cast<float>(w);
 
     timber_type_.SetBounds(rgc::Bounds(x_f, y_f, w_f, 12));
-    arg_knobs_[0].set_bound(x, y + 12, 50, 70);
-    arg_knobs_[1].set_bound(x + 50, y + 12, 50, 70);
-    arg_knobs_[2].set_bound(x + 100, y + 12, 50, 70);
-    arg_knobs_[3].set_bound(x + 150, y + 12, 50, 70);
+    arg_knobs_[0].set_bound(x, y + 12, 50, 50);
+    arg_knobs_[1].set_bound(x + 50, y + 12, 50, 50);
+    arg_knobs_[2].set_bound(x + 100, y + 12, 50, 50);
+    arg_knobs_[3].set_bound(x + 150, y + 12, 50, 50);
 }
 
 void OscLayout::OnTimberTypeChanged(int c) {
@@ -48,7 +48,8 @@ void OscLayout::OnTimberTypeChanged(int c) {
         SetGuiKnobs(arg_knobs_,
                     param::DualSaw_Ratio{},
                     param::DualSaw_BeatingRate{},
-                    param::DualSaw_SawSquare{});
+                    param::DualSaw_SawSquare{},
+                    param::DualSaw_SecondAmp{});
         break;
     case kSync:
         SetGuiKnobs(arg_knobs_,

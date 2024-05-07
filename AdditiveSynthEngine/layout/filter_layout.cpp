@@ -29,12 +29,12 @@ void FilterLayout::SetBounds(int x, int y, int w, int h) {
     auto w_f = static_cast<float>(w);
 
     filter_type_.SetBounds(rgc::Bounds(x_f, y_f, w_f, 16));
-    arg_knobs_[0].set_bound(x, y + 16, 50, 70);
-    arg_knobs_[1].set_bound(x + 50, y + 16, 50, 70);
-    arg_knobs_[2].set_bound(x + 100, y + 16, 50, 70);
-    arg_knobs_[3].set_bound(x, y + 86, 50, 70);
-    arg_knobs_[4].set_bound(x + 50, y + 86, 50, 70);
-    arg_knobs_[5].set_bound(x + 100, y + 86, 50, 70);
+    arg_knobs_[0].set_bound(x, y + 16, 50, 50);
+    arg_knobs_[1].set_bound(x + 50, y + 16, 50, 50);
+    arg_knobs_[2].set_bound(x + 100, y + 16, 50, 50);
+    arg_knobs_[3].set_bound(x, y + 86, 50, 50);
+    arg_knobs_[4].set_bound(x + 50, y + 86, 50, 50);
+    arg_knobs_[5].set_bound(x + 100, y + 86, 50, 50);
 }
 
 void FilterLayout::OnFilterTypeChanged(int c) {

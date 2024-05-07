@@ -11,6 +11,7 @@ struct EffectType : IntChoiceParam<EffectType> {
         kPhaser,
         kScramble,
         kBlur,
+        kDecay,
         kNumEnums
     };
 
@@ -22,6 +23,7 @@ struct EffectType : IntChoiceParam<EffectType> {
             "phaser"sv,
             "scramble"sv,
             "blur"sv,
+            "decay"sv,
     };
 };
 
@@ -68,13 +70,14 @@ struct Reverb_Amount : FloatParam<Reverb_Amount> {
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Reverb_Decay : FloatParam<Reverb_Decay> {
+struct Reverb_Decay : FloatParam < Reverb_Decay, [](float v) {return v*v*v; } > {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "decay"sv;
     static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = 5000.0f;
+    static constexpr auto kMax = 50000.0f;
     static constexpr auto kDefault = 1000.0f;
     static constexpr auto kTextPrecision = 0;
+    static constexpr auto kStuff = "ms";
 };
 
 struct Reverb_Attack : FloatParam<Reverb_Attack> {
@@ -91,8 +94,17 @@ struct Reverb_Damp : FloatParam<Reverb_Damp> {
     static constexpr auto kName = "damp"sv;
     static constexpr auto kMin = 0.0f;
     static constexpr auto kMax = 1.0f;
-    static constexpr auto kDefault = 1.0f;
+    static constexpr auto kDefault = 0.3f;
     static constexpr auto kTextPrecision = 2;
+};
+
+struct Reverb_Speed : FloatParam<Reverb_Speed> {
+    static constexpr int kArgIdx = 4;
+    static constexpr auto kName = "speed"sv;
+    static constexpr auto kMin = -100.0f;
+    static constexpr auto kMax = -50.0f;
+    static constexpr auto kDefault = -55.0f;
+    static constexpr auto kTextPrecision = 0;
 };
 
 // =========================================================
@@ -146,25 +158,27 @@ struct Phaser_Cycles : FloatParam < Phaser_Cycles, [](float v) {return v * v; } 
     static constexpr auto kMin = 0.0f;
     static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 0.0f;
-    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kTextPrecision = 3;
 };
 
 struct Phaser_Shape : FloatChoiceParam<Phaser_Shape> {
     enum class ParamEnum {
-        kBox = 0,
-        kParabola,
+        kTri = 0,
         kSine,
-        kTri,
-        kDeep,
+        kLogSine,
+        kLogTri,
+        kLogNarrow,
+        kBox,
         kNumEnums
     };
 
     static constexpr std::array kNames{
-        "box"sv,
-        "parabola"sv,
-        "sine"sv,
         "tri"sv,
-        "deep"sv
+        "sine"sv,
+        "log_sine"sv,
+        "log_tri"sv,
+        "log_narrow"sv,
+        "box"sv
     };
 
     static constexpr int kArgIdx = 1;
@@ -278,5 +292,28 @@ struct Blur_BinRelease : FloatParam<Blur_BinRelease> {
     static constexpr auto kMax = 0.99f;
     static constexpr auto kDefault = 1.0f;
     static constexpr auto kTextPrecision = 3;
+};
+
+// =========================================================
+// decay
+// =========================================================
+struct Decay_Time : FloatParam<Decay_Time> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "time"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 5000.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "ms";
+};
+
+struct Decay_Slope : FloatParam<Decay_Slope> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "slope"sv;
+    static constexpr auto kMin = -24.0f;
+    static constexpr auto kMax = 0.0f;
+    static constexpr auto kDefault = -6.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "dB/oct";
 };
 }

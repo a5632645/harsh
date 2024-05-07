@@ -126,16 +126,16 @@ void ResynthsisLayout::CheckAndDoResynthsis() {
                 auto x_idx = static_cast<size_t>(x / bound_.GetWidth() * spectrum.size());
                 const auto& draw_frame = spectrum.at(x_idx);
 
-                
                 for (int y = 0; y < h; ++y) {
                     auto y_idx = static_cast<size_t>((1.0f - y / bound_.GetHeight()) * (display_height - 1));
 
+                    // map gain to g
                     auto db_g = utli::GainToDb<-60.0f>(draw_frame.gains[y_idx]) / 60.0f + 1.0f;
                     auto g = static_cast<unsigned char>(std::clamp(0xff * db_g, 0.0f, 255.0f));
 
-                    auto fre_diff = draw_frame.freq_diffs[y_idx];
-                    auto max_fre_diff = frame.max_fre_diff;
-                    auto bit_fre_diff = std::clamp(fre_diff, -max_fre_diff, max_fre_diff) / max_fre_diff;
+                    // map ratio_diff to b
+                    auto fre_diff = draw_frame.ratio_diffs[y_idx];
+                    auto bit_fre_diff = std::clamp(fre_diff, -1.0f, 1.0f);
                     auto nor_fre_diff = 0.5f + 0.5f * bit_fre_diff;
                     auto b = static_cast<unsigned char>(std::clamp(0xff * nor_fre_diff + 0.5f, 0.0f, 255.0f));
 

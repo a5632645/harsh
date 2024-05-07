@@ -17,5 +17,6 @@ private:
     float saw_square_{};
     float sample_rate_{};
     float beating_phase_{};
+    float second_amp_{};
 };
 }

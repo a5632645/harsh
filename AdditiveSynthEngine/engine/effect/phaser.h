@@ -2,48 +2,83 @@
 
 #include <numbers>
 #include <algorithm>
+#include <gcem.hpp>
 #include "param/param.h"
 #include "param/effect_param.h"
 #include "engine/IProcessor.h"
 #include "engine/VolumeTable.hpp"
 #include "engine/EngineConfig.h"
+#include "utli/warp.h"
+#include "utli/convert.h"
 
 namespace mana {
-constexpr float MySimpleAbs(float x) {
+inline static constexpr float MySimpleAbs(float x) {
     return x >= 0.0f ? x : -x;
 }
 
-// input are [-0.5, 0.5]
-constexpr float SingeCycleBox(float x) {
-    return x > -0.25 && x < 0.25 ? 1.0f : -1.0f;
+static constexpr auto kSineTable = NormalizeTableByPower(MakeNormalizeTable<kNumPartials>(
+    [](float v) {
+    return gcem::sqrt(0.5f * gcem::cos(v * std::numbers::pi_v<float> *2.0f) + 0.5f);
+}));
+
+inline static constexpr float SingeCycleTriangle(float v) {
+    return MySimpleAbs(2.0f * v);
 }
-constexpr float SingeCycleParabola(float v) {
-    return -8.0f * v * v + 1.0f;
+
+inline constexpr float SingeCycleBox(float x) {
+    return SingeCycleTriangle(x) > 0.5f ? 1.0f : 0.0f;
 }
-static const auto kSineTable = MakeNormalizeTable<kNumPartials>([](float v) {return -std::cos(v * std::numbers::pi_v<float> *2.0f); });
-constexpr float SingeCycleTriangle(float v) {
-    return 1.0f - MySimpleAbs(4.0f * v);
-}
-constexpr float SingeCycleDeep(float x) {
-    x = MySimpleAbs(x);
-    return -1.6f + (1.0f + 1.6f) * (1.0f / (4.5f * x + 1.0f) - 0.1f) / 0.9f;
-}
-static constexpr auto kDeepTable = MakeNormalizeTable<kNumPartials>([](float v) {return SingeCycleDeep(v - 0.5f); });
+
+static constexpr auto kLogSineTable = MakeNormalizeTable<kNumPartials>(
+    [](float v) {
+    auto cos_val = gcem::cos(std::numbers::pi_v<float> *2.0f * v);
+    auto vv = cos_val * 0.5f + 0.5f;
+    auto up_db = 0.0f;
+    auto down_db = -60.0f;
+    auto map_db = std::lerp(down_db, up_db, vv);
+    return utli::cp::DbToGain(map_db) * 1.2f;
+});
+
+static constexpr auto kLogTriTable = MakeNormalizeTable<kNumPartials>(
+    [](float v) {
+    if (v > 0.5f) {
+        v = 1.0f - v;
+    }
+    v *= 2.0f; // map to 0..1
+    auto up_db = 0.0f;
+    auto down_db = -60.0f;
+    auto map_db = std::lerp(up_db, down_db, v);
+    return utli::cp::DbToGain(map_db) * 1.5;
+});
+
+static constexpr auto kLogNarrowTable = MakeNormalizeTable<kNumPartials>(
+    [](float v) {
+    auto cos_val = gcem::cos(std::numbers::pi_v<float> *2.0f * v);
+    if (cos_val < 0.0f) {
+        return 0.0f;
+    }
+    auto up_db = 0.0f;
+    auto down_db = -60.0f;
+    auto map_db = std::lerp(down_db, up_db, cos_val);
+    return utli::cp::DbToGain(map_db) * 1.3f;
+});
 
 static float PhaserShapeVal(param::Phaser_Shape::ParamEnum s, float nor_x) {
     auto nor_sym_x = nor_x - 0.5f;
     using enum param::Phaser_Shape::ParamEnum;
     switch (s) {
-    case kBox:
-        return SingeCycleBox(nor_sym_x);
-    case kParabola:
-        return SingeCycleParabola(nor_sym_x);
-    case kSine:
-        return kSineTable[static_cast<size_t>(nor_x * (kSineTable.size() - 1))];
     case kTri:
         return SingeCycleTriangle(nor_sym_x);
-    case kDeep:
-        return SingeCycleDeep(nor_sym_x);
+    case kSine:
+        return utli::warp::GetRangeByNorIdx(kSineTable, nor_x);
+    case kLogSine:
+        return utli::warp::GetRangeByNorIdx(kLogSineTable, nor_x);
+    case kLogTri:
+        return utli::warp::GetRangeByNorIdx(kLogTriTable, nor_x);
+    case kLogNarrow:
+        return utli::warp::GetRangeByNorIdx(kLogNarrowTable, nor_x);
+    case kBox:
+        return SingeCycleBox(nor_sym_x);
     default:
         return {};
     }
@@ -59,8 +94,11 @@ public:
 
     void Process(Partials& partials) override {
         for (int i = 0; i < kNumPartials; ++i) {
-            auto mode1_ph = GetPhase(first_mode_, i, partials.freqs[i], partials.pitches[i]);
-            auto mode2_ph = GetPhase(second_mode_, i, partials.freqs[i], partials.pitches[i]);
+            auto freq = partials.freqs[i] - partials.base_frequency;
+            auto pitch = partials.pitches[i] - partials.base_pitch;
+
+            auto mode1_ph = GetPhase(first_mode_, i, freq, pitch);
+            auto mode2_ph = GetPhase(second_mode_, i, freq, pitch);
             auto mode1_gain = std::lerp(PhaserShapeVal(first_shape_, mode1_ph),
                                         PhaserShapeVal(second_shape_, mode1_ph),
                                         shape_fraction_);
@@ -68,7 +106,7 @@ public:
                                         PhaserShapeVal(second_shape_, mode2_ph),
                                         shape_fraction_);
             auto org_gain = std::lerp(mode1_gain, mode2_gain, mode_fraction_);
-            auto gain = std::lerp(1.0f, 0.5f + 0.5f * org_gain, mix_);
+            auto gain = (1.0f - mix_) + mix_ * org_gain;
             partials.gains[i] *= gain;
         }
     }
@@ -124,7 +162,7 @@ private:
 
         // warp 01
         float temp{};
-        return std::modf(warp_phase * cycles_ + lfo_phase_ + 1.0f, &temp);
+        return std::modf(warp_phase * cycles_ /*+ lfo_phase_*/ + 1.0f, &temp);
     }
 
     static float ParabolaWarp(float x, float w) {

@@ -33,11 +33,11 @@ void StandardLayout::Paint() {
 }
 
 void StandardLayout::SetBounds(int x, int y, int w, int h) {
-    pitch_bend_.set_bound(x, y, 50, 70);
-    output_gain_.set_bound(x + 50, y, 50, 70);
+    pitch_bend_.set_bound(x, y, 50, 50);
+    output_gain_.set_bound(x + 50, y, 50, 50);
     phase_type_.SetBounds(rgc::Bounds(x, y + 70, w, 16));
     for (int i = 0; auto & k : phase_arg_knobs_) {
-        k.set_bound(x + i * 50, y + 86, 50, 70);
+        k.set_bound(x + i * 50, y + 86, 50, 50);
         ++i;
     }
 }

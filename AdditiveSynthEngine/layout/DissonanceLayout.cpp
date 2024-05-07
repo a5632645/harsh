@@ -38,8 +38,8 @@ void DissonanceLayout::SetBounds(int x, int y, int w, int h) {
 
     is_enable_.SetBounds(rgc::Bounds(x_f, y_f, 12.0f, 12.0f));
     type_.SetBounds(rgc::Bounds(x_f, y_f + 12.0f, w_f, 12.0f));
-    arg_knobs_[0].set_bound(x, y + 24, 50, 70);
-    arg_knobs_[1].set_bound(x + 50, y + 24, 50, 70);
+    arg_knobs_[0].set_bound(x, y + 24, 50, 50);
+    arg_knobs_[1].set_bound(x + 50, y + 24, 50, 50);
 }
 
 void DissonanceLayout::OnDissonanceTypeChanged(int c) {

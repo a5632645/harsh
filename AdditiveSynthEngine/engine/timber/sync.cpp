@@ -21,8 +21,17 @@ static constexpr auto kTriTable = makeHarmonicArray<kNumPartials>([](float x) {
     auto pi2 = std::numbers::pi_v<float> *std::numbers::pi_v<float>;
     return 8.0f * sign / pi2 / xint / xint;
 });
-static constexpr auto kSawTable = VolumeTable<kNumPartials>::SAW_TABLE;
-static constexpr auto kSquareTable = VolumeTable<kNumPartials>::PULSE_TABLE;
+static constexpr auto kSawTable = makeHarmonicArray<kNumPartials>([](float v) {
+    return  1.0f / v / (std::numbers::pi_v<float> / 2.0f);
+});
+static constexpr auto kSquareTable = makeHarmonicArray<kNumPartials>([](float v) {
+    if ((static_cast<int>(v) & 1) == 1) {
+        return  1.0f / v;
+    }
+    else {
+        return 0.0f;
+    }
+});
 
 static constexpr float GetPartialGain(param::Sync_WaveShape::ParamEnum a, int idx) {
     switch (a) {
