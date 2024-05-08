@@ -41,21 +41,53 @@ void Synth::NoteOff(int note, float velocity) {
 void Synth::Render(size_t numFrame) {
     std::ranges::fill(audio_buffer_, 0.0F);
 
-    for (Oscillor& o : m_oscillators) {
-        o.renderBuffer(numFrame);
-        std::ranges::transform(audio_buffer_, o.getBuffer(), audio_buffer_.begin(), std::plus<float>());
+    int write_pos = 0;
+    int left = static_cast<int>(numFrame);
+
+    auto render_func = [&](int num) mutable {
+        for (Oscillor& o : m_oscillators) {
+            if (!o.IsPlaying()) {
+                continue;
+            }
+
+            auto write_iter = audio_buffer_.begin() + write_pos;
+            for (int i = 0; i < num; ++i) {
+                *write_iter++ += o.SrTick();
+            };
+        }
+        write_pos += num;
+    };
+
+    while (left != 0) {
+        if (left >= update_counter_) {
+            left -= update_counter_;
+            render_func(update_counter_);
+            update_counter_ = update_skip_;
+            update_state(update_skip_);
+        }
+        else {
+            render_func(left);
+            update_counter_ -= left;
+            break;
+        }
     }
+
+    //for (Oscillor& o : m_oscillators) {
+    //    o.renderBuffer(numFrame);
+    //    std::ranges::transform(audio_buffer_, o.getBuffer(), audio_buffer_.begin(), std::plus<float>());
+    //}
 
     std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [this](float v) {return v * output_gain_; });
 }
 
-void Synth::Init(size_t bufferSize, float sampleRate, float update_rate) {
-    sample_rate_ = sampleRate;
+void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {
+    sample_rate_ = sample_rate;
+    update_skip_ = static_cast<int>(std::round(sample_rate / update_rate));
+    update_rate_ = sample_rate / static_cast<float>(update_skip_);
 
-    audio_buffer_.resize(bufferSize);
-
+    audio_buffer_.resize(buffer_size);
     for (Oscillor& o : m_oscillators) {
-        o.Init(bufferSize, sampleRate, update_rate);
+        o.Init(buffer_size, sample_rate, update_rate_);
     }
 }
 

@@ -15,7 +15,6 @@ static mana::SynthLayout synth_layout_{ synth_ };
 
 static void ThisAudioCallback(void* buffer, unsigned int frames) {
     std::scoped_lock lock{ synth_.GetSynthLock() };
-    synth_.update_state(frames);
     synth_.Render(frames);
     std::ranges::copy(synth_.getBuffer(), static_cast<float*>(buffer));
     synth_layout_.GetOscilloscope().PushBuffer(synth_.getBuffer());
@@ -32,9 +31,8 @@ int main(void) {
     SetTargetFPS(30);               // Set our game to run at 30 frames-per-second
 
     // init synth
-    synth_.Init(480, 48000.0f, 100.0f);
+    synth_.Init(480, 48000.0f, 200.0f);
     synth_layout_.SetBounds(0, 0, 800, 600);
-    //synth_.CreateResynthsisFrames(AudioFile<float>{R"(C:\Users\Kawai\Desktop\o.wav)"}.samples.front());
 
     // link keyboard and synth
     keyboard_.onNoteOn = [](int n) {synth_.NoteOn(n, 1.0f); };

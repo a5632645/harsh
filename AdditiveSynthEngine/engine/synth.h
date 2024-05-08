@@ -54,6 +54,9 @@ private:
     size_t m_rrPosition{};
 
     float sample_rate_{};
+    float update_rate_{};
+    int update_skip_{};
+    int update_counter_{};
     float output_gain_{};
 };
 }

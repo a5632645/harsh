@@ -77,6 +77,8 @@ public:
         }
     }
 
+    float SrTick() { return sine_bank_.SrTick(); }
+
     const std::vector<float>& getBuffer() const {
         return audio_buffer_;
     }
