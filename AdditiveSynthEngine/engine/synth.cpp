@@ -49,13 +49,13 @@ void Synth::Render(size_t numFrame) {
     std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [this](float v) {return v * output_gain_; });
 }
 
-void Synth::Init(size_t bufferSize, float sampleRate) {
+void Synth::Init(size_t bufferSize, float sampleRate, float update_rate) {
     sample_rate_ = sampleRate;
 
     audio_buffer_.resize(bufferSize);
 
     for (Oscillor& o : m_oscillators) {
-        o.Init(bufferSize, sampleRate);
+        o.Init(bufferSize, sampleRate, update_rate);
     }
 }
 

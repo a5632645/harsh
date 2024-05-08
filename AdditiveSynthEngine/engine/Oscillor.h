@@ -18,7 +18,7 @@ class Oscillor {
 public:
     Oscillor(Synth& synth);
 
-    void Init(size_t bufferSize, float sampleRate);
+    void Init(size_t bufferSize, float sampleRate, float update_rate);
 
     void NoteOn(int noteNumber, float v);
 

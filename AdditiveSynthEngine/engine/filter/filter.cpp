@@ -5,7 +5,7 @@
 #include "param/filter_param.h"
 
 namespace mana {
-void Filter::Init(float sample_rate) {
+void Filter::Init(float sample_rate, float update_rate) {
     sample_rate_ = sample_rate;
 }
 

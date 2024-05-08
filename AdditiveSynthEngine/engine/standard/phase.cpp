@@ -6,7 +6,7 @@
 #include "utli/warp.h"
 
 namespace mana {
-void PhaseProcessor::Init(float sample_rate) {
+void PhaseProcessor::Init(float sample_rate, float update_rate) {
 }
 
 void PhaseProcessor::OnUpdateTick(const SynthParam & params, int skip, int module_idx) {

@@ -4,7 +4,7 @@
 #include "param/standard_param.h"
 
 namespace mana {
-void FreqProcessor::Init(float sample_rate) {
+void FreqProcessor::Init(float sample_rate, float update_rate) {
     reciprocal_nyquist_rate_ = 2.0f / sample_rate;
 }
 

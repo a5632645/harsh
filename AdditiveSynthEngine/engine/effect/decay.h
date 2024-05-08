@@ -11,7 +11,7 @@
 namespace mana {
 class Decay : public IProcessor {
 public:
-    void Init(float sample_rate) override {
+    void Init(float sample_rate, float update_rate) override {
         sample_rate_ = sample_rate;
     }
 

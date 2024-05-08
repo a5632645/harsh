@@ -7,7 +7,7 @@
 namespace mana {
 class Dissonance : public IProcessor {
 public:
-    void Init(float sample_rate) override;
+    void Init(float sample_rate, float update_rate) override;
     void Process(Partials & partials) override;
     void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override;
     void OnNoteOn(int note) override;

@@ -9,8 +9,7 @@
 namespace mana {
 class Chorus : public IProcessor {
 public:
-    // 通过 IProcessor 继承
-    void Init(float sample_rate) override {
+    void Init(float sample_rate, float update_rate) override {
         sample_rate_ = sample_rate;
     }
 

@@ -32,7 +32,7 @@ int main(void) {
     SetTargetFPS(30);               // Set our game to run at 30 frames-per-second
 
     // init synth
-    synth_.Init(480, 48000.0f);
+    synth_.Init(480, 48000.0f, 100.0f);
     synth_layout_.SetBounds(0, 0, 800, 600);
     //synth_.CreateResynthsisFrames(AudioFile<float>{R"(C:\Users\Kawai\Desktop\o.wav)"}.samples.front());
 

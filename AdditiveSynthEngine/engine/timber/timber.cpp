@@ -5,7 +5,7 @@
 #include "utli/convert.h"
 
 namespace mana {
-void Timber::Init(float sample_rate) {
+void Timber::Init(float sample_rate, float update_rate) {
     osc1_.Init(sample_rate);
     osc2_.Init(sample_rate);
     inv_sample_rate_ = 1.0f / sample_rate;

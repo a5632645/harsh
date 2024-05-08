@@ -104,6 +104,11 @@ void EffectLayout::OnEffectTypeChanged(int c) {
                     param::Decay_Slope{},
                     param::Decay_Time{});
         break;
+    case kHarmonicDelay:
+        SetGuiKnobs(arg_knobs_,
+                    param::Delay_Feedback{},
+                    param::Delay_Time{});
+        break;
     default:
         SetGuiKnobs(arg_knobs_);
         break;

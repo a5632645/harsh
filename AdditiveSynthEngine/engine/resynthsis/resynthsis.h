@@ -13,7 +13,7 @@ class Resynthesis : public IProcessor {
 public:
     Resynthesis(Synth& s) : synth_(s) {}
 
-    void Init(float sample_rate) override;
+    void Init(float sample_rate, float update_rate) override;
     void Process(Partials& partials) override;
     void OnUpdateTick(const SynthParam& param, int skip, int module_idx) override;
     void OnNoteOn(int note) override;

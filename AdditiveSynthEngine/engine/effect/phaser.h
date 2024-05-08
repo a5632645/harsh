@@ -48,7 +48,7 @@ static constexpr auto kLogTriTable = MakeNormalizeTable<kNumPartials>(
     auto up_db = 0.0f;
     auto down_db = -60.0f;
     auto map_db = std::lerp(up_db, down_db, v);
-    return utli::cp::DbToGain(map_db) * 1.5;
+    return utli::cp::DbToGain(map_db) * 1.5f;
 });
 
 static constexpr auto kLogNarrowTable = MakeNormalizeTable<kNumPartials>(
@@ -88,7 +88,7 @@ static float PhaserShapeVal(param::Phaser_Shape::ParamEnum s, float nor_x) {
 namespace mana {
 class Phaser : public IProcessor {
 public:
-    void Init(float sample_rate) override {
+    void Init(float sample_rate, float update_rate) override {
         sample_rate_ = sample_rate;
     }
 
@@ -162,7 +162,7 @@ private:
 
         // warp 01
         float temp{};
-        return std::modf(warp_phase * cycles_ /*+ lfo_phase_*/ + 1.0f, &temp);
+        return std::modf(warp_phase * cycles_ + lfo_phase_ + 1.0f, &temp);
     }
 
     static float ParabolaWarp(float x, float w) {

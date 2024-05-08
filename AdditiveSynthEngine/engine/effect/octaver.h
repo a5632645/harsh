@@ -11,8 +11,7 @@ class Octaver : public IProcessor {
 public:
     static constexpr auto kMaxBins = static_cast<int>(param::Octaver_Width::kMax);
 
-    // 通过 IProcessor 继承
-    void Init(float sample_rate) override {}
+    void Init(float sample_rate, float update_rate) override {}
     void Process(Partials& partials) override {
         std::ranges::transform(partials.gains, saved_gains_.begin(), [this](float v) {return v * gain_; });
         std::ranges::copy(saved_gains_, partials.gains.begin());

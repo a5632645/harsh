@@ -7,9 +7,10 @@
 #include "scramble.h"
 #include "Blur.h"
 #include "decay.h"
+#include "harmonic_delay.h"
 
 namespace mana {
-void Effect::Init(float sample_rate) {
+Effect::Effect(int idx) : effect_idx_(idx) {
     processers_[param::EffectType::ParamEnum::kOctaver] = std::make_unique<Octaver>();
     processers_[param::EffectType::ParamEnum::kReverb] = std::make_unique<Reverb>();
     processers_[param::EffectType::ParamEnum::kChorus] = std::make_unique<Chorus>();
@@ -17,11 +18,15 @@ void Effect::Init(float sample_rate) {
     processers_[param::EffectType::ParamEnum::kScramble] = std::make_unique<Scramble>();
     processers_[param::EffectType::ParamEnum::kBlur] = std::make_unique<Blur>();
     processers_[param::EffectType::ParamEnum::kDecay] = std::make_unique<Decay>();
+    processers_[param::EffectType::ParamEnum::kHarmonicDelay] = std::make_unique<HarmonicDelay>();
 
-    for (auto&&[k, v] : processers_) {
-        v->Init(sample_rate);
-    }
     p_processor_ = processers_.begin()->second.get();
+}
+
+void Effect::Init(float sample_rate, float update_rate) {
+    for (auto&&[k, v] : processers_) {
+        v->Init(sample_rate, update_rate);
+    }
 }
 
 void Effect::Process(Partials& partials) {

@@ -4,7 +4,7 @@
 #include "param/resynthsis_param.h"
 
 namespace mana {
-void Resynthesis::Init(float sample_rate) {
+void Resynthesis::Init(float sample_rate, float update_rate) {
     sample_rate_ = sample_rate;
 }
 

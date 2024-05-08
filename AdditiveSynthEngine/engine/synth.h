@@ -25,7 +25,7 @@ public:
 
     void Render(size_t numFrame);
 
-    void Init(size_t bufferSize, float sampleRate);
+    void Init(size_t bufferSize, float sampleRate, float update_rate);
 
     void update_state(int step);
 

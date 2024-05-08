@@ -12,6 +12,7 @@ struct EffectType : IntChoiceParam<EffectType> {
         kScramble,
         kBlur,
         kDecay,
+        kHarmonicDelay,
         kNumEnums
     };
 
@@ -24,6 +25,7 @@ struct EffectType : IntChoiceParam<EffectType> {
             "scramble"sv,
             "blur"sv,
             "decay"sv,
+            "harm delay"sv,
     };
 };
 
@@ -315,5 +317,27 @@ struct Decay_Slope : FloatParam<Decay_Slope> {
     static constexpr auto kDefault = -6.0f;
     static constexpr auto kTextPrecision = 1;
     static constexpr auto kStuff = "dB/oct";
+};
+
+// =========================================================
+// delay
+// =========================================================
+struct Delay_Time : FloatParam<Delay_Time> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "time"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 5000.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "ms";
+};
+
+struct Delay_Feedback : FloatParam<Delay_Feedback> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "feedback"sv;
+    static constexpr auto kMin = -1.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 2;
 };
 }

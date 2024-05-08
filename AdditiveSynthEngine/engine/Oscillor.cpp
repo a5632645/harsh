@@ -23,7 +23,7 @@ Oscillor::Oscillor(Synth& synth) {
     AddProcessor(std::make_shared<Effect>(4));
 }
 
-void Oscillor::Init(size_t bufferSize, float sampleRate) {
+void Oscillor::Init(size_t bufferSize, float sampleRate, float update_rate) {
     audio_buffer_.resize(bufferSize);
     sample_rate_ = sampleRate;
 
@@ -31,7 +31,7 @@ void Oscillor::Init(size_t bufferSize, float sampleRate) {
     sine_bank_.SetSmoothTime(10.0F);
     sine_bank_.SetNumMaxActivePartials(kNumPartials);
 
-    std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->Init(sampleRate); });
+    std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->Init(sampleRate, update_rate); });
 }
 
 void Oscillor::NoteOn(int note_number, float velocity) {

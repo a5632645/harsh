@@ -151,7 +151,7 @@ static void DoFakeUnison2(Partials& partials, float ratio0, float ratio1) {
 // =========================================================
 // dissonance
 // =========================================================
-void Dissonance::Init(float sample_rate) {
+void Dissonance::Init(float sample_rate, float update_rate) {
 }
 
 void Dissonance::Process(Partials& partials) {
