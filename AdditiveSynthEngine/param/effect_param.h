@@ -10,10 +10,9 @@ struct EffectType : IntChoiceParam<EffectType> {
         kChorus,
         kPhaser,
         kScramble,
-        kBlur,
         kDecay,
         kHarmonicDelay,
-        kNumEnums
+        kNumEnums,
     };
 
     static constexpr auto kName = "type"sv;
@@ -23,7 +22,6 @@ struct EffectType : IntChoiceParam<EffectType> {
             "chorus"sv,
             "phaser"sv,
             "scramble"sv,
-            "blur"sv,
             "decay"sv,
             "harm delay"sv,
     };
@@ -72,7 +70,7 @@ struct Reverb_Amount : FloatParam<Reverb_Amount> {
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Reverb_Decay : FloatParam < Reverb_Decay, [](float v) {return v*v*v; } > {
+struct Reverb_Decay : FloatParam < Reverb_Decay, [](float v) {return v * v * v; } > {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "decay"sv;
     static constexpr auto kMin = 0.0f;
@@ -256,47 +254,6 @@ struct Scramble_Range : FloatParam<Scramble_Range> {
 };
 
 // =========================================================
-// blur
-// =========================================================
-struct Blur_TimeAttack : FloatParam<Blur_TimeAttack> {
-    static constexpr int kArgIdx = 0;
-    static constexpr auto kName = "t.att"sv;
-    static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = 2000.0f;
-    static constexpr auto kDefault = 0.0f;
-    static constexpr auto kTextPrecision = 1;
-    static constexpr auto kStuff = "ms";
-};
-
-struct Blur_TimeRelease : FloatParam<Blur_TimeRelease> {
-    static constexpr int kArgIdx = 1;
-    static constexpr auto kName = "t.rel"sv;
-    static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = 2000.0f;
-    static constexpr auto kDefault = 0.0f;
-    static constexpr auto kTextPrecision = 1;
-    static constexpr auto kStuff = "ms";
-};
-
-struct Blur_BinAttack : FloatParam<Blur_BinAttack> {
-    static constexpr int kArgIdx = 2;
-    static constexpr auto kName = "b.att"sv;
-    static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = 0.99f;
-    static constexpr auto kDefault = 0.0f;
-    static constexpr auto kTextPrecision = 3;
-};
-
-struct Blur_BinRelease : FloatParam<Blur_BinRelease> {
-    static constexpr int kArgIdx = 3;
-    static constexpr auto kName = "b.rel"sv;
-    static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = 0.99f;
-    static constexpr auto kDefault = 1.0f;
-    static constexpr auto kTextPrecision = 3;
-};
-
-// =========================================================
 // decay
 // =========================================================
 struct Decay_Time : FloatParam<Decay_Time> {
@@ -320,7 +277,7 @@ struct Decay_Slope : FloatParam<Decay_Slope> {
 };
 
 // =========================================================
-// delay
+// harmonic delay
 // =========================================================
 struct Delay_Time : FloatParam<Delay_Time> {
     static constexpr int kArgIdx = 0;

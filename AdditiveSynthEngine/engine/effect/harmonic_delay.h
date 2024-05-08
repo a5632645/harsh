@@ -1,14 +1,17 @@
 #pragma once
 
-#include <random>
-#include <ranges>
-#include <algorithm>
 #include "engine/IProcessor.h"
 #include "param/effect_param.h"
 #include "param/param.h"
-#include "utli/convert.h"
+#include <array>
+#include <complex>
+#include <vector>
 
 namespace mana {
+/**
+* spectral delay are not available because additive synthesizer can not play
+* the whole spectrum.if use ifft that maybe possible.
+ */
 class HarmonicDelay : public IProcessor {
 public:
     void Init(float sample_rate, float update_rate) override {

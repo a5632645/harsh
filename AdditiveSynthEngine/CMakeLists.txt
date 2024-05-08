@@ -86,7 +86,7 @@ add_executable (AdditiveSynthEngine
  "utli/NoiseGenerator.h"
  "layout/standard_layout.h"
  "layout/standard_layout.cpp"
- "engine/effect/Blur.h" "utli/spin_lock.h" "utli/convert.h" "engine/standard/phase.h" "engine/standard/phase.cpp" "utli/warp.h" "engine/timber/timber_frame.h" "engine/timber/timber_gen.h" "engine/timber/timber_gen.cpp" "layout/osc_layout.h" "layout/osc_layout.cpp" "engine/timber/dynamic_noise.h" "engine/effect/decay.h" "engine/effect/harmonic_delay.h")
+  "utli/spin_lock.h" "utli/convert.h" "engine/standard/phase.h" "engine/standard/phase.cpp" "utli/warp.h" "engine/timber/timber_frame.h" "engine/timber/timber_gen.h" "engine/timber/timber_gen.cpp" "layout/osc_layout.h" "layout/osc_layout.cpp" "engine/timber/dynamic_noise.h" "engine/effect/decay.h" "engine/effect/harmonic_delay.h"  )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)

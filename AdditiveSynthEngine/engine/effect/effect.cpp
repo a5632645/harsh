@@ -5,7 +5,6 @@
 #include "chrous.h"
 #include "phaser.h"
 #include "scramble.h"
-#include "Blur.h"
 #include "decay.h"
 #include "harmonic_delay.h"
 
@@ -16,7 +15,6 @@ Effect::Effect(int idx) : effect_idx_(idx) {
     processers_[param::EffectType::ParamEnum::kChorus] = std::make_unique<Chorus>();
     processers_[param::EffectType::ParamEnum::kPhaser] = std::make_unique<Phaser>();
     processers_[param::EffectType::ParamEnum::kScramble] = std::make_unique<Scramble>();
-    processers_[param::EffectType::ParamEnum::kBlur] = std::make_unique<Blur>();
     processers_[param::EffectType::ParamEnum::kDecay] = std::make_unique<Decay>();
     processers_[param::EffectType::ParamEnum::kHarmonicDelay] = std::make_unique<HarmonicDelay>();
 
