@@ -4,18 +4,28 @@
 #include <ranges>
 #include <unordered_map>
 #include <memory>
+#include <cassert>
 #include "Parameter.h"
 
 namespace mana {
 class ParamBank {
 public:
-    void UpdateParamOutput();
+    template<IsParamter Type = FloatParameter>
+    Type& AddOrCreateIfNull(std::string_view id) {
+        auto e = std::make_unique<Type>(id);
+        auto& v = *e;
+        parameters_[std::string(id)] = std::move(e);
+        return v;
+    }
 
-    Parameter& AddOrCreateIfNull(std::string_view id,
-                                 float default_value);
-
-    Parameter* GetParamPtr(std::string_view id) const;
+    template<IsParamter Type = FloatParameter>
+    Type* GetParamPtr(std::string_view id) const {
+        auto e = parameters_.at(std::string(id)).get();
+        assert(e->GetParamType() == Type::kTypeEnum);
+        assert(e != nullptr);
+        return static_cast<Type*>(e);
+    }
 private:
-    std::unordered_map<std::string, std::shared_ptr<Parameter>> parameters_;
+    std::unordered_map<std::string, std::unique_ptr<FloatParameter>> parameters_;
 };
 }

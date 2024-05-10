@@ -70,13 +70,13 @@ static float PhaserShapeVal(param::Phaser_Shape::ParamEnum s, float nor_x) {
     case kTri:
         return SingeCycleTriangle(nor_sym_x);
     case kSine:
-        return utli::warp::GetRangeByNorIdx(kSineTable, nor_x);
+        return utli::warp::AtNormalizeIndex(kSineTable, nor_x);
     case kLogSine:
-        return utli::warp::GetRangeByNorIdx(kLogSineTable, nor_x);
+        return utli::warp::AtNormalizeIndex(kLogSineTable, nor_x);
     case kLogTri:
-        return utli::warp::GetRangeByNorIdx(kLogTriTable, nor_x);
+        return utli::warp::AtNormalizeIndex(kLogTriTable, nor_x);
     case kLogNarrow:
-        return utli::warp::GetRangeByNorIdx(kLogNarrowTable, nor_x);
+        return utli::warp::AtNormalizeIndex(kLogNarrowTable, nor_x);
     case kBox:
         return SingeCycleBox(nor_sym_x);
     default:
@@ -111,7 +111,7 @@ public:
         }
     }
 
-    void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
+    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
         auto cycle01 = param::FloatParam<param::Phaser_Cycles>::GetNumber(params.effects[module_idx].args);
         cycles_ = cycle01 * kNumPartials / 2;
         {

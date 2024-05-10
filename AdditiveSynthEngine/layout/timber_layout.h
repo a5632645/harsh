@@ -12,7 +12,6 @@ public:
     void Paint();
     void SetBounds(int x, int y, int w, int h);
 private:
-    SynthParam& synth_param_;
     OscLayout osc1_layout_;
     OscLayout osc2_layout_;
     Knob osc2_shift_;

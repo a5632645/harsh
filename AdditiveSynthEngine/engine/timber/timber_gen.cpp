@@ -23,8 +23,8 @@ void TimberGen::Process(TimberFrame& frame) {
     }
 }
 
-void TimberGen::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
-    timber_type_ = param::TimberType::GetEnum(params.timber.osc_args[module_idx].timber_type);
+void TimberGen::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
+    timber_type_ = param::TimberType::GetEnum(params.timber.osc_args[module_idx].timber_type->GetInt());
     dual_saw_.OnUpdateTick(params, skip, module_idx);
     sync_.OnUpdateTick(params, skip, module_idx);
 }

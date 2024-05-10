@@ -3,6 +3,7 @@
 #include "engine/synth.h"
 #include "ui/Knob.h"
 #include "ui/WrapDropBox.h"
+#include "ui/wrap_check_box.h"
 
 namespace mana {
 class DissonanceLayout {
@@ -13,8 +14,7 @@ public:
     void SetBounds(int x, int y, int w, int h);
 private:
     void OnDissonanceTypeChanged(int c);
-    rgc::CheckBox is_enable_;
-    SynthParam& synth_param_;
+    WrapCheckBox is_enable_;
     WrapDropBox type_;
     std::array<Knob, 2> arg_knobs_;
 };

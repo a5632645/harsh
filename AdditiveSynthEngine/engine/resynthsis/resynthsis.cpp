@@ -38,14 +38,15 @@ void Resynthesis::Process(Partials& partials) {
     });
 }
 
-void Resynthesis::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
+void Resynthesis::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
+    is_enable_ = params.resynthsis.is_enable->GetBool();
+
     formant_mix_ = param::Resynthsis_FormantMix::GetNumber(params.resynthsis.args);
     formant_shift_ = param::Resynthsis_FormantShift::GetNumber(params.resynthsis.args);
     freq_scale_ = param::Resynthsis_FreqScale::GetNumber(params.resynthsis.args);
     frame_offset_ = param::Resynthsis_FrameOffset::GetNumber(params.resynthsis.args);
     frame_speed_ = param::Resynthsis_FrameSpeed::GetNumber(params.resynthsis.args);
     gain_mix_ = param::Resynthsis_GainMix::GetNumber(params.resynthsis.args);
-    is_enable_ = params.resynthsis.is_enable;
 
     if (!IsWork()) return;
 

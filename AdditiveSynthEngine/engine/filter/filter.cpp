@@ -28,9 +28,9 @@ void Filter::Process(Partials& partials) {
     }
 }
 
-void Filter::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
+void Filter::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
     filter_type_ = param::Filter_Type::GetEnum(
-        params.filter.filter_type
+        params.filter.filter_type->GetInt()
     );
 
     cutoff_semitone_ = param::Filter_Cutoff::GetNumber(params.filter.args);

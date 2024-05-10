@@ -26,7 +26,7 @@ public:
         }
     }
 
-    void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
+    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
         auto update_rate = sample_rate_ / static_cast<float>(skip);
 
         decay_slope_ = param::Decay_Slope::GetNumber(params.effects[module_idx].args);

@@ -4,9 +4,10 @@
 #include <string_view>
 #include <memory>
 #include <functional>
+#include <string>
 
 namespace mana {
-class Parameter;
+class FloatParameter;
 
 class Knob {
 public:
@@ -26,7 +27,7 @@ public:
     Knob& set_value(float v);
     Knob& set_bound(Rectangle bound);
     Knob& set_bound(int x, int y, int w, int h);
-    Knob& set_parameter(Parameter* parameter);
+    Knob& set_parameter(FloatParameter* parameter);
 
     float get_value() const;
 
@@ -53,9 +54,9 @@ protected:
 
     Rectangle m_bounds{};
 
-    Parameter* m_parameter;
+    FloatParameter* m_parameter;
 private:
     static void empty_callback(float) {}
-    static std::string EmptyV2Tcaller(float) { return {}; }
+    static std::string EmptyV2Tcaller(float e) { return std::to_string(e); }
 };
 }

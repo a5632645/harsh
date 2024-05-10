@@ -1,10 +1,6 @@
 #include "WrapDropBox.h"
 
-mana::WrapDropBox::WrapDropBox() {
-    SetActive(&m_item_selected);
-}
-
-void mana::WrapDropBox::show() {
+void mana::WrapDropBox::Paint() {
     int old_choice = m_item_selected;
 
     SetEditMode(m_is_edit_mode);
@@ -14,6 +10,9 @@ void mana::WrapDropBox::show() {
             m_is_edit_mode = false;
             if (old_choice != m_item_selected) {
                 on_choice_changed(m_item_selected);
+                if (parameter != nullptr) {
+                    parameter->SetInt(m_item_selected);
+                }
             }
         }
         else {

@@ -49,7 +49,7 @@ public:
         }
     }
 
-    void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
+    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
         update_rate_ = sample_rate_ / static_cast<float>(skip);
         inv_system_rate_ = 1.0f / update_rate_;
 

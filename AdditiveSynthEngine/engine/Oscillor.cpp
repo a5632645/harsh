@@ -7,9 +7,13 @@
 #include "resynthsis/resynthsis.h"
 #include "filter/filter.h"
 #include "effect/effect.h"
+#include "engine/synth.h"
 
 namespace mana {
 Oscillor::Oscillor(Synth& synth) {
+    oscillor_param_.ConnectSynthParams(synth.GetParamBank());
+    oscillor_param_.parent_synth = std::addressof(synth);
+
     AddProcessor(std::make_shared<FreqProcessor>());
     AddProcessor(std::make_shared<PhaseProcessor>());
     AddProcessor(std::make_shared<Dissonance>());
@@ -24,7 +28,6 @@ Oscillor::Oscillor(Synth& synth) {
 }
 
 void Oscillor::Init(size_t bufferSize, float sampleRate, float update_rate) {
-    audio_buffer_.resize(bufferSize);
     sample_rate_ = sampleRate;
 
     sine_bank_.Init(sampleRate);
@@ -32,6 +35,7 @@ void Oscillor::Init(size_t bufferSize, float sampleRate, float update_rate) {
     sine_bank_.SetNumMaxActivePartials(kNumPartials);
 
     std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->Init(sampleRate, update_rate); });
+    modulator_bank_.Init(sampleRate, update_rate);
 }
 
 void Oscillor::NoteOn(int note_number, float velocity) {
@@ -42,16 +46,20 @@ void Oscillor::NoteOn(int note_number, float velocity) {
     sine_bank_.ResetState();
 
     std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnNoteOn(note_number); });
+    modulator_bank_.OnNoteOn(note_number);
 }
 
-void Oscillor::update_state(const SynthParam& param, int step) {
+void Oscillor::update_state(int step) {
     if (!IsPlaying()) return;
+
+    modulator_bank_.OnUpdateTick(oscillor_param_, step, 0);
+    oscillor_param_.UpdateParams();
 
     // first copy phase from sinebank
     std::ranges::copy(sine_bank_.GetPhaseTable(), partials_.phases.begin());
 
     // cr tick
-    std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnUpdateTick(param, step, 0); });
+    std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnUpdateTick(oscillor_param_, step, 0); });
 
     // process by each processor
     static_cast<Resynthesis*>(p_resynthsis_)->PreGetFreqDiffsInRatio(partials_);
@@ -59,5 +67,15 @@ void Oscillor::update_state(const SynthParam& param, int step) {
 
     // load into sinebank
     sine_bank_.LoadPartials(partials_);
+}
+
+void Oscillor::CreateModulation(std::string_view param_id, std::string_view modulator_id, ModulationConfig * pconfig) {
+    auto* pmodulator = modulator_bank_.GetModulatorPtr(modulator_id);
+    assert(pmodulator != nullptr);
+    oscillor_param_.CreateModulation(param_id, pmodulator, pconfig);
+}
+
+void Oscillor::RemoveModulation(ModulationConfig& config) {
+    oscillor_param_.RemoveModulation(config);
 }
 }

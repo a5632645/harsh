@@ -3,11 +3,12 @@
 #include <vector>
 #include "partials.h"
 #include "SineBank.h"
-#include "param/synth_param.h"
+#include "engine/oscillor_param.h"
 #include <algorithm>
 #include <memory>
 #include "IProcessor.h"
 #include "resynthsis/resynthsis.h"
+#include "modulation/modulator_bank.h"
 
 namespace mana {
 class Synth;
@@ -39,64 +40,35 @@ public:
     void NoteOff() {
         midi_note_ = -1;
         std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnNoteOff(); });
+        modulator_bank_.OnNoteOff();
     }
 
-    void forceChangeNoteNumber(int note) {
-        midi_note_ = note;
-    }
-
-    void SetPitchShift(float v) {
-        pitch_shift_ = v;
-    }
-
-    void setPhaseShift(float v) {
-        phase_shift_ = v;
-    }
-
-    Partials& get_particles() {
-        return partials_;
-    }
-
-    const Partials& GetPartials() const {
-        return partials_;
-    }
+    Partials& get_particles() { return partials_; }
+    const Partials& GetPartials() const { return partials_; }
 
     Resynthesis& GetResynthsisProcessor() { return *p_resynthsis_; }
     const Resynthesis& GetResynthsisProcessor() const { return *p_resynthsis_; }
 
-    //=============================STREAM================================================
-    void update_state(const SynthParam& param, int skip);
-
-    void renderBuffer(size_t length) {
-        std::ranges::fill(audio_buffer_, 0.0F);
-
-        if (!IsPlaying()) return;
-
-        for (size_t i = 0; i < length; ++i) {
-            audio_buffer_[i] = sine_bank_.SrTick();
-        }
-    }
-
+    void update_state(int skip);
     float SrTick() { return sine_bank_.SrTick(); }
 
-    const std::vector<float>& getBuffer() const {
-        return audio_buffer_;
-    }
-
+    std::vector<std::string_view> GetModulatorIds() const { return modulator_bank_.GetModulatorsIds(); }
+    std::vector<std::string_view> GetModulableParamIds() const { return oscillor_param_.GetParamIds(); }
+    void CreateModulation(std::string_view param_id, std::string_view modulator_id, ModulationConfig* pconfig);
+    void RemoveModulation(ModulationConfig& config);
 private:
     IProcessor* AddProcessor(std::shared_ptr<IProcessor>&& processor) {
         return processors_.emplace_back(std::move(processor)).get();
     }
 
-    std::vector<float> audio_buffer_;
     SineBank sine_bank_;
+    OscillorParams oscillor_param_;
+    ModulatorBank modulator_bank_;
     Partials partials_;
 
     int midi_note_{ -1 };
     float midi_velocity_{};
     float sample_rate_{};
-    float pitch_shift_{};
-    float phase_shift_{};
     bool note_on_ = false;
 
     // component

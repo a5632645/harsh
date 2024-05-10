@@ -8,7 +8,7 @@
 #include "engine/modulation/Parameter.h"
 
 namespace mana {
-inline static std::shared_ptr<Parameter> s_empty_parameter = std::make_shared<Parameter>("", 0.0F);
+inline static std::shared_ptr<FloatParameter> s_empty_parameter = std::make_shared<FloatParameter>("");
 }
 
 namespace mana {
@@ -47,7 +47,7 @@ void Knob::display() {
         m_lastMousePosition = mousePosition;
         auto newValue = std::clamp(m_value, m_min, m_max);
         m_value = newValue;
-        m_parameter->set_current(m_value);
+        m_parameter->Set(m_value);
     }
     else if (isNowDown && !m_isPressed) {
         if (s_currentKnob == nullptr) {
@@ -70,7 +70,7 @@ void Knob::display() {
         m_value = m_default_value;
         m_counter = 0;
         m_isPressed = false;
-        m_parameter->set_current(m_value);
+        m_parameter->Set(m_value);
     }
 
     // draw name
@@ -117,23 +117,6 @@ void Knob::display() {
         .y = centerY - radius * std::sin(angle)
         };
         DrawLine(centerX, centerY, pointerPos.x, pointerPos.y, m_fore_color);
-    }
-
-    // draw pointer2
-    if (m_parameter->has_modulation()) {
-        auto const pw = (m_parameter->get_output_value() - m_min) / (m_max - m_min);
-        auto const startAngle = 5.0F / 4.0F * std::numbers::pi_v<float>;
-        auto const endAngle = -1.0F / 4.0F * std::numbers::pi_v<float>;
-        auto const angle = startAngle + pw * (endAngle - startAngle);
-        Vector2 const outer_pointer_pos = {
-        .x = centerX + radius * 1.0F * std::cos(angle),
-        .y = centerY - radius * 1.0F * std::sin(angle)
-        };
-        Vector2 const inner_pointer_pos = {
-            .x = centerX + radius * 0.6F * std::cos(angle),
-            .y = centerY - radius * 0.6F * std::sin(angle)
-        };
-        DrawLine(inner_pointer_pos.x, inner_pointer_pos.y, outer_pointer_pos.x, outer_pointer_pos.y, GREEN);
     }
 }
 
@@ -218,10 +201,10 @@ Knob& Knob::set_bound(int x, int y, int w, int h) {
     return *this;
 }
 
-Knob& Knob::set_parameter(Parameter* parameter) {
+Knob& Knob::set_parameter(FloatParameter* parameter) {
     m_parameter = parameter;
-    this->set_range(0.0f, 1.0f, 0.005f, parameter->get_default_value());
-    this->set_value(parameter->get_default_value());
+    this->set_range(0.0f, 1.0f, 0.005f, 0.0f);
+    this->set_value(parameter->Get());
     return *this;
 }
 

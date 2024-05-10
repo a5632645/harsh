@@ -9,10 +9,10 @@ namespace mana {
 void PhaseProcessor::Init(float sample_rate, float update_rate) {
 }
 
-void PhaseProcessor::OnUpdateTick(const SynthParam & params, int skip, int module_idx) {
-    process_arg0_ = params.phase.args[0];
-    process_arg1_ = params.phase.args[1];
-    process_type_ = param::PhaseType::GetEnum(params.phase.phase_type);
+void PhaseProcessor::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
+    process_arg0_ = params.phase.args[0].GetClamp();
+    process_arg1_ = params.phase.args[1].GetClamp();
+    process_type_ = param::PhaseType::GetEnum(params.phase.phase_type->GetInt());
 }
 
 void PhaseProcessor::OnNoteOn(int note) {

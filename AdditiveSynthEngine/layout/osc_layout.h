@@ -13,7 +13,6 @@ public:
     void SetBounds(int x, int y, int w, int h);
 private:
     void OnTimberTypeChanged(int c);
-    SynthParam& synth_param_;
     const int idx_;
     WrapDropBox timber_type_;
     std::array<Knob, 4> arg_knobs_;

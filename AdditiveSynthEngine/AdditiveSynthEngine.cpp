@@ -7,11 +7,12 @@
 #include <AudioFile.h>
 #include "engine/synth.h"
 #include "utli/Keyboard.hpp"
-#include "layout/SynthLayout.h"
+#include "layout/main_window.h"
 
 static mana::Synth synth_;
 static mana::KeyBoard keyboard_;
-static mana::SynthLayout synth_layout_{ synth_ };
+//static mana::SynthLayout synth_layout_{ synth_ };
+static mana::MainWindow synth_layout_{ synth_ };
 
 static void ThisAudioCallback(void* buffer, unsigned int frames) {
     std::scoped_lock lock{ synth_.GetSynthLock() };
@@ -67,7 +68,7 @@ int main(void) {
                 }
                 int x = static_cast<int>(800 * x_nor);
                 int y = static_cast<int>(600 * (1.0f - y_nor));
-                DrawLine(x, y, x, 600, GREEN);
+                DrawLine(x, y, x, 600, WHITE);
             }
         }
         EndDrawing();

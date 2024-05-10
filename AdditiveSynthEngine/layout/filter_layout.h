@@ -13,7 +13,6 @@ public:
     void SetBounds(int x, int y, int w, int h);
 private:
     void OnFilterTypeChanged(int c);
-    SynthParam& synth_param_;
     WrapDropBox filter_type_;
     std::array<Knob, 6> arg_knobs_;
 };

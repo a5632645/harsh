@@ -6,7 +6,7 @@
 
 namespace mana {
 OscLayout::OscLayout(Synth& synth, int idx)
-    : synth_param_(synth.GetSynthParam())
+    : timber_type_(synth.GetParamBank().GetParamPtr<IntParameter>(std::format("timber.osc{}.type", idx)))
     , idx_(idx) {
     timber_type_.SetChoices(param::TimberType::kNames);
     timber_type_.on_choice_changed = [this](int c) {OnTimberTypeChanged(c); };
@@ -14,16 +14,14 @@ OscLayout::OscLayout(Synth& synth, int idx)
     for (int i = 0; auto & k : arg_knobs_) {
         k.set_parameter(synth.GetParamBank().GetParamPtr(std::format("timber.osc{}.arg{}", idx, i++)));
     }
-
-    // init
-    OnTimberTypeChanged(synth_param_.timber.osc_args[idx].timber_type);
+    OnTimberTypeChanged(0);
 }
 
 void OscLayout::Paint() {
     for (auto& knob : arg_knobs_) {
         knob.display();
     }
-    timber_type_.show();
+    timber_type_.Paint();
 }
 
 void OscLayout::SetBounds(int x, int y, int w, int h) {
@@ -39,8 +37,6 @@ void OscLayout::SetBounds(int x, int y, int w, int h) {
 }
 
 void OscLayout::OnTimberTypeChanged(int c) {
-    synth_param_.timber.osc_args[idx_].timber_type = c;
-
     auto type = param::TimberType::GetEnum(c);
     using enum mana::param::TimberType::ParamEnum;
     switch (type) {

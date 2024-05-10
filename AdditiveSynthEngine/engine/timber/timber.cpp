@@ -47,7 +47,7 @@ void Timber::Process(Partials& partials) {
     }
 }
 
-void Timber::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
+void Timber::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
     osc1_.OnUpdateTick(params, skip, 0);
     osc2_.OnUpdateTick(params, skip, 1);
 

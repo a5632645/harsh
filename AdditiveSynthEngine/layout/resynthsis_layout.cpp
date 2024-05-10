@@ -8,7 +8,8 @@
 
 namespace mana {
 ResynthsisLayout::ResynthsisLayout(Synth& synth)
-    : synth_(synth) {
+    : synth_(synth)
+    , is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.enable")) {
     for (int i = 0; auto & k : arg_knobs_) {
         k.set_parameter(synth.GetParamBank().GetParamPtr(std::format("resynthsis.arg{}", i++)));
     }
@@ -22,11 +23,10 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
                 param::Resynthsis_GainMix{});
 
     is_enable_.SetText("resynthsis");
-    is_enable_.SetChecked(synth.GetSynthParam().resynthsis.is_enable);
 }
 
 void ResynthsisLayout::Paint() {
-    synth_.GetSynthParam().resynthsis.is_enable = is_enable_.Show();
+    is_enable_.Paint();
     if (!is_enable_.IsChecked()) {
         return;
     }

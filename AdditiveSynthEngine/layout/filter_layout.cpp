@@ -6,21 +6,19 @@
 
 namespace mana {
 mana::FilterLayout::FilterLayout(Synth & synth)
-    : synth_param_(synth.GetSynthParam()) {
+    : filter_type_(synth.GetParamBank().GetParamPtr<IntParameter>("filter.type")) {
     filter_type_.SetChoices(param::Filter_Type::kNames);
     filter_type_.on_choice_changed = [this](int c) {OnFilterTypeChanged(c); };
 
     for (int i = 0; auto & knob : arg_knobs_) {
         knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("filter.arg{}", i++)));
     }
-
-    // init
-    OnFilterTypeChanged(synth_param_.filter.filter_type);
+    OnFilterTypeChanged(0);
 }
 
 void FilterLayout::Paint() {
     std::ranges::for_each(arg_knobs_, &Knob::display);
-    filter_type_.show();
+    filter_type_.Paint();
 }
 
 void FilterLayout::SetBounds(int x, int y, int w, int h) {
@@ -38,8 +36,6 @@ void FilterLayout::SetBounds(int x, int y, int w, int h) {
 }
 
 void FilterLayout::OnFilterTypeChanged(int c) {
-    synth_param_.filter.filter_type = c;
-
     auto type = param::Filter_Type::GetEnum(c);
     switch (type) {
     case mana::param::Filter_Type::ParamEnum::kLowpass:

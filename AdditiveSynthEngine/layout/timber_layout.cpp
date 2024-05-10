@@ -7,8 +7,7 @@
 
 namespace mana {
 TimberLayout::TimberLayout(Synth& synth)
-    : synth_param_(synth.GetSynthParam())
-    , osc1_layout_(synth, 0)
+    : osc1_layout_(synth, 0)
     , osc2_layout_(synth, 1) {
     osc2_beating_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_beating"));
     osc2_shift_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_shift"));

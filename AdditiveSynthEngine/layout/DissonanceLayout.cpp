@@ -7,20 +7,20 @@
 
 namespace mana {
 DissonanceLayout::DissonanceLayout(Synth& synth)
-    : synth_param_(synth.GetSynthParam()) {
+    : is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("dissonance.enable"))
+    , type_(synth.GetParamBank().GetParamPtr<IntParameter>("dissonance.type")) {
     type_.SetChoices(param::DissonanceType::kNames);
     type_.on_choice_changed = [this](int c) {OnDissonanceTypeChanged(c); };
-    OnDissonanceTypeChanged(synth_param_.dissonance.dissonance_type);
 
     arg_knobs_[0].set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg0"));
     arg_knobs_[1].set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg1"));
 
     is_enable_.SetText("dissonance");
-    is_enable_.SetChecked(synth_param_.dissonance.is_enable);
+    OnDissonanceTypeChanged(0);
 }
 
 void DissonanceLayout::Paint() {
-    synth_param_.dissonance.is_enable = is_enable_.Show();
+    is_enable_.Paint();
     if (!is_enable_.IsChecked()) {
         return;
     }
@@ -28,7 +28,7 @@ void DissonanceLayout::Paint() {
     for (auto& k : arg_knobs_) {
         k.display();
     }
-    type_.show();
+    type_.Paint();
 }
 
 void DissonanceLayout::SetBounds(int x, int y, int w, int h) {
@@ -43,8 +43,6 @@ void DissonanceLayout::SetBounds(int x, int y, int w, int h) {
 }
 
 void DissonanceLayout::OnDissonanceTypeChanged(int c) {
-    synth_param_.dissonance.dissonance_type = c;
-
     auto type = param::DissonanceType::GetEnum(c);
 
     using enum param::DissonanceType::ParamEnum;

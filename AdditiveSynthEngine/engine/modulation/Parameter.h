@@ -1,64 +1,68 @@
 #pragma once
 
 #include <string>
-#include <algorithm>
 #include <string_view>
-#include <memory>
-#include <vector>
-#include <functional>
+#include <concepts>
+#include <atomic>
 
 namespace mana {
-class Modulator;
-class Modulation;
-class Knob;
-
-class Parameter {
+class FloatParameter {
 public:
-    Parameter(std::string_view id,
-              float default_value);
+    enum class ParamType {
+        kFloat,
+        kInt,
+        kBool
+    };
 
-    virtual ~Parameter() = default;
-    Parameter(Parameter const&) = delete;
-    Parameter(Parameter&&) = delete;
-    Parameter& operator=(Parameter const&) = delete;
-    Parameter& operator=(Parameter&&) = delete;
+    static constexpr auto kTypeEnum = ParamType::kFloat;
 
-    float get_no_modulation_value() const {
-        return m_value;
+    FloatParameter(std::string_view id) : id_(id) {}
+
+    virtual ~FloatParameter() = default;
+    FloatParameter(FloatParameter const&) = default;
+    FloatParameter(FloatParameter&&) = default;
+    FloatParameter& operator=(FloatParameter const&) = default;
+    FloatParameter& operator=(FloatParameter&&) = default;
+
+    float Get() const { return value_; }
+    void Set(float new_val) {
+        if (new_val != value_) {
+            value_ = new_val;
+        }
     }
 
-    float get_output_value() const {
-        return m_output_value;
-    }
-
-    void set_current(float v) {
-        m_value = std::clamp(v, 0.0f, 1.0f);
-    }
-
-    std::string const& get_id() const {
-        return m_id;
-    }
-
-    float get_default_value() const {
-        return m_default_value;
-    }
-
-    void update_output();
-
-    void add_modulation(std::shared_ptr<Modulation> m);
-    void remove_modulation(std::string_view id);
-    bool has_modulation() const {
-        return !m_modulations.empty();
-    }
-    std::shared_ptr<Modulation> find_modulator(std::string_view modulator_id);
-    std::function<void(float)> on_output_changed = [](float) {};
+    virtual ParamType GetParamType() const { return ParamType::kFloat; }
 protected:
-    virtual void _on_output_changed(float v) {}
-
-    std::string m_id;
-    float m_value{};
-    float m_default_value{};
-    float m_output_value{};
-    std::vector<std::shared_ptr<Modulation>> m_modulations;
+    std::string id_;
+    std::atomic<float> value_{};
 };
+
+class IntParameter : public FloatParameter {
+public:
+    static constexpr auto kTypeEnum = ParamType::kInt;
+
+    using FloatParameter::FloatParameter;
+
+    void SetInt(int v) { Set(static_cast<float>(v)); }
+    int GetInt() const { return static_cast<int>(std::round(value_)); }
+    operator int() const { return GetInt(); }
+
+    ParamType GetParamType() const override { return ParamType::kInt; }
+};
+
+class BoolParameter : public FloatParameter {
+public:
+    static constexpr auto kTypeEnum = ParamType::kBool;
+
+    using FloatParameter::FloatParameter;
+
+    void SetBool(bool v) { Set(value_ = v ? 1.0f : 0.0f); }
+    bool GetBool() const { return value_ > 0.5f; }
+    operator bool() const { return GetBool(); }
+
+    ParamType GetParamType() const override { return ParamType::kBool; }
+};
+
+template<class Type>
+concept IsParamter = std::same_as<Type, FloatParameter> || std::same_as<Type, IntParameter> || std::same_as<Type, BoolParameter>;
 }

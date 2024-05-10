@@ -1,10 +1,4 @@
-﻿# CMakeList.txt: AdditiveSynthEngine 的 CMake 项目，在此处包括源代码并定义
-# 项目特定的逻辑。
-#
-include_directories(".")
-
-# 将源代码添加到此项目的可执行文件.
-add_executable (AdditiveSynthEngine
+﻿add_executable (AdditiveSynthEngine
 "AdditiveSynthEngine.cpp"
 "engine/Oscillor.h"
 "engine/Oscillor.cpp"
@@ -17,13 +11,13 @@ add_executable (AdditiveSynthEngine
 "engine/standard/freq.cpp"
 
 "engine/modulation/Parameter.h"
-"engine/modulation/Parameter.cpp"
+
 "engine/modulation/ParamBank.h"
-"engine/modulation/ParamBank.cpp"
+
 "engine/modulation/Modulator.h"
-"engine/modulation/Modulator.cpp"
+
 "engine/modulation/Modulation.h"
-"engine/modulation/Modulation.cpp"
+
 
 "param/timber_param.h"
 "engine/timber/timber.cpp"
@@ -33,8 +27,8 @@ add_executable (AdditiveSynthEngine
 "engine/timber/sync.cpp"
 
 "param/param.h"
-"param/synth_param.h"
-"param/synth_bind_param.cpp"
+"engine/oscillor_param.h"
+"engine/synth_bind_param.cpp"
 "param/standard_param.h"
 "param/dissonance_param.h"
 
@@ -86,7 +80,32 @@ add_executable (AdditiveSynthEngine
  "utli/NoiseGenerator.h"
  "layout/standard_layout.h"
  "layout/standard_layout.cpp"
-  "utli/spin_lock.h" "utli/convert.h" "engine/standard/phase.h" "engine/standard/phase.cpp" "utli/warp.h" "engine/timber/timber_frame.h" "engine/timber/timber_gen.h" "engine/timber/timber_gen.cpp" "layout/osc_layout.h" "layout/osc_layout.cpp" "engine/timber/dynamic_noise.h" "engine/effect/decay.h" "engine/effect/harmonic_delay.h"  )
+  "utli/spin_lock.h"
+  "utli/convert.h"
+  "engine/standard/phase.h"
+  "engine/standard/phase.cpp"
+  "utli/warp.h"
+  "engine/timber/timber_frame.h"
+  "engine/timber/timber_gen.h"
+  "engine/timber/timber_gen.cpp"
+  "layout/osc_layout.h"
+  "layout/osc_layout.cpp"
+  "engine/timber/dynamic_noise.h"
+  "engine/effect/decay.h"
+  "engine/effect/harmonic_delay.h"
+  "engine/modulation/curve.h"
+  "ui/curve_editor.h"
+  "ui/curve_editor.cpp"
+  "layout/curve_layout.h"
+  "layout/curve_layout.cpp"
+  "layout/main_window.h"
+  "layout/main_window.cpp"
+  "ui/warp_text_input.h"
+  "ui/warp_text_input.cpp"
+ "ui/wrap_check_box.h"
+ "ui/wrap_check_box.cpp"
+ "engine/modulation/lfo.h"
+ "engine/modulation/lfo.cpp" "param/lfo_param.h" "engine/modulation/modulator_bank.h" "engine/modulation/modulator_bank.cpp" "layout/modulator_layout.h" "layout/modulator_layout.cpp" "layout/lfo_layout.h" "layout/lfo_layout.cpp" "layout/modulation_matrix_layout.h" "layout/modulation_matrix_layout.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)
@@ -98,10 +117,6 @@ target_link_libraries(AdditiveSynthEngine PUBLIC raygui_cpp)
 target_link_libraries(AdditiveSynthEngine PUBLIC AudioFFT)
 target_link_libraries(AdditiveSynthEngine PUBLIC AudioFile)
 target_link_libraries(AdditiveSynthEngine PUBLIC gcem)
-
-include(FetchContent)
-
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
-FetchContent_MakeAvailable(json)
-
+target_link_libraries(AdditiveSynthEngine PUBLIC xsimd)
 target_link_libraries(AdditiveSynthEngine PRIVATE nlohmann_json::nlohmann_json)
+target_include_directories(AdditiveSynthEngine PRIVATE .)

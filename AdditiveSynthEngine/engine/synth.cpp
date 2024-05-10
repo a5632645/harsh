@@ -3,13 +3,18 @@
 #include "resynthsis/window.h"
 #include "param/standard_param.h"
 #include "AudioFFT.h"
+#include <mutex>
+#include "utli/convert.h"
 
 namespace mana {
 Synth::Synth() {
+    BindParam();
+    m_oscillators.reserve(kNumOscillors);
     for (int i = 0; i < kNumOscillors; ++i) {
         m_oscillators.emplace_back(*this);
     }
-    BindParam();
+
+    output_gain_ = param_bank_.GetParamPtr("standard.output_gain");
 }
 
 void Synth::NoteOn(int note, float velocity) {
@@ -72,12 +77,8 @@ void Synth::Render(size_t numFrame) {
         }
     }
 
-    //for (Oscillor& o : m_oscillators) {
-    //    o.renderBuffer(numFrame);
-    //    std::ranges::transform(audio_buffer_, o.getBuffer(), audio_buffer_.begin(), std::plus<float>());
-    //}
-
-    std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [this](float v) {return v * output_gain_; });
+    auto output_gain = utli::DbToGain(param::OutputGain::GetNumber(output_gain_->Get()));
+    std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [output_gain](float v) {return v * output_gain; });
 }
 
 void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {
@@ -96,12 +97,8 @@ static float Db2Gain(float db) {
 }
 
 void Synth::update_state(int step) {
-    param_bank_.UpdateParamOutput();
-
-    output_gain_ = Db2Gain(param::OutputGain::GetNumber(synth_param_.standard.output_gain));
-
     for (Oscillor& o : m_oscillators) {
-        o.update_state(synth_param_, step);
+        o.update_state(step);
     }
 }
 
@@ -132,6 +129,46 @@ static constexpr float PhaseWrap(float p) {
 
 void Synth::SetResynthsisFrames(ResynthsisFrames new_frame) {
     resynthsis_frames_ = std::move(new_frame);
+}
+
+std::pair<bool, ModulationConfig*> Synth::CreateModulation(std::string_view modulator, std::string_view param) {
+    {
+        auto existed_it = std::ranges::find_if(modulation_configs_, [modulator, param](std::shared_ptr<ModulationConfig>& cfg) {
+            return cfg->modulator_id == modulator && cfg->param_id == param;
+        });
+        if (existed_it != modulation_configs_.cend()) {
+            return { false, nullptr };
+        }
+    }
+
+    auto new_modulation_cfg = std::make_shared<ModulationConfig>();
+    new_modulation_cfg->modulator_id = modulator;
+    new_modulation_cfg->param_id = param;
+    modulation_configs_.emplace_back(new_modulation_cfg);
+
+    {
+        std::scoped_lock lock{ synth_lock_ };
+        for (auto& osc : m_oscillators) {
+            osc.CreateModulation(param, modulator, new_modulation_cfg.get());
+        }
+    }
+
+    return { true, new_modulation_cfg.get() };
+}
+
+void Synth::RemoveModulation(ModulationConfig& config) {
+    {
+        std::scoped_lock lock{ synth_lock_ };
+        for (auto& osc : m_oscillators) {
+            osc.RemoveModulation(config);
+        }
+    }
+
+    auto it = std::ranges::find_if(modulation_configs_, [config](std::shared_ptr<ModulationConfig>& cfg) {
+        return cfg->modulator_id == config.modulator_id
+            && cfg->param_id == config.param_id;
+    });
+    modulation_configs_.erase(it);
 }
 
 ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float sample_rate) {

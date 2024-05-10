@@ -1,6 +1,7 @@
 #pragma once
 
 #include "param/param.h"
+#include "engine/EngineConfig.h"
 
 namespace mana::param {
 struct EffectType : IntChoiceParam<EffectType> {
@@ -296,5 +297,23 @@ struct Delay_Feedback : FloatParam<Delay_Feedback> {
     static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 0.0f;
     static constexpr auto kTextPrecision = 2;
+};
+
+struct Delay_TimeMap : FloatParam<Delay_TimeMap> {
+    static constexpr int kArgIdx = 3;
+    static constexpr auto kName = "time_map"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = kNumCurves - 1;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 0;
+};
+
+struct Delay_FeedbackMap : FloatParam<Delay_FeedbackMap> {
+    static constexpr int kArgIdx = 4;
+    static constexpr auto kName = "fb_map"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = kNumCurves - 1;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 0;
 };
 }

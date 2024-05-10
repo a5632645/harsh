@@ -1,7 +1,10 @@
 #pragma once
 
-#include "partials.h"
-#include "param/synth_param.h"
+#include "engine/partials.h"
+
+namespace mana {
+struct OscillorParams;
+}
 
 namespace mana {
 class IProcessor {
@@ -16,7 +19,7 @@ public:
 
     virtual void Init(float sample_rate, float update_rate) = 0;
     virtual void Process(Partials& partials) = 0;
-    virtual void OnUpdateTick(const SynthParam& params, int skip, int module_idx) = 0;
+    virtual void OnUpdateTick(const OscillorParams & params, int skip, int module_idx) = 0;
     virtual void OnNoteOn(int note) = 0;
     virtual void OnNoteOff() = 0;
 };

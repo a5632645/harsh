@@ -1,13 +1,12 @@
 #pragma once
 
 #include "engine/IProcessor.h"
-#include "param/synth_param.h"
 
 namespace mana {
 class FreqProcessor : public IProcessor {
 public:
     void Init(float sample_rate, float update_rate) override;
-    void OnUpdateTick(const SynthParam& param, int skip, int module_idx) override;
+    void OnUpdateTick(const OscillorParams& param, int skip, int module_idx) override;
     void OnNoteOn(int note) override;
     void OnNoteOff() override;
     void Process(Partials& partials) override;

@@ -23,7 +23,7 @@ public:
         }
     }
 
-    void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
+    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
         scramble_range_ = param::Scramble_Range::GetNumber(params.effects[module_idx].args);
         lfo_rate_ = param::Scramble_Rate::GetNumber(params.effects[module_idx].args);
         UpdateLfoAndIndexTable(skip);

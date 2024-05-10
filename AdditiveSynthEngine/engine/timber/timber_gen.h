@@ -11,7 +11,7 @@ class TimberGen {
 public:
     void Init(float sample_rate);
     void Process(TimberFrame& frame);
-    void OnUpdateTick(const SynthParam& params, int skip, int module_idx);
+    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx);
     void OnNoteOn(int note);
     void OnNoteOff();
 

@@ -26,7 +26,7 @@ public:
         }
     }
 
-    void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
+    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
         amount_ = param::Chorus_Amount::GetNumber(params.effects[module_idx].args);
         depth_num_samples_ = param::Chorus_Depth::GetNumber(params.effects[module_idx].args) * sample_rate_ / 1000.0f;
         offset_num_samples_ = param::Chorus_Offset::GetNumber(params.effects[module_idx].args) * sample_rate_ / 1000.0f;

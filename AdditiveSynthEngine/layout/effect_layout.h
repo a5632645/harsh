@@ -3,6 +3,7 @@
 #include <array>
 #include "engine/synth.h"
 #include "ui/WrapDropBox.h"
+#include "ui/wrap_check_box.h"
 #include "ui/Knob.h"
 
 namespace mana {
@@ -32,8 +33,7 @@ private:
     }
 
     const int effect_idx;
-    SynthParam& synth_param_;
-    rgc::CheckBox is_enable_;
+    WrapCheckBox is_enable_;
     WrapDropBox effect_type_;
     std::array<Knob, 6> arg_knobs_;
 };

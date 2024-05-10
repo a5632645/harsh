@@ -15,7 +15,6 @@ private:
     void OnPhaseTypeChanged(int c);
 
     Synth& synth_;
-    SynthParam& synth_param_;
 
     Knob pitch_bend_;
     Knob output_gain_;

@@ -30,7 +30,7 @@ public:
         ProcessBin(partials, last_bin, last_bin_vol);
     }
 
-    void OnUpdateTick(const SynthParam& params, int skip, int module_idx) override {
+    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
         amount_ = param::Octaver_Amount::GetNumber(params.effects[module_idx].args);
         width_ = param::Octaver_Width::GetNumber(params.effects[module_idx].args);
         decay_ = param::Octaver_Decay::GetNumber(params.effects[module_idx].args);

@@ -7,7 +7,7 @@
 namespace mana {
 StandardLayout::StandardLayout(Synth& synth)
     : synth_(synth)
-    , synth_param_(synth.GetSynthParam()) {
+    , phase_type_(synth.GetParamBank().GetParamPtr<IntParameter>("standard.phase.type")) {
     const auto& bank = synth.GetParamBank();
     pitch_bend_.set_parameter(bank.GetParamPtr("standard.pitch_bend"));
     output_gain_.set_parameter(bank.GetParamPtr("standard.output_gain"));
@@ -18,18 +18,18 @@ StandardLayout::StandardLayout(Synth& synth)
     // phases
     phase_type_.SetChoices(param::PhaseType::kNames);
     phase_type_.on_choice_changed = [this](int c) {OnPhaseTypeChanged(c); };
-    OnPhaseTypeChanged(synth_param_.phase.phase_type);
 
     for (int i = 0; auto & arg_knob : phase_arg_knobs_) {
         arg_knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("standard.phase.arg{}", i++)));
     }
+    OnPhaseTypeChanged(0);
 }
 
 void StandardLayout::Paint() {
     pitch_bend_.display();
     output_gain_.display();
     std::ranges::for_each(phase_arg_knobs_, &Knob::display);
-    phase_type_.show();
+    phase_type_.Paint();
 }
 
 void StandardLayout::SetBounds(int x, int y, int w, int h) {
@@ -43,8 +43,6 @@ void StandardLayout::SetBounds(int x, int y, int w, int h) {
 }
 
 void StandardLayout::OnPhaseTypeChanged(int c) {
-    synth_param_.phase.phase_type = c;
-
     auto type = param::PhaseType::GetEnum(c);
     using enum param::PhaseType::ParamEnum;
     switch (type) {

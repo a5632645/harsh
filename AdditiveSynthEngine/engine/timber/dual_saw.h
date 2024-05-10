@@ -1,6 +1,6 @@
 #pragma once
 
-#include "param/synth_param.h"
+#include "engine/oscillor_param.h"
 #include "timber_frame.h"
 
 namespace mana {
@@ -8,7 +8,7 @@ class DualSaw {
 public:
     void Init(float sample_rate);
     void Process(TimberFrame& frame);
-    void OnUpdateTick(const SynthParam& param, int skip, int module_idx);
+    void OnUpdateTick(const OscillorParams& param, int skip, int module_idx);
     void OnNoteOn(int note);
     void OnNoteOff();
 private:

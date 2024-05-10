@@ -192,9 +192,9 @@ void Dissonance::Process(Partials& partials) {
     }
 }
 
-void Dissonance::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
-    is_enable_ = params.dissonance.is_enable;
-    type_ = param::DissonanceType::GetEnum(params.dissonance.dissonance_type);
+void Dissonance::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
+    is_enable_ = params.dissonance.is_enable->GetBool();
+    type_ = param::DissonanceType::GetEnum(params.dissonance.dissonance_type->GetInt());
 
     {
         auto raw_string = param::StringDissStretch::GetNumber(params.dissonance.args);

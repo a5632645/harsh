@@ -32,10 +32,11 @@ void Effect::Process(Partials& partials) {
     p_processor_->Process(partials);
 }
 
-void Effect::OnUpdateTick(const SynthParam& params, int skip, int /*module_idx*/) {
-    is_enable_ = params.effects[effect_idx_].is_enable;
+void Effect::OnUpdateTick(const OscillorParams & params, int skip, int /*module_idx*/) {
+    is_enable_ = params.effects[effect_idx_].is_enable->GetBool();
+
     effect_type_ = param::EffectType::GetEnum(
-        params.effects[effect_idx_].effect_type);
+        params.effects[effect_idx_].effect_type->GetInt());
     p_processor_ = processers_.at(effect_type_).get();
 
     p_processor_->OnUpdateTick(params, skip, effect_idx_);

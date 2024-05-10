@@ -45,11 +45,11 @@ void DualSaw::Process(TimberFrame& frame) {
     }
 }
 
-void DualSaw::OnUpdateTick(const SynthParam& param, int skip, int module_idx) {
-    ratio_ = param::DualSaw_Ratio::GetNumber(param.timber.osc_args[module_idx].args);
-    beating_rate_ = param::DualSaw_BeatingRate::GetNumber(param.timber.osc_args[module_idx].args);
-    saw_square_ = param::DualSaw_SawSquare::GetNumber(param.timber.osc_args[module_idx].args);
-    second_amp_ = param::DualSaw_SecondAmp::GetNumber(param.timber.osc_args[module_idx].args);
+void DualSaw::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
+    ratio_ = param::DualSaw_Ratio::GetNumber(params.timber.osc_args[module_idx].args);
+    beating_rate_ = param::DualSaw_BeatingRate::GetNumber(params.timber.osc_args[module_idx].args);
+    saw_square_ = param::DualSaw_SawSquare::GetNumber(params.timber.osc_args[module_idx].args);
+    second_amp_ = param::DualSaw_SecondAmp::GetNumber(params.timber.osc_args[module_idx].args);
 
     auto inc = beating_rate_ * skip / sample_rate_;
     beating_phase_ += inc;

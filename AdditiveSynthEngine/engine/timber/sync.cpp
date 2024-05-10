@@ -84,7 +84,7 @@ void Sync::Process(TimberFrame& frame) {
     }
 }
 
-void Sync::OnUpdateTick(const SynthParam& params, int skip, int module_idx) {
+void Sync::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
     auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(params.timber.osc_args[module_idx].args);
     first_shape_ = a;
     second_shape_ = b;

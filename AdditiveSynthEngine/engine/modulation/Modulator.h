@@ -1,41 +1,23 @@
 #pragma once
 
 #include <string_view>
+#include "engine/IProcessor.h"
 
 namespace mana {
-class ParamSection;
-
-class Modulator {
+class Modulator : public IProcessor {
 public:
-    Modulator(std::string_view id,
-              std::string_view name);
+    Modulator(std::string_view id) : id_(id) {}
 
-    virtual ~Modulator() = default;
-    Modulator(Modulator const&) = delete;
-    Modulator(Modulator&&) = delete;
-    Modulator& operator=(Modulator const&) = delete;
-    Modulator& operator=(Modulator&&) = delete;
+    float get_output_value() const { return output_value_; }
 
-    virtual void Init(float sample_rate) = 0;
-    virtual void update_state(size_t step) = 0;
-    virtual void build_parameters(ParamSection& bank) = 0;
-    virtual void note_on() = 0;
-
-    float get_output_value() const {
-        return m_output_value;
-    }
-
-    std::string_view get_id() const {
-        return m_id;
-    }
+    std::string_view get_id() const { return id_; }
 
 protected:
     std::string with_id(std::string_view x) const {
-        return std::string(m_id) + "_" + std::string(x);
+        return std::string(id_) + "_" + std::string(x);
     }
 
-    std::string_view m_id;
-    std::string_view m_name;
-    float m_output_value{};
+    std::string id_;
+    float output_value_{};
 };
 }

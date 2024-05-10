@@ -6,7 +6,8 @@
 
 namespace mana {
 EffectLayout::EffectLayout(Synth& synth, int effect_idx)
-    : synth_param_(synth.GetSynthParam())
+    : is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>(std::format("effect{}.enable", effect_idx)))
+    , effect_type_(synth.GetParamBank().GetParamPtr<IntParameter>(std::format("effect{}.type", effect_idx)))
     , effect_idx(effect_idx) {
     effect_type_.SetChoices(param::EffectType::kNames);
     effect_type_.on_choice_changed = [this](int c) {OnEffectTypeChanged(c); };
@@ -16,14 +17,11 @@ EffectLayout::EffectLayout(Synth& synth, int effect_idx)
     }
 
     is_enable_.SetText("effect");
-    is_enable_.SetChecked(synth_param_.effects[effect_idx].is_enable);
-
-    // init
-    OnEffectTypeChanged(synth_param_.effects[effect_idx].effect_type);
+    OnEffectTypeChanged(0);
 }
 
 void EffectLayout::Paint() {
-    synth_param_.effects[effect_idx].is_enable = is_enable_.Show();
+    is_enable_.Paint();
     if (!is_enable_.IsChecked()) {
         return;
     }
@@ -31,7 +29,7 @@ void EffectLayout::Paint() {
     for (auto& knob : arg_knobs_) {
         knob.display();
     }
-    effect_type_.show();
+    effect_type_.Paint();
 }
 
 void EffectLayout::SetBounds(int x, int y, int w, int h) {
@@ -52,8 +50,6 @@ void EffectLayout::SetBounds(int x, int y, int w, int h) {
 }
 
 void EffectLayout::OnEffectTypeChanged(int c) {
-    synth_param_.effects[effect_idx].effect_type = c;
-
     auto type = param::EffectType::GetEnum(c);
     using enum param::EffectType::ParamEnum;
     switch (type) {
@@ -100,7 +96,9 @@ void EffectLayout::OnEffectTypeChanged(int c) {
     case kHarmonicDelay:
         SetGuiKnobs(arg_knobs_,
                     param::Delay_Feedback{},
-                    param::Delay_Time{});
+                    param::Delay_Time{},
+                    param::Delay_TimeMap{},
+                    param::Delay_FeedbackMap{});
         break;
     default:
         SetGuiKnobs(arg_knobs_);
