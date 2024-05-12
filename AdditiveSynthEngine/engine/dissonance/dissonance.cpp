@@ -27,12 +27,19 @@ static void DoSemitoneSpace(Partials& partials, float semitone) {
     auto ratio_mul = std::exp2(semitone / 12.0f);
     auto base_freq = partials.base_frequency;
 
-    for (int i = 0; i < kNumPartials; ++i) {
+    int i = 0;
+    for (i = 0; i < kNumPartials && ratio < kNumPartials * 8.0f; ++i) {
         auto final_ratio = ratio + partials.ratios[i];
         partials.freqs[i] = final_ratio * base_freq;
         partials.pitches[i] = RatioToPitch(final_ratio, partials.base_pitch);
         partials.ratios[i] = final_ratio;
         ratio *= ratio_mul;
+    }
+    for (; i < kNumPartials; ++i) {
+        partials.ratios[i] = 9999.0f;
+        partials.freqs[i] = 2.0f;
+        partials.pitches[i] = 9999.0f;
+        partials.gains[i] = 0.0f;
     }
 }
 

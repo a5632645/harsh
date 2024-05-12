@@ -93,16 +93,15 @@ bool Resynthesis::IsWork() const {
 
 std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
                                                              const ResynthsisFrames::FftFrame& frame) const {
-    auto formant_ratio = std::exp2(formant_shift_ / 12.0f);
-    auto idx_scale = synth_.GetResynthsisFrames().base_freq / (partials.base_frequency * formant_ratio);
+    auto formant_ratio = std::exp2(-formant_shift_ / 12.0f);
 
     // Todo: solve formant shift problem
     std::array<float, kNumPartials> output{};
     for (int i = 0; i < kNumPartials; ++i) {
-        auto scaled_idx = idx_scale * (i + 1.0f) - 1.0f;
-        auto int_idx = static_cast<int>(scaled_idx);
-        constexpr auto max_idx = kFFtSize / 2 - 1;
-        if (int_idx < 0 || int_idx > max_idx) {
+        auto idx = partials.freqs[i] * (kFFtSize / 2) * formant_ratio - 1.0f;
+        auto int_idx = static_cast<int>(std::round(idx));
+
+        if (int_idx < 0 || int_idx >= kFFtSize / 2) {
             output[i] = 0.0f;
         }
         else {
