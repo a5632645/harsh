@@ -27,19 +27,26 @@ void Effect::Init(float sample_rate, float update_rate) {
     }
 }
 
+void Effect::PrepareParams(OscillorParams& params) {
+    is_enable_ = params.GetParam<BoolParameter>("effect{}.enable", effect_idx_);
+    effect_type_arg_ = params.GetParam<IntParameter>("effect{}.type", effect_idx_);
+
+    for (int i = 0; auto & parg : effect_args_.args) {
+        parg = params.GetPolyFloatParam("effect{}.arg{}", effect_idx_, i++);
+    }
+    curve_manager_ = &params.GetParentSynthParams().GetCurveManager();
+}
+
 void Effect::Process(Partials& partials) {
-    if (!is_enable_) return;
+    if (!is_enable_->GetBool()) return;
     p_processor_->Process(partials);
 }
 
-void Effect::OnUpdateTick(const OscillorParams & params, int skip, int /*module_idx*/) {
-    is_enable_ = params.effects[effect_idx_].is_enable->GetBool();
+void Effect::OnUpdateTick() {
+    effect_type_ = param::EffectType::GetEnum(effect_type_arg_->GetInt());
 
-    effect_type_ = param::EffectType::GetEnum(
-        params.effects[effect_idx_].effect_type->GetInt());
     p_processor_ = processers_.at(effect_type_).get();
-
-    p_processor_->OnUpdateTick(params, skip, effect_idx_);
+    p_processor_->OnUpdateTick(effect_args_, *curve_manager_);
 }
 
 void Effect::OnNoteOn(int note) {

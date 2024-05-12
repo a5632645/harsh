@@ -4,15 +4,22 @@
 #include <numbers>
 #include <complex>
 #include "utli/warp.h"
+#include "engine/oscillor_param.h"
 
 namespace mana {
 void PhaseProcessor::Init(float sample_rate, float update_rate) {
 }
 
-void PhaseProcessor::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
-    process_arg0_ = params.phase.args[0].GetClamp();
-    process_arg1_ = params.phase.args[1].GetClamp();
-    process_type_ = param::PhaseType::GetEnum(params.phase.phase_type->GetInt());
+void PhaseProcessor::OnUpdateTick() {
+    process_type_ = param::PhaseType::GetEnum(type_->GetInt());
+    process_arg0_ = arg0_->Get();
+    process_arg1_ = arg1_->Get();
+}
+
+void PhaseProcessor::PrepareParams(OscillorParams & params) {
+    type_ = params.GetParam<IntParameter>("phase.type");
+    arg0_ = params.GetParam<FloatParameter>("phase.arg0");
+    arg1_ = params.GetParam<FloatParameter>("phase.arg1");
 }
 
 void PhaseProcessor::OnNoteOn(int note) {

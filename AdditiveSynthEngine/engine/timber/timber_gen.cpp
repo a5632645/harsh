@@ -3,9 +3,13 @@
 #include <cassert>
 
 namespace mana {
-void TimberGen::Init(float sample_rate) {
-    dual_saw_.Init(sample_rate);
-    sync_.Init(sample_rate);
+TimberGen::TimberGen(int idx) 
+    : idx_(idx) {
+}
+
+void TimberGen::Init(float sample_rate, float update_rate) {
+    dual_saw_.Init(sample_rate, update_rate);
+    sync_.Init(sample_rate, update_rate);
 }
 
 void TimberGen::Process(TimberFrame& frame) {
@@ -23,10 +27,17 @@ void TimberGen::Process(TimberFrame& frame) {
     }
 }
 
-void TimberGen::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
-    timber_type_ = param::TimberType::GetEnum(params.timber.osc_args[module_idx].timber_type->GetInt());
-    dual_saw_.OnUpdateTick(params, skip, module_idx);
-    sync_.OnUpdateTick(params, skip, module_idx);
+void TimberGen::PrepareParams(OscillorParams & params) {
+    timber_type_arg_ = params.GetParam<IntParameter>("timber.osc{}.type", idx_);
+    for (int i = 0; auto & parg : osc_param_.args) {
+        parg = params.GetPolyFloatParam("timber.osc{}.arg{}", idx_, i++);
+    }
+}
+
+void TimberGen::OnUpdateTick() {
+    timber_type_ = param::TimberType::GetEnum(timber_type_arg_->GetInt());
+    dual_saw_.OnUpdateTick(osc_param_);
+    sync_.OnUpdateTick(osc_param_);
 }
 
 void TimberGen::OnNoteOn(int note) {

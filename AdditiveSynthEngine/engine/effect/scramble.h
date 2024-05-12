@@ -3,15 +3,16 @@
 #include <numbers>
 #include <random>
 #include <complex>
-#include "engine/IProcessor.h"
+#include "effect_base.h"
 #include "param/effect_param.h"
 #include "param/param.h"
 
 namespace mana {
-class Scramble : public IProcessor {
+class Scramble : public EffectBase {
 public:
     void Init(float sample_rate, float update_rate) override {
         sample_rate_ = sample_rate;
+        inv_update_rate_ = 1.0f / update_rate;
     }
 
     void Process(Partials& partials) override {
@@ -23,16 +24,16 @@ public:
         }
     }
 
-    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
-        scramble_range_ = param::Scramble_Range::GetNumber(params.effects[module_idx].args);
-        lfo_rate_ = param::Scramble_Rate::GetNumber(params.effects[module_idx].args);
-        UpdateLfoAndIndexTable(skip);
+    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+        scramble_range_ = param::Scramble_Range::GetNumber(args.args);
+        lfo_rate_ = param::Scramble_Rate::GetNumber(args.args);
+        UpdateLfoAndIndexTable();
     }
     void OnNoteOn(int note) override {}
     void OnNoteOff() override {}
 private:
-    void UpdateLfoAndIndexTable(int skip) {
-        float phase_inc = skip * lfo_rate_ / sample_rate_;
+    void UpdateLfoAndIndexTable() {
+        float phase_inc = lfo_rate_ * inv_update_rate_;
         lfo_phase_ += phase_inc;
 
         if (lfo_phase_ >= 1.0f) {
@@ -66,6 +67,7 @@ private:
     float scramble_range_{};
     float lfo_rate_{};
     float sample_rate_{};
+    float inv_update_rate_{};
     float lfo_phase_{ 1.0f };
     std::array<int, kNumPartials> idx_table0_{ kInitTable };
     std::array<int, kNumPartials> idx_table1_{ kInitTable };

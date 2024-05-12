@@ -153,7 +153,7 @@ struct Chorus_Speed : FloatParam<Chorus_Speed> {
 // =========================================================
 // phaser
 // =========================================================
-struct Phaser_Cycles : FloatParam < Phaser_Cycles, [](float v) {return v * v; } > {
+struct Phaser_Cycles : FloatParam < Phaser_Cycles> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "cycles"sv;
     static constexpr auto kMin = 0.0f;

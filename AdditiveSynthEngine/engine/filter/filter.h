@@ -1,17 +1,21 @@
 #pragma once
 
-#include "engine/IProcessor.h"
+#include "engine/oscillor_param.h"
 #include "param/filter_param.h"
+#include "engine/partials.h"
 
 namespace mana {
-class Filter : public IProcessor {
+class Filter {
 public:
-    void Init(float sample_rate, float update_rate) override;
-    void Process(Partials & partials) override;
-    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override;
-    void OnNoteOn(int note) override;
-    void OnNoteOff() override;
+    void Init(float sample_rate, float update_rate);
+    void Process(Partials & partials);
+    void PrepareParams(OscillorParams& params);
+    void OnUpdateTick();
+    void OnNoteOn(int note);
+    void OnNoteOff();
 private:
+    std::array<PolyModuFloatParameter*, 6> filter_args_;
+    IntParameter* filter_type_arg_;
     param::Filter_Type::ParamEnum filter_type_;
     float sample_rate_;
 

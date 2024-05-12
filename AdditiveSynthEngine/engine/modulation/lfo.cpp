@@ -23,14 +23,23 @@ void LFO::Init(float sample_rate, float update_rate) {
     inv_update_rate_ = 1.0f / update_rate;
 }
 
-void LFO::OnUpdateTick(const OscillorParams& params, int /*skip*/, int /*module_idx*/) {
-    auto lfo_rate = param::LFO_Rate::GetNumber(params.lfos[idx_].rate);
-    start_phase_ = param::LFO_Phase::GetNumber(params.lfos[idx_].start_phase);
-    restart_ = params.lfos[idx_].restart->GetBool();
-    output_level_ = param::LFO_Level::GetNumber(params.lfos[idx_].level);
-    wave_type_ = param::LFO_WaveType::GetEnum(params.lfos[idx_].wave_type->GetInt());
-    wave_curve_idx_ = params.lfos[idx_].wave_curve_idx->GetInt();
-    wave_curve_ = params.parent_synth->GetCurveManager().GetCurvePtr(wave_curve_idx_);
+void LFO::PrepareParams(OscillorParams& params) {
+    arg_start_phase_ = params.GetPolyFloatParam("lfo{}.start_phase", idx_);
+    arg_lfo_rate_ = params.GetPolyFloatParam("lfo{}.rate", idx_);
+    restart_ = params.GetParam<BoolParameter>("lfo{}.restart", idx_);
+    arg_output_level_ = params.GetPolyFloatParam("lfo{}.level", idx_);
+    arg_wave_type_ = params.GetParam<IntParameter>("lfo{}.wave_type", idx_);
+    wave_curve_idx_ = params.GetParam<IntParameter>("lfo{}.wave_curve_idx", idx_);
+    curve_manager_ = &params.GetParentSynthParams().GetCurveManager();
+}
+
+void LFO::OnUpdateTick() {
+    auto lfo_rate = param::LFO_Rate::GetNumber(arg_lfo_rate_->GetClamp());
+    start_phase_ = param::LFO_Phase::GetNumber(arg_start_phase_->GetClamp());
+    auto output_level = param::LFO_Level::GetNumber(arg_output_level_->GetClamp());
+    wave_type_ = param::LFO_WaveType::GetEnum(arg_wave_type_->GetInt());
+    auto wave_curve_idx = wave_curve_idx_->GetInt();
+    wave_curve_ = curve_manager_->GetCurvePtr(wave_curve_idx);
 
     auto phase_inc = lfo_rate * inv_update_rate_;
     lfo_phase_ += phase_inc;
@@ -71,11 +80,11 @@ void LFO::OnUpdateTick(const OscillorParams& params, int /*skip*/, int /*module_
         assert(false);
         break;
     }
-    output_value_ *= output_level_;
+    output_value_ *= output_level;
 }
 
 void LFO::OnNoteOn(int note) {
-    if (restart_) {
+    if (restart_->GetBool()) {
         lfo_phase_ = start_phase_;
     }
 }

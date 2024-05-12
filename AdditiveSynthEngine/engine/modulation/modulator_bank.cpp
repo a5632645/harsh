@@ -40,11 +40,15 @@ void ModulatorBank::Init(float sample_rate, float update_rate) {
     }
 }
 
-void ModulatorBank::Process(Partials& partials) {}
+void ModulatorBank::PrepareParams(OscillorParams & params) {
+    for (auto& m : modulators_) {
+        m->PrepareParams(params);
+    }
+}
 
-void ModulatorBank::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
+void ModulatorBank::OnUpdateTick() {
     for (auto& p : modulators_) {
-        p->OnUpdateTick(params, skip, module_idx);
+        p->OnUpdateTick();
     }
 }
 

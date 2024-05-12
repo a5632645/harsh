@@ -64,7 +64,7 @@ static float Sinc(float x) {
     return std::sin(std::numbers::pi_v<float> *x) / (std::numbers::pi_v<float> *x);
 }
 
-void Sync::Init(float sample_rate) {
+void Sync::Init(float sample_rate, float update_rate) {
 }
 
 void Sync::Process(TimberFrame& frame) {
@@ -84,13 +84,13 @@ void Sync::Process(TimberFrame& frame) {
     }
 }
 
-void Sync::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
-    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(params.timber.osc_args[module_idx].args);
+void Sync::OnUpdateTick(OscParam& params) {
+    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(params.args);
     first_shape_ = a;
     second_shape_ = b;
     fraction_ = c;
 
-    auto semitone = param::Sync_Sync::GetNumber(params.timber.osc_args[module_idx].args);
+    auto semitone = param::Sync_Sync::GetNumber(params.args);
     sync_ratio_ = std::exp2(semitone / 12.0f);
 }
 

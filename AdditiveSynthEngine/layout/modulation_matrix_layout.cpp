@@ -80,9 +80,6 @@ ModulationMatrixLayout::ModulationMatrixLayout(Synth& synth)
 ModulationMatrixLayout::~ModulationMatrixLayout() = default;
 
 void ModulationMatrixLayout::Paint() {
-    param_selector_.Paint();
-    modulator_selector_.Paint();
-    section_selector_.Paint();
     if (add_button_.Show()) {
         OnAddClick();
     }
@@ -90,6 +87,10 @@ void ModulationMatrixLayout::Paint() {
     for (auto& p : layouts_) {
         p->Paint();
     }
+
+    param_selector_.Paint();
+    modulator_selector_.Paint();
+    section_selector_.Paint();
 
     CheckAndRemoveLayout();
 }

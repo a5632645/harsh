@@ -6,6 +6,7 @@
 namespace mana {
 void Resynthesis::Init(float sample_rate, float update_rate) {
     sample_rate_ = sample_rate;
+    skip_ = sample_rate / update_rate;
 }
 
 void Resynthesis::Process(Partials& partials) {
@@ -38,19 +39,19 @@ void Resynthesis::Process(Partials& partials) {
     });
 }
 
-void Resynthesis::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
-    is_enable_ = params.resynthsis.is_enable->GetBool();
+void Resynthesis::OnUpdateTick() {
+    is_enable_ = is_enable_arg_->GetBool();
 
-    formant_mix_ = param::Resynthsis_FormantMix::GetNumber(params.resynthsis.args);
-    formant_shift_ = param::Resynthsis_FormantShift::GetNumber(params.resynthsis.args);
-    freq_scale_ = param::Resynthsis_FreqScale::GetNumber(params.resynthsis.args);
-    frame_offset_ = param::Resynthsis_FrameOffset::GetNumber(params.resynthsis.args);
-    frame_speed_ = param::Resynthsis_FrameSpeed::GetNumber(params.resynthsis.args);
-    gain_mix_ = param::Resynthsis_GainMix::GetNumber(params.resynthsis.args);
+    formant_mix_ = param::Resynthsis_FormantMix::GetNumber(args_);
+    formant_shift_ = param::Resynthsis_FormantShift::GetNumber(args_);
+    freq_scale_ = param::Resynthsis_FreqScale::GetNumber(args_);
+    frame_offset_ = param::Resynthsis_FrameOffset::GetNumber(args_);
+    frame_speed_ = param::Resynthsis_FrameSpeed::GetNumber(args_);
+    gain_mix_ = param::Resynthsis_GainMix::GetNumber(args_);
 
     if (!IsWork()) return;
 
-    auto pos_inc = frame_speed_ * (float)skip / synth_.GetResynthsisFrames().frame_interval_sample / synth_.GetResynthsisFrames().frames.size();
+    auto pos_inc = frame_speed_ * (float)skip_ / synth_.GetResynthsisFrames().frame_interval_sample / synth_.GetResynthsisFrames().frames.size();
     frame_player_pos_ += pos_inc;
     while (frame_player_pos_ > 1.0f) {
         frame_player_pos_ -= 1.0f;
@@ -62,6 +63,13 @@ void Resynthesis::OnUpdateTick(const OscillorParams & params, int skip, int modu
     frame_pos_ = frame_player_pos_ + frame_offset_;
     while (frame_pos_ > 1.0f) {
         frame_pos_ -= 1.0f;
+    }
+}
+
+void Resynthesis::PrepareParams(OscillorParams & params) {
+    is_enable_arg_ = params.GetParam<BoolParameter>("resynthsis.enable");
+    for (int i = 0; auto & parg : args_) {
+        parg = params.GetPolyFloatParam("resynthsis.arg{}", i++);
     }
 }
 

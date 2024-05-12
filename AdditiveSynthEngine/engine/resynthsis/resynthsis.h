@@ -1,23 +1,24 @@
 #pragma once
 
-#include "engine/IProcessor.h"
 #include "engine/oscillor_param.h"
 #include "resynthsis_data.h"
+#include <engine/partials.h>
 
 namespace mana {
 class Synth;
 }
 
 namespace mana {
-class Resynthesis : public IProcessor {
+class Resynthesis {
 public:
     Resynthesis(Synth& s) : synth_(s) {}
 
-    void Init(float sample_rate, float update_rate) override;
-    void Process(Partials& partials) override;
-    void OnUpdateTick(const OscillorParams& param, int skip, int module_idx) override;
-    void OnNoteOn(int note) override;
-    void OnNoteOff() override { is_running_ = false; }
+    void Init(float sample_rate, float update_rate);
+    void Process(Partials& partials);
+    void OnUpdateTick();
+    void PrepareParams(OscillorParams& params);
+    void OnNoteOn(int note);
+    void OnNoteOff() { is_running_ = false; }
 
     void PreGetFreqDiffsInRatio(Partials& partials);
     float GetPlayerPosition() const { return frame_pos_; }
@@ -25,11 +26,13 @@ private:
     bool IsWork() const;
     std::array<float, kNumPartials> GetFormantGains(Partials& partials,
                                                     const ResynthsisFrames::FftFrame& frame) const;
-
+    std::array<PolyModuFloatParameter*, 7> args_{};
+    BoolParameter* is_enable_arg_{};
     Synth& synth_;
     float sample_rate_{};
     float frame_pos_{};
     float frame_player_pos_{};
+    int skip_{};
 
     // parameters
     bool is_running_{};

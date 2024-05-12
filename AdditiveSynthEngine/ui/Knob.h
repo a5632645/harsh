@@ -11,9 +11,6 @@ class FloatParameter;
 
 class Knob {
 public:
-    Knob();
-    virtual ~Knob() = default;
-
     void display();
 
     Knob& set_title(std::string_view name);
@@ -54,7 +51,7 @@ protected:
 
     Rectangle m_bounds{};
 
-    FloatParameter* m_parameter;
+    FloatParameter* m_parameter{};
 private:
     static void empty_callback(float) {}
     static std::string EmptyV2Tcaller(float e) { return std::to_string(e); }

@@ -2,12 +2,12 @@
 
 #include <ranges>
 #include <algorithm>
-#include "engine/IProcessor.h"
+#include "effect_base.h"
 #include "param/effect_param.h"
 #include "param/param.h"
 
 namespace mana {
-class Octaver : public IProcessor {
+class Octaver : public EffectBase {
 public:
     static constexpr auto kMaxBins = static_cast<int>(param::Octaver_Width::kMax);
 
@@ -30,10 +30,10 @@ public:
         ProcessBin(partials, last_bin, last_bin_vol);
     }
 
-    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
-        amount_ = param::Octaver_Amount::GetNumber(params.effects[module_idx].args);
-        width_ = param::Octaver_Width::GetNumber(params.effects[module_idx].args);
-        decay_ = param::Octaver_Decay::GetNumber(params.effects[module_idx].args);
+    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+        amount_ = param::Octaver_Amount::GetNumber(args.args);
+        width_ = param::Octaver_Width::GetNumber(args.args);
+        decay_ = param::Octaver_Decay::GetNumber(args.args);
         gain_ = std::lerp(1.0f, 1.0f / (CalcAndCountTotalGain() + 1.0f), amount_);
     }
     void OnNoteOn(int note) override {}

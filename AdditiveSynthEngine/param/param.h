@@ -2,8 +2,9 @@
 
 #include <string>
 #include <format>
-#include <functional>
-#include "engine/oscillor_param.h"
+#include <string_view>
+#include <array>
+#include "engine/poly_param.h"
 
 namespace mana::param {
 using namespace std::string_view_literals;
@@ -25,7 +26,7 @@ struct FloatParam {
         return std::lerp(DetailParam::kMin, DetailParam::kMax, nor);
     }
 
-    static constexpr float GetNumber(SingleOscillorParam nor) {
+    static constexpr float GetNumber(PolyModuFloatParameter& nor) {
         static_assert(requires {DetailParam::kMin; DetailParam::kMax; });
 
         auto v = nor.GetClamp();
@@ -46,12 +47,12 @@ struct FloatParam {
     }
 
     template<size_t N>
-    static constexpr float GetNumber(const std::array<SingleOscillorParam, N>& arr) {
+    static constexpr float GetNumber(const std::array<PolyModuFloatParameter*, N>& arr) {
         constexpr bool kHasArgIdx = requires {DetailParam::kArgIdx; };
         static_assert(kHasArgIdx, "must have an arg index.");
         static_assert(DetailParam::kArgIdx < N, "arg idx out of bounds.");
 
-        return GetNumber(arr[DetailParam::kArgIdx].GetClamp());
+        return GetNumber(arr[DetailParam::kArgIdx]->GetClamp());
     }
 
     static std::string GetText(float nor) {
@@ -90,10 +91,10 @@ struct FloatChoiceParam {
         return GetChoiceIndex(args[DetailParam::kArgIdx]);
     }
 
-    template<std::ranges::input_range RNG> requires std::same_as<std::ranges::range_value_t<RNG>, SingleOscillorParam>
+    template<std::ranges::input_range RNG> requires std::same_as<std::ranges::range_value_t<RNG>, PolyModuFloatParameter*>
     static constexpr auto GetChoiceIndex(RNG&& args) {
         static_assert(requires{DetailParam::kArgIdx; });
-        return GetChoiceIndex(args[DetailParam::kArgIdx].GetClamp());
+        return GetChoiceIndex(args[DetailParam::kArgIdx]->GetClamp());
     }
 
     static constexpr auto GetInterpIndex(float nor) {
@@ -110,7 +111,7 @@ struct FloatChoiceParam {
         return R{ static_cast<EnumType>(fd), static_cast<EnumType>(fu), f - fd };
     }
 
-    static constexpr auto GetInterpIndex(SingleOscillorParam nor) {
+    static constexpr auto GetInterpIndex(PolyModuFloatParameter& nor) {
         using EnumType = typename DetailParam::ParamEnum;
         struct R {
             EnumType first;
@@ -130,10 +131,10 @@ struct FloatChoiceParam {
         return GetInterpIndex(args[DetailParam::kArgIdx]);
     }
 
-    template<std::ranges::input_range RNG> requires std::same_as<std::ranges::range_value_t<RNG>, SingleOscillorParam>
+    template<std::ranges::input_range RNG> requires std::same_as<std::ranges::range_value_t<RNG>, PolyModuFloatParameter*>
     static constexpr auto GetInterpIndex(RNG&& args) {
         static_assert(requires{DetailParam::kArgIdx; });
-        return GetInterpIndex(args[DetailParam::kArgIdx].GetClamp());
+        return GetInterpIndex(args[DetailParam::kArgIdx]->GetClamp());
     }
 
     static constexpr auto GetEnum(float nor) {

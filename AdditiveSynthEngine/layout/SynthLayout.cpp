@@ -18,7 +18,8 @@ SynthLayout::SynthLayout(Synth& synth)
     , effect_layout3_(synth, 3)
     , effect_layout4_(synth, 4)
     , resynthsis_layout_(synth)
-    , standard_layout_(synth) {
+    , standard_layout_(synth)
+    , unison_layout_(synth.GetSynthParams()) {
 }
 
 void SynthLayout::paint() {
@@ -33,6 +34,7 @@ void SynthLayout::paint() {
     effect_layout3_.Paint();
     effect_layout4_.Paint();
     resynthsis_layout_.Paint();
+    unison_layout_.Paint();
 }
 
 void SynthLayout::SetBounds(int x, int y, int w, int h) {
@@ -41,6 +43,7 @@ void SynthLayout::SetBounds(int x, int y, int w, int h) {
     timber_layout_.SetBounds(x + 0, y + 0, 200, 12 + 70);
     dissonance_layout_.SetBounds(x + 250, y + 0, 100, 152);
     filter_layout_.SetBounds(x + 350, y + 0, 150, 156);
+    unison_layout_.SetBounds({ x + 500.0f, y + 0.0f, 150.0f, 156.0f });
     effect_layout0_.SetBounds(x + 0, y + 156 + 16, 150, 156);
     effect_layout1_.SetBounds(x + 150, y + 156 + 16, 150, 156);
     effect_layout2_.SetBounds(x + 300, y + 156 + 16, 150, 156);

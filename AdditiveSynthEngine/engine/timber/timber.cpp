@@ -5,10 +5,15 @@
 #include "utli/convert.h"
 
 namespace mana {
+Timber::Timber()
+    : osc1_(0)
+    , osc2_(1) {
+}
+
 void Timber::Init(float sample_rate, float update_rate) {
-    osc1_.Init(sample_rate);
-    osc2_.Init(sample_rate);
-    inv_sample_rate_ = 1.0f / sample_rate;
+    osc1_.Init(sample_rate, update_rate);
+    osc2_.Init(sample_rate, update_rate);
+    inv_update_rate_ = 1.0f / update_rate;
 }
 
 void Timber::Process(Partials& partials) {
@@ -47,19 +52,28 @@ void Timber::Process(Partials& partials) {
     }
 }
 
-void Timber::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
-    osc1_.OnUpdateTick(params, skip, 0);
-    osc2_.OnUpdateTick(params, skip, 1);
+void Timber::PrepareParams(OscillorParams & params) {
+    arg_osc2_timber_shift_ = params.GetPolyFloatParam("timber.osc2_shift");
+    arg_osc2_beating_ = params.GetPolyFloatParam("timber.osc2_beating");
+    arg_osc1_gain_ = params.GetPolyFloatParam("timber.osc1_gain");
+    arg_osc2_gain_ = params.GetPolyFloatParam("timber.osc2_gain");
+    osc1_.PrepareParams(params);
+    osc2_.PrepareParams(params);
+}
 
-    osc2_timber_shift_ = static_cast<int>(param::Timber_Osc2Shift::GetNumber(params.timber.osc2_shift));
-    osc2_beating_ = param::Timber_Osc2Beating::GetNumber(params.timber.osc2_beating);
-    auto inc = osc2_beating_ * inv_sample_rate_ * skip;
+void Timber::OnUpdateTick() {
+    osc1_.OnUpdateTick();
+    osc2_.OnUpdateTick();
+
+    osc2_timber_shift_ = static_cast<int>(param::Timber_Osc2Shift::GetNumber(arg_osc2_timber_shift_->GetClamp()));
+    osc2_beating_ = param::Timber_Osc2Beating::GetNumber(arg_osc2_beating_->GetClamp());
+    auto inc = osc2_beating_ * inv_update_rate_;
     beating_phase_ += inc;
     beating_phase_ -= static_cast<int>(beating_phase_);
 
-    osc1_gain_ = utli::DbToGain(param::Timber_OscGain::GetNumber(params.timber.osc1_gain),
+    osc1_gain_ = utli::DbToGain(param::Timber_OscGain::GetNumber(arg_osc1_gain_->GetClamp()),
                                 param::Timber_OscGain::kMin);
-    osc2_gain_ = utli::DbToGain(param::Timber_OscGain::GetNumber(params.timber.osc2_gain),
+    osc2_gain_ = utli::DbToGain(param::Timber_OscGain::GetNumber(arg_osc2_gain_->GetClamp()),
                                 param::Timber_OscGain::kMin);
 }
 

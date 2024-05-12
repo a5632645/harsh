@@ -4,8 +4,15 @@
 #include <string_view>
 #include <concepts>
 #include <atomic>
+#include <format>
 
 namespace mana {
+enum class ModulationType {
+    kDisable,
+    kMono,
+    kPoly
+};
+
 class FloatParameter {
 public:
     enum class ParamType {
@@ -16,7 +23,9 @@ public:
 
     static constexpr auto kTypeEnum = ParamType::kFloat;
 
-    FloatParameter(std::string_view id) : id_(id) {}
+    FloatParameter(ModulationType modulation_type, std::string_view id) : id_(id), modulation_type_(modulation_type) {}
+    template<class...T> requires (sizeof...(T) >= 1)
+        FloatParameter(ModulationType modulation_type, std::format_string<T...> format_text, T&&... args) : id_(std::format(format_text, std::forward<T>(args)...)), modulation_type_(modulation_type) {}
 
     virtual ~FloatParameter() = default;
     FloatParameter(FloatParameter const&) = default;
@@ -30,10 +39,13 @@ public:
             value_ = new_val;
         }
     }
+    ModulationType GetModulationType() const { return modulation_type_; }
+    std::string_view GetId() const { return id_; }
 
     virtual ParamType GetParamType() const { return ParamType::kFloat; }
 protected:
     std::string id_;
+    ModulationType modulation_type_;
     std::atomic<float> value_{};
 };
 

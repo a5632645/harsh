@@ -5,7 +5,6 @@
 #include <gcem.hpp>
 #include "param/param.h"
 #include "param/effect_param.h"
-#include "engine/IProcessor.h"
 #include "engine/VolumeTable.hpp"
 #include "engine/EngineConfig.h"
 #include "utli/warp.h"
@@ -86,10 +85,11 @@ static float PhaserShapeVal(param::Phaser_Shape::ParamEnum s, float nor_x) {
 }
 
 namespace mana {
-class Phaser : public IProcessor {
+class Phaser : public EffectBase {
 public:
     void Init(float sample_rate, float update_rate) override {
         sample_rate_ = sample_rate;
+        inv_update_rate_ = 1.0f / update_rate;
     }
 
     void Process(Partials& partials) override {
@@ -111,47 +111,49 @@ public:
         }
     }
 
-    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
-        auto cycle01 = param::FloatParam<param::Phaser_Cycles>::GetNumber(params.effects[module_idx].args);
-        cycles_ = cycle01 * kNumPartials / 2;
+    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+        auto cycle01 = param::FloatParam<param::Phaser_Cycles>::GetNumber(args.args);
+        phaser_cycles_ = cycle01 * kNumPartials / 4;
+        flanger_cycles_ = cycle01 * kNumPartials / 2;
+        harmonic_cycles_ = cycle01 * kNumPartials;
+
         {
-            auto [fs, ss, f] = param::Phaser_Shape::GetInterpIndex(params.effects[module_idx].args);
+            auto [fs, ss, f] = param::Phaser_Shape::GetInterpIndex(args.args);
             first_shape_ = fs;
             second_shape_ = ss;
             shape_fraction_ = f;
         }
-        mix_ = param::FloatParam<param::Phaser_Mix>::GetNumber(params.effects[module_idx].args);
-        pinch_ = param::FloatParam<param::Phaser_Pinch>::GetNumber(params.effects[module_idx].args);
-        barber_rate_ = param::FloatParam<param::Phaser_BarberRate>::GetNumber(params.effects[module_idx].args);
+        mix_ = param::FloatParam<param::Phaser_Mix>::GetNumber(args.args);
+        pinch_ = param::FloatParam<param::Phaser_Pinch>::GetNumber(args.args);
+        barber_rate_ = param::FloatParam<param::Phaser_BarberRate>::GetNumber(args.args);
         {
-            auto [fm, sm, f] = param::Phaser_Mode::GetInterpIndex(params.effects[module_idx].args);
+            auto [fm, sm, f] = param::Phaser_Mode::GetInterpIndex(args.args);
             first_mode_ = fm;
             second_mode_ = sm;
             mode_fraction_ = f;
         }
-        UpdateLfo(skip);
+
+        float val{};
+        float phase_inc = barber_rate_ * inv_update_rate_;
+        lfo_phase_ += phase_inc;
+        lfo_phase_ = std::modf(lfo_phase_, &val);
     }
     void OnNoteOn(int note) override {}
     void OnNoteOff() override {}
 private:
-    void UpdateLfo(int skip) {
-        float val{};
-        float phase_inc = skip * barber_rate_ / sample_rate_;
-        lfo_phase_ += phase_inc;
-        lfo_phase_ = std::modf(lfo_phase_, &val);
-    }
-
     float GetPhase(param::Phaser_Mode::ParamEnum mode, int harmonic_no, float freq, float pitch) {
+        float temp{};
         float nor_phase = {};
+
         switch (mode) {
         case mana::param::Phaser_Mode::ParamEnum::kSemitone:
-            nor_phase = std::clamp(pitch, 0.0f, 140.0f) / 140.0f;
+            nor_phase = std::modf(std::abs(pitch / 140.0f) * phaser_cycles_, &temp);
             break;
         case mana::param::Phaser_Mode::ParamEnum::kHz:
-            nor_phase = std::clamp(freq, 0.0f, 1.0f);
+            nor_phase = std::modf(std::abs(freq) * flanger_cycles_, &temp);
             break;
         case mana::param::Phaser_Mode::ParamEnum::kHarmonic:
-            nor_phase = harmonic_no / static_cast<float>(kNumPartials);
+            nor_phase = std::modf(harmonic_no * harmonic_cycles_ / static_cast<float>(kNumPartials), &temp);
             break;
         default:
             break;
@@ -161,15 +163,16 @@ private:
         auto warp_phase = ParabolaWarp(nor_phase, pinch_);
 
         // warp 01
-        float temp{};
-        return std::modf(warp_phase * cycles_ + lfo_phase_ + 1.0f, &temp);
+        return std::modf(warp_phase + lfo_phase_ + 1.0f, &temp);
     }
 
     static float ParabolaWarp(float x, float w) {
         return (w + 1.0f - w * std::abs(x)) * x;
     }
 
-    float cycles_;
+    float phaser_cycles_;
+    float flanger_cycles_;
+    float harmonic_cycles_;
     param::Phaser_Shape::ParamEnum first_shape_;
     param::Phaser_Shape::ParamEnum second_shape_;
     float shape_fraction_;
@@ -181,6 +184,7 @@ private:
     float mode_fraction_;
 
     float sample_rate_;
+    float inv_update_rate_;
     float lfo_phase_;
 };
 }

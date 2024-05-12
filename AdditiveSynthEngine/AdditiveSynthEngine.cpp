@@ -8,10 +8,10 @@
 #include "engine/synth.h"
 #include "utli/Keyboard.hpp"
 #include "layout/main_window.h"
+#include <RtMidi.h>
 
 static mana::Synth synth_;
 static mana::KeyBoard keyboard_;
-//static mana::SynthLayout synth_layout_{ synth_ };
 static mana::MainWindow synth_layout_{ synth_ };
 
 static void ThisAudioCallback(void* buffer, unsigned int frames) {
@@ -21,7 +21,27 @@ static void ThisAudioCallback(void* buffer, unsigned int frames) {
     synth_layout_.GetOscilloscope().PushBuffer(synth_.getBuffer());
 }
 
+static void ThisRtMidiCallback(double timeStamp, std::vector<unsigned char> *message, void *userData) {
+    if (message->size() == 3) {
+        if ((message->at(0) >> 4) == 9) {
+            if (message->at(2) == 0) {
+                synth_.NoteOff(message->at(1), message->at(2) / 127.0f);
+            }
+            else {
+                synth_.NoteOn(message->at(1), message->at(2) / 127.0f);
+            }
+        }
+        else if ((message->at(0) >> 4) == 8) {
+            synth_.NoteOff(message->at(1), message->at(2) / 127.0f);
+        }
+    }
+}
+
 int main(void) {
+    RtMidiIn midi_in{ RtMidi::Api::WINDOWS_MM };
+    midi_in.openPort();
+    midi_in.setCallback(ThisRtMidiCallback);
+
     InitWindow(800, 600, "additive synth");
     InitAudioDevice();
     SetAudioStreamBufferSizeDefault(480);
@@ -78,6 +98,9 @@ int main(void) {
     CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 
     CloseWindow();              // Close window and OpenGL context
+
+    midi_in.cancelCallback();
+    midi_in.closePort();
 
     return 0;
 }

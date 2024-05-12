@@ -1,18 +1,24 @@
 #pragma once
 
 #include <random>
-#include "engine/IProcessor.h"
+#include "engine/oscillor_param.h"
+#include "engine/partials.h"
 #include "param/dissonance_param.h"
 
 namespace mana {
-class Dissonance : public IProcessor {
+class Dissonance {
 public:
-    void Init(float sample_rate, float update_rate) override;
-    void Process(Partials & partials) override;
-    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override;
-    void OnNoteOn(int note) override;
-    void OnNoteOff() override;
+    void Init(float sample_rate, float update_rate);
+    void PrepareParams(OscillorParams& params);
+    void Process(Partials & partials);
+    void OnUpdateTick();
+    void OnNoteOn(int note);
+    void OnNoteOff();
 private:
+    BoolParameter* is_enable_param_;
+    IntParameter* diss_type_;
+    std::array<PolyModuFloatParameter*, 2>args_;
+
     bool is_enable_;
     param::DissonanceType::ParamEnum type_;
 
@@ -27,7 +33,8 @@ private:
 
     // static noise
     void DoSyncNoise(Partials& partials);
-    std::random_device random_;
+    std::default_random_engine random_;
+    std::uniform_real_distribution<float> random_dist_;
     std::array<float, kNumPartials> static_noise_{};
     float error_range_;
     float error_ramp_;

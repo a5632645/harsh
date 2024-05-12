@@ -1,12 +1,18 @@
 #pragma once
 
 #include <string_view>
-#include "engine/IProcessor.h"
+#include "engine/oscillor_param.h"
 
 namespace mana {
-class Modulator : public IProcessor {
+class Modulator {
 public:
     Modulator(std::string_view id) : id_(id) {}
+
+    virtual void Init(float sample_rate, float update_rate) = 0;
+    virtual void PrepareParams(OscillorParams& params) = 0;
+    virtual void OnUpdateTick() = 0;
+    virtual void OnNoteOn(int note) = 0;
+    virtual void OnNoteOff() = 0;
 
     float get_output_value() const { return output_value_; }
 

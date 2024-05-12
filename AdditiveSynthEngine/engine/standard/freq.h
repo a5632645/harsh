@@ -1,16 +1,19 @@
 #pragma once
 
-#include "engine/IProcessor.h"
+#include "engine/oscillor_param.h"
+#include "engine/partials.h"
 
 namespace mana {
-class FreqProcessor : public IProcessor {
+class FreqProcessor {
 public:
-    void Init(float sample_rate, float update_rate) override;
-    void OnUpdateTick(const OscillorParams& param, int skip, int module_idx) override;
-    void OnNoteOn(int note) override;
-    void OnNoteOff() override;
-    void Process(Partials& partials) override;
+    void Init(float sample_rate, float update_rate);
+    void OnUpdateTick();
+    void OnNoteOn(int note);
+    void OnNoteOff();
+    void PrepareParams(OscillorParams& params);
+    void Process(Partials& partials);
 private:
+    PolyModuFloatParameter* pitch_bend_;
     float reciprocal_nyquist_rate_{};
     float note_pitch_{};
     float base_frequency_{};

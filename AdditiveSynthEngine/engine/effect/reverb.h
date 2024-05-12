@@ -3,16 +3,17 @@
 #include <random>
 #include <ranges>
 #include <algorithm>
-#include "engine/IProcessor.h"
+#include "effect_base.h"
 #include "param/effect_param.h"
 #include "param/param.h"
 #include "utli/convert.h"
 
 namespace mana {
-class Reverb : public IProcessor {
+class Reverb : public EffectBase {
 public:
     void Init(float sample_rate, float update_rate) override {
         sample_rate_ = sample_rate;
+        update_rate_ = update_rate;
     }
 
     void Process(Partials& partials) override {
@@ -49,26 +50,25 @@ public:
         }
     }
 
-    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
-        update_rate_ = sample_rate_ / static_cast<float>(skip);
+    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
         inv_system_rate_ = 1.0f / update_rate_;
 
-        amount_ = param::Reverb_Amount::GetNumber(params.effects[module_idx].args);
-        decay_time_ = param::Reverb_Decay::GetNumber(params.effects[module_idx].args);
-        attack_ = param::Reverb_Attack::GetNumber(params.effects[module_idx].args);
-        damp_ = param::Reverb_Damp::GetNumber(params.effects[module_idx].args);
+        amount_ = param::Reverb_Amount::GetNumber(args.args);
+        decay_time_ = param::Reverb_Decay::GetNumber(args.args);
+        attack_ = param::Reverb_Attack::GetNumber(args.args);
+        damp_ = param::Reverb_Damp::GetNumber(args.args);
 
         attack_a_ = utli::Calc1stSmoothFilterCoeff(attack_ / 1000.0f, update_rate_);
         constexpr auto kSilenceDb = -60.0f;
         decay_a_ = utli::Calc1stSmoothFilterCoeffByDecayRate((-kSilenceDb * 1000.0f) / decay_time_, update_rate_);
 
-        auto noise_speed = param::Reverb_Speed::GetNumber(params.effects[module_idx].args);
+        auto noise_speed = param::Reverb_Speed::GetNumber(args.args);
         dp_ff_ = std::exp2(noise_speed / 12.0f);
     }
     void OnNoteOn(int note) override {}
     void OnNoteOff() override {}
 private:
-    std::random_device random_dev_{};
+    std::default_random_engine random_dev_{};
     std::uniform_real_distribution<float> urnd_;
     std::array<float, kNumPartials> latched_gains_{};
     std::array<float, kNumPartials> noise_phase_{};

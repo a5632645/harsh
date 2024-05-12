@@ -6,9 +6,15 @@
 #include "engine/oscillor_param.h"
 #include <algorithm>
 #include <memory>
-#include "IProcessor.h"
-#include "resynthsis/resynthsis.h"
 #include "modulation/modulator_bank.h"
+#include "resynthsis/resynthsis.h"
+#include "standard/freq.h"
+#include "standard/phase.h"
+#include "filter/filter.h"
+#include "effect/effect.h"
+#include "dissonance/dissonance.h"
+#include "timber/timber.h"
+#include "timber/unison.h"
 
 namespace mana {
 class Synth;
@@ -18,6 +24,11 @@ namespace mana {
 class Oscillor {
 public:
     Oscillor(Synth& synth);
+
+    Oscillor(const Oscillor&) = delete;
+    Oscillor& operator=(const Oscillor&) = delete;
+    Oscillor(Oscillor&&) = default;
+    Oscillor& operator=(Oscillor&&) = default;
 
     void Init(size_t bufferSize, float sampleRate, float update_rate);
 
@@ -37,32 +48,24 @@ public:
         return midi_note_;
     }
 
-    void NoteOff() {
-        midi_note_ = -1;
-        std::ranges::for_each(processors_, [=](std::shared_ptr<IProcessor>& p) {p->OnNoteOff(); });
-        modulator_bank_.OnNoteOff();
-    }
+    void NoteOff();
 
     Partials& get_particles() { return partials_; }
     const Partials& GetPartials() const { return partials_; }
 
-    Resynthesis& GetResynthsisProcessor() { return *p_resynthsis_; }
-    const Resynthesis& GetResynthsisProcessor() const { return *p_resynthsis_; }
+    Resynthesis& GetResynthsisProcessor() { return resynthsis_; }
+    const Resynthesis& GetResynthsisProcessor() const { return resynthsis_; }
 
     void update_state(int skip);
     float SrTick() { return sine_bank_.SrTick(); }
 
     std::vector<std::string_view> GetModulatorIds() const { return modulator_bank_.GetModulatorsIds(); }
-    std::vector<std::string_view> GetModulableParamIds() const { return oscillor_param_.GetParamIds(); }
+    std::vector<std::string_view> GetModulableParamIds() const { return oscillor_param_->GetParamIds(); }
     void CreateModulation(std::string_view param_id, std::string_view modulator_id, ModulationConfig* pconfig);
     void RemoveModulation(ModulationConfig& config);
 private:
-    IProcessor* AddProcessor(std::shared_ptr<IProcessor>&& processor) {
-        return processors_.emplace_back(std::move(processor)).get();
-    }
-
     SineBank sine_bank_;
-    OscillorParams oscillor_param_;
+    std::unique_ptr<OscillorParams> oscillor_param_;
     ModulatorBank modulator_bank_;
     Partials partials_;
 
@@ -71,8 +74,17 @@ private:
     float sample_rate_{};
     bool note_on_ = false;
 
-    // component
-    std::vector<std::shared_ptr<IProcessor>> processors_;
-    Resynthesis* p_resynthsis_{};
+    FreqProcessor freq_;
+    PhaseProcessor phase_;
+    Timber timber_;
+    Resynthesis resynthsis_;
+    Filter filter_;
+    Effect effec0_;
+    Effect effec1_;
+    Effect effec2_;
+    Effect effec3_;
+    Effect effec4_;
+    Dissonance dissonance_;
+    Unison unison_;
 };
 }

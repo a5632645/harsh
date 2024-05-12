@@ -3,7 +3,7 @@
 #include <array>
 #include <complex>
 #include <vector>
-#include "engine/IProcessor.h"
+#include "effect_base.h"
 #include "param/effect_param.h"
 #include "param/param.h"
 #include "engine/modulation/curve.h"
@@ -14,7 +14,7 @@ namespace mana {
 * spectral delay are not available because additive synthesizer can not play
 * the whole spectrum.if use ifft that maybe possible.
  */
-class HarmonicDelay : public IProcessor {
+class HarmonicDelay : public EffectBase {
 public:
     void Init(float sample_rate, float update_rate) override {
         constexpr auto max_delay_seconds = param::Delay_Time::kMax / 1000.0f;
@@ -52,15 +52,15 @@ public:
         write_pos_ = (write_pos_ + 1) % buffer_size;
     }
 
-    void OnUpdateTick(const OscillorParams& params, int skip, int module_idx) override {
-        delay_time_ = param::Delay_Time::GetNumber(params.effects[module_idx].args);
-        feedback_ = param::Delay_Feedback::GetNumber(params.effects[module_idx].args);
+    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+        delay_time_ = param::Delay_Time::GetNumber(args.args);
+        feedback_ = param::Delay_Feedback::GetNumber(args.args);
         //frame_offset_ = delay_time_ * update_rate_ / 1000.0f;
 
-        auto time_map_idx_ = param::Delay_TimeMap::GetNumber(params.effects[module_idx].args);
-        auto feedback_map_idx_ = param::Delay_FeedbackMap::GetNumber(params.effects[module_idx].args);
-        time_map_ = params.parent_synth->GetCurveManager().GetCurvePtr(time_map_idx_);
-        feedback_map_ = params.parent_synth->GetCurveManager().GetCurvePtr(feedback_map_idx_);
+        auto time_map_idx_ = param::Delay_TimeMap::GetNumber(args.args);
+        auto feedback_map_idx_ = param::Delay_FeedbackMap::GetNumber(args.args);
+        time_map_ = curves.GetCurvePtr(time_map_idx_);
+        feedback_map_ = curves.GetCurvePtr(feedback_map_idx_);
     }
 
     void OnNoteOn(int note) override {}

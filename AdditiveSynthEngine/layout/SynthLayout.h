@@ -9,6 +9,7 @@
 #include "effect_layout.h"
 #include "resynthsis_layout.h"
 #include "standard_layout.h"
+#include "unison_layout.h"
 
 namespace mana {
 class SynthLayout {
@@ -33,5 +34,6 @@ private:
     EffectLayout effect_layout3_;
     EffectLayout effect_layout4_;
     ResynthsisLayout resynthsis_layout_;
+    UnisonLayout unison_layout_;
 };
 }

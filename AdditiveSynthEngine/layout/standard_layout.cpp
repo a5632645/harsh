@@ -7,10 +7,10 @@
 namespace mana {
 StandardLayout::StandardLayout(Synth& synth)
     : synth_(synth)
-    , phase_type_(synth.GetParamBank().GetParamPtr<IntParameter>("standard.phase.type")) {
+    , phase_type_(synth.GetParamBank().GetParamPtr<IntParameter>("phase.type")) {
     const auto& bank = synth.GetParamBank();
-    pitch_bend_.set_parameter(bank.GetParamPtr("standard.pitch_bend"));
-    output_gain_.set_parameter(bank.GetParamPtr("standard.output_gain"));
+    pitch_bend_.set_parameter(bank.GetParamPtr("pitch_bend"));
+    output_gain_.set_parameter(bank.GetParamPtr("output_gain"));
 
     SetSingeKnobInfo(pitch_bend_, param::PitchBend{});
     SetSingeKnobInfo(output_gain_, param::OutputGain{});
@@ -20,7 +20,7 @@ StandardLayout::StandardLayout(Synth& synth)
     phase_type_.on_choice_changed = [this](int c) {OnPhaseTypeChanged(c); };
 
     for (int i = 0; auto & arg_knob : phase_arg_knobs_) {
-        arg_knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("standard.phase.arg{}", i++)));
+        arg_knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("phase.arg{}", i++)));
     }
     OnPhaseTypeChanged(0);
 }

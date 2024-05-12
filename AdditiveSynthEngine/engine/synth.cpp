@@ -8,13 +8,12 @@
 
 namespace mana {
 Synth::Synth() {
-    BindParam();
     m_oscillators.reserve(kNumOscillors);
     for (int i = 0; i < kNumOscillors; ++i) {
         m_oscillators.emplace_back(*this);
     }
 
-    output_gain_ = param_bank_.GetParamPtr("standard.output_gain");
+    output_gain_ = synth_params_.GetParamBank().GetParamPtr("output_gain");
 }
 
 void Synth::NoteOn(int note, float velocity) {

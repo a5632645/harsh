@@ -13,8 +13,9 @@ static constexpr auto kSawHarmonicGains = makeHarmonicArray<kNumPartials>([](flo
 });
 static constexpr auto kTwoPi = std::numbers::pi_v<float> *2.0f;
 
-void DualSaw::Init(float sample_rate) {
+void DualSaw::Init(float sample_rate, float update_rate) {
     sample_rate_ = sample_rate;
+    inv_update_rate_ = 1.0f / update_rate;
 }
 
 void DualSaw::Process(TimberFrame& frame) {
@@ -45,13 +46,13 @@ void DualSaw::Process(TimberFrame& frame) {
     }
 }
 
-void DualSaw::OnUpdateTick(const OscillorParams & params, int skip, int module_idx) {
-    ratio_ = param::DualSaw_Ratio::GetNumber(params.timber.osc_args[module_idx].args);
-    beating_rate_ = param::DualSaw_BeatingRate::GetNumber(params.timber.osc_args[module_idx].args);
-    saw_square_ = param::DualSaw_SawSquare::GetNumber(params.timber.osc_args[module_idx].args);
-    second_amp_ = param::DualSaw_SecondAmp::GetNumber(params.timber.osc_args[module_idx].args);
+void DualSaw::OnUpdateTick(OscParam& params) {
+    ratio_ = param::DualSaw_Ratio::GetNumber(params.args);
+    beating_rate_ = param::DualSaw_BeatingRate::GetNumber(params.args);
+    saw_square_ = param::DualSaw_SawSquare::GetNumber(params.args);
+    second_amp_ = param::DualSaw_SecondAmp::GetNumber(params.args);
 
-    auto inc = beating_rate_ * skip / sample_rate_;
+    auto inc = beating_rate_ * inv_update_rate_;
     beating_phase_ += inc;
     beating_phase_ -= static_cast<float>(static_cast<int>(beating_phase_));
 }

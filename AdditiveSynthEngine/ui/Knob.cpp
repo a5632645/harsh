@@ -8,15 +8,7 @@
 #include "engine/modulation/Parameter.h"
 
 namespace mana {
-inline static std::shared_ptr<FloatParameter> s_empty_parameter = std::make_shared<FloatParameter>("");
-}
-
-namespace mana {
 inline static Knob* s_currentKnob = nullptr;
-
-Knob::Knob() {
-    m_parameter = s_empty_parameter.get();
-}
 
 void Knob::display() {
     if (!enable_) {
@@ -47,7 +39,10 @@ void Knob::display() {
         m_lastMousePosition = mousePosition;
         auto newValue = std::clamp(m_value, m_min, m_max);
         m_value = newValue;
-        m_parameter->Set(m_value);
+
+        if (m_parameter != nullptr) {
+            m_parameter->Set(m_value);
+        }
     }
     else if (isNowDown && !m_isPressed) {
         if (s_currentKnob == nullptr) {
@@ -70,7 +65,9 @@ void Knob::display() {
         m_value = m_default_value;
         m_counter = 0;
         m_isPressed = false;
-        m_parameter->Set(m_value);
+        if (m_parameter != nullptr) {
+            m_parameter->Set(m_value);
+        }
     }
 
     // draw name

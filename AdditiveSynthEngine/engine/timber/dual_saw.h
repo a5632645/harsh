@@ -1,14 +1,14 @@
 #pragma once
 
-#include "engine/oscillor_param.h"
 #include "timber_frame.h"
+#include "osc_param.h"
 
 namespace mana {
 class DualSaw {
 public:
-    void Init(float sample_rate);
+    void Init(float sample_rate, float update_rate);
     void Process(TimberFrame& frame);
-    void OnUpdateTick(const OscillorParams& param, int skip, int module_idx);
+    void OnUpdateTick(OscParam& params);
     void OnNoteOn(int note);
     void OnNoteOff();
 private:
@@ -16,6 +16,7 @@ private:
     float beating_rate_{};
     float saw_square_{};
     float sample_rate_{};
+    float inv_update_rate_{};
     float beating_phase_{};
     float second_amp_{};
 };
