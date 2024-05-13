@@ -16,12 +16,6 @@
 [submodule "raygui-cpp"]
 	path = raygui-cpp
 	url = https://github.com/scastd/raygui-cpp.git
-[submodule "exprtk"]
-	path = exprtk
-	url = https://github.com/ArashPartow/exprtk.git
-[submodule "METL"]
-	path = METL
-	url = https://github.com/TillHeinzel/METL.git
 [submodule "xsimd"]
 	path = xsimd
 	url = https://github.com/xtensor-stack/xsimd.git
