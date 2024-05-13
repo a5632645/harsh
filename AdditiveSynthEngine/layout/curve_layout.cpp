@@ -3,6 +3,7 @@
 #include <ranges>
 #include <numeric>
 #include <vector>
+#include <metl.hpp>
 
 namespace mana {
 CurveLayout::CurveLayout(CurveManager& manager)
@@ -17,7 +18,6 @@ CurveLayout::CurveLayout(CurveManager& manager)
     curve_selector_.on_choice_changed(0);
 
     expression_input_box_.on_enter_press = [](WrapTextBox* box) {
-        
         box->GetTextBuffer().clear();
     };
 }

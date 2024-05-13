@@ -9,7 +9,8 @@
 namespace mana {
 ResynthsisLayout::ResynthsisLayout(Synth& synth)
     : synth_(synth)
-    , is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.enable")) {
+    , is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.enable"))
+    , formant_remap_selector_(synth.GetParamBank().GetParamPtr<IntParameter>("resynthsis.formant_map")) {
     for (int i = 0; auto & k : arg_knobs_) {
         k.set_parameter(synth.GetParamBank().GetParamPtr(std::format("resynthsis.arg{}", i++)));
     }
@@ -23,17 +24,23 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
                 param::Resynthsis_GainMix{});
 
     is_enable_.SetText("resynthsis");
+
+    using namespace std::string_literals;
+    formant_remap_selector_.SetChoices(std::ranges::views::iota(-1, kNumCurves)
+                                       | std::ranges::views::transform([](int x) {return x == -1 ? "disable"s : std::to_string(x); }));
 }
 
 void ResynthsisLayout::Paint() {
+    CheckAndDoResynthsis();
+
     is_enable_.Paint();
     if (!is_enable_.IsChecked()) {
         return;
     }
 
-    CheckAndDoResynthsis();
     DrawSpectrum();
     std::ranges::for_each(arg_knobs_, &Knob::display);
+    formant_remap_selector_.Paint();
 }
 
 void ResynthsisLayout::SetBounds(int x, int y, int w, int h) {
@@ -47,6 +54,7 @@ void ResynthsisLayout::SetBounds(int x, int y, int w, int h) {
         k.set_bound(x + 50 * i, y + 12, 50, 50);
         ++i;
     }
+    formant_remap_selector_.SetBounds({ x_f + 50.0f * arg_knobs_.size(), y + 12.0f, 100.0f, 16.0f });
 }
 
 void ResynthsisLayout::CheckAndDoResynthsis() {

@@ -7,6 +7,7 @@
 #include "utli/spin_lock.h"
 #include "raylib-cpp.hpp"
 #include "ui/wrap_check_box.h"
+#include "ui/WrapDropBox.h"
 
 namespace mana {
 class ResynthsisLayout {
@@ -26,5 +27,6 @@ private:
     rgc::Bounds bound_;
     utli::SpinLock ui_lock_;
     std::vector<std::vector<Color>> render_img_;
+    WrapDropBox formant_remap_selector_;
 };
 }

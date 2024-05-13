@@ -77,8 +77,9 @@ void Sync::Process(TimberFrame& frame) {
                 continue;
             }
 
-            gain += GetPartialGainFrac(first_shape_, second_shape_, fraction_, idx)
-                * Sinc((partial_idx + 1) - (idx + 1) * sync_ratio_);
+            auto w = (partial_idx + 1) - (idx + 1) * sync_ratio_;
+            auto sinc_v = Sinc(w);
+            gain += GetPartialGainFrac(first_shape_, second_shape_, fraction_, idx) * sinc_v;
         }
         frame.gains[partial_idx] = gain;
     }

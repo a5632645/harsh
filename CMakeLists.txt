@@ -32,3 +32,5 @@ FetchContent_MakeAvailable(json)
 # rtmidi
 FetchContent_Declare(rtmidi URL http://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-6.0.0.tar.gz)
 FetchContent_MakeAvailable(rtmidi)
+
+set_property(TARGET metl PROPERTY CXX_STANDARD 14)

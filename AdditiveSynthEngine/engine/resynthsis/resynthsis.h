@@ -3,6 +3,7 @@
 #include "engine/oscillor_param.h"
 #include "resynthsis_data.h"
 #include <engine/partials.h>
+#include "engine/modulation/curve.h"
 
 namespace mana {
 class Synth;
@@ -28,6 +29,8 @@ private:
                                                     const ResynthsisFrames::FftFrame& frame) const;
     std::array<PolyModuFloatParameter*, 7> args_{};
     BoolParameter* is_enable_arg_{};
+    IntParameter* formant_map_curve_idx_{};
+    CurveManager* synth_curve_manager_{};
     Synth& synth_;
     float sample_rate_{};
     float frame_pos_{};

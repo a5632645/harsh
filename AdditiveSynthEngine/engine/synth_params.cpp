@@ -42,6 +42,7 @@ SynthParams::SynthParams() {
     }
 
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "resynthsis.enable");
+    param_bank_.AddOrCreateIfNull<IntParameter>(kDisable, "resynthsis.formant_map");
     for (int arg_idx = 0; arg_idx < 7; ++arg_idx) {
         param_bank_.AddOrCreateIfNull(kPoly, "resynthsis.arg{}", arg_idx);
     }
