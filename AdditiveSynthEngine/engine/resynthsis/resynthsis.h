@@ -25,12 +25,12 @@ public:
     float GetPlayerPosition() const { return frame_pos_; }
 private:
     bool IsWork() const;
-    std::array<float, kNumPartials> GetFormantGains(Partials& partials,
-                                                    const ResynthsisFrames::FftFrame& frame) const;
+    std::array<float, kNumPartials> GetFormantGains(Partials& partials) const;
     std::array<PolyModuFloatParameter*, 7> args_{};
     BoolParameter* is_enable_arg_{};
     BoolParameter* is_formant_remap_{};
     CurveManager::Curve* formant_remap_curve_{};
+    CurveManager::Curve* pos_offset_curve_{};
     Synth& synth_;
     float sample_rate_{};
     float frame_pos_{};

@@ -14,9 +14,12 @@ public:
     void Paint();
     void SetBounds(float x, float y, float w, float h);
 private:
+    void DoOperator(int op, CurveManager::Curve& curve);
+
     CurveManager& manager_;
     CurveEditor curve_editor_;
     WrapDropBox curve_selector_;
+    WrapDropBox curve_operator_;
     WrapTextBox expression_input_box_;
 };
 }

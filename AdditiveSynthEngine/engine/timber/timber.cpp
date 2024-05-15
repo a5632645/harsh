@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "param/timber_param.h"
 #include "utli/convert.h"
+#include "engine/oscillor_param.h"
 
 namespace mana {
 Timber::Timber()

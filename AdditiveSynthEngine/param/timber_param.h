@@ -11,12 +11,14 @@ struct TimberType : IntChoiceParam<TimberType> {
     enum class ParamEnum {
         kDualSaw = 0,
         kSync,
+        kNoise,
         kNumEnums
     };
 
     static constexpr std::array kNames{
         "dual_saw"sv,
-        "sync"sv
+        "sync"sv,
+        "noise"sv,
     };
 };
 
@@ -140,5 +142,35 @@ struct Sync_Sync : FloatParam<Sync_Sync> {
     static constexpr float kDefault = 0.0f;
     static constexpr auto kStuff = "st"sv;
     static constexpr int kTextPrecision = 1;
+};
+
+// =========================================================
+// noise
+// =========================================================
+struct Noise_Dynamic : FloatParam<Noise_Dynamic> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "dynamic"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 1.0f;
+    static constexpr int kTextPrecision = 0;
+};
+
+struct Noise_Color : FloatParam<Noise_Color> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "color"sv;
+    static constexpr float kMin = -12.0f;
+    static constexpr float kMax = 0.0f;
+    static constexpr float kDefault = -6.0f;
+    static constexpr int kTextPrecision = 1;
+};
+
+struct Noise_Seed : FloatParam<Noise_Seed> {
+    static constexpr int kArgIdx = 2;
+    static constexpr auto kName = "seed"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 100.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 0;
 };
 }

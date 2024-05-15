@@ -53,6 +53,16 @@ void OscLayout::OnTimberTypeChanged(int c) {
                     param::Sync_Sync{},
                     param::Sync_WaveShape{});
         break;
+    case kNoise:
+        SetGuiKnobs(arg_knobs_,
+                    param::Noise_Color{},
+                    param::Noise_Dynamic{},
+                    param::Noise_Seed{});
+        break;
+    default:
+        SetGuiKnobs(arg_knobs_);
+        assert(false);
+        break;
     }
 }
 }

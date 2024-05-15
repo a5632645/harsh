@@ -20,6 +20,10 @@ static constexpr float PitchToFreq(float pitch) {
     return gcem::exp(pitch * 0.05776226504666210911810267678818f) * 8.1758f;
 }
 
+static constexpr float FreqToPitch(float freq) {
+    return gcem::log(freq / 8.1758f) / 0.05776226504666210911810267678818f;
+}
+
 static constexpr float Exp2(float x) {
     return gcem::exp(0.69314718055994530941723212145818f * x);
 }

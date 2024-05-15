@@ -1,11 +1,11 @@
 #pragma once
 
-#include "param/timber_param.h"
+#include "engine/forward_decalre.h"
 #include "sync.h"
 #include "dual_saw.h"
 #include "timber_frame.h"
 #include "osc_param.h"
-#include "engine/oscillor_param.h"
+#include "noise.h"
 
 namespace mana {
 class TimberGen {
@@ -18,14 +18,12 @@ public:
     void OnUpdateTick();
     void OnNoteOn(int note);
     void OnNoteOff();
-
-    void SetTimberType(param::TimberType::ParamEnum type) { timber_type_ = type; }
 private:
     const int idx_;
-    OscParam osc_param_;
-    IntParameter* timber_type_arg_;
-    param::TimberType::ParamEnum timber_type_;
+    OscParam osc_param_{};
+    IntParameter* timber_type_arg_{};
     DualSaw dual_saw_;
     Sync sync_;
+    Noise noise_;
 };
 }

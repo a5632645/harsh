@@ -52,7 +52,7 @@ int main(void) {
     SetTargetFPS(30);               // Set our game to run at 30 frames-per-second
 
     // init synth
-    synth_.Init(480, 48000.0f, 200.0f);
+    synth_.Init(480, 48000.0f, 400.0f);
     synth_layout_.SetBounds(0, 0, 800, 600);
 
     // link keyboard and synth

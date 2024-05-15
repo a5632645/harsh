@@ -11,25 +11,32 @@ void Resynthesis::Init(float sample_rate, float update_rate) {
 }
 
 void Resynthesis::Process(Partials& partials) {
+    using namespace std::views;
+
     if (!IsWork()) {
         return;
     }
 
-    auto frame_idx = static_cast<size_t>((synth_.GetResynthsisFrames().frames.size() - 1) * frame_pos_);
-    const auto& frame = synth_.GetResynthsisFrames().frames.at(frame_idx);
-
     std::array<float, kNumPartials> gains{};
-    using namespace std::views;
+    for (int i = 0; i < kNumPartials; ++i) {
+        float final_frame_nor_pos = pos_offset_curve_->data[i] + frame_pos_;
+        {
+            float temp{};
+            final_frame_nor_pos = std::modf(final_frame_nor_pos, &temp);
+        }
+        const auto& resynthsis_frames = synth_.GetResynthsisFrames().frames;
+        size_t frame_idx = static_cast<size_t>((resynthsis_frames.size() - 0.01f) * final_frame_nor_pos);
+        const auto& frame = resynthsis_frames[frame_idx];
+
+        gains[i] = frame.gains[i];
+    }
 
     if (formant_mix_ != float{}) {
-        auto formant_gains = GetFormantGains(partials, frame);
-        std::ranges::transform(frame.gains | take(kNumPartials), formant_gains, gains.begin(),
+        auto formant_gains = GetFormantGains(partials);
+        std::ranges::transform(gains, formant_gains, gains.begin(),
                                [this](float no_shift_gain, float shift_gain) {
             return std::lerp(no_shift_gain, shift_gain, formant_mix_);
         });
-    }
-    else {
-        std::ranges::copy(frame.gains | take(kNumPartials), gains.begin());
     }
 
     auto osc_mix = 1.0f - gain_mix_;
@@ -69,6 +76,7 @@ void Resynthesis::OnUpdateTick() {
 
 void Resynthesis::PrepareParams(OscillorParams & params) {
     formant_remap_curve_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("resynthsis.formant_remap");
+    pos_offset_curve_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("resynthsis.pos_offset");
 
     is_enable_arg_ = params.GetParam<BoolParameter>("resynthsis.enable");
     is_formant_remap_ = params.GetParam<BoolParameter>("resynthsis.formant_remap");
@@ -85,23 +93,43 @@ void Resynthesis::PreGetFreqDiffsInRatio(Partials& partials) {
 
     using namespace std::views;
 
-    auto frame_idx = static_cast<size_t>((synth_.GetResynthsisFrames().frames.size() - 1) * frame_pos_);
+    for (int i = 0; i < kNumPartials; ++i) {
+        float final_frame_nor_pos = pos_offset_curve_->data[i] + frame_pos_;
+        {
+            float temp{};
+            final_frame_nor_pos = std::modf(final_frame_nor_pos, &temp);
+        }
+        const auto& resynthsis_frames = synth_.GetResynthsisFrames().frames;
+        size_t frame_idx = static_cast<size_t>((resynthsis_frames.size() - 0.01f) * final_frame_nor_pos);
+        const auto& frame = resynthsis_frames[frame_idx];
+        partials.ratios[i] = frame.ratio_diffs[i] * freq_scale_;
+    }
+
+    /*auto frame_idx = static_cast<size_t>((synth_.GetResynthsisFrames().frames.size() - 1) * frame_pos_);
     const auto& frame = synth_.GetResynthsisFrames().frames.at(frame_idx);
     std::ranges::transform(frame.ratio_diffs | take(kNumPartials), partials.ratios.begin(),
-                           [this](float ratio_diff) {return ratio_diff * freq_scale_; });
+                           [this](float ratio_diff) {return ratio_diff * freq_scale_; });*/
 }
 
 bool Resynthesis::IsWork() const {
     return is_running_ && is_enable_ && synth_.IsResynthsisAvailable();
 }
 
-std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
-                                                             const ResynthsisFrames::FftFrame& frame) const {
+std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials) const {
     auto formant_ratio = std::exp2(-formant_shift_ / 12.0f);
     std::array<float, kNumPartials> output{};
 
     if (!is_formant_remap_->GetBool()) { // disable remap
         for (int i = 0; i < kNumPartials; ++i) {
+            float final_frame_nor_pos = pos_offset_curve_->data[i] + frame_pos_;
+            {
+                float temp{};
+                final_frame_nor_pos = std::modf(final_frame_nor_pos, &temp);
+            }
+            const auto& resynthsis_frames = synth_.GetResynthsisFrames().frames;
+            size_t frame_idx = static_cast<size_t>((resynthsis_frames.size() - 0.01f) * final_frame_nor_pos);
+            const auto& frame = resynthsis_frames[frame_idx];
+
             auto idx = partials.freqs[i] * (kFFtSize / 2) * formant_ratio - 1.0f;
             auto int_idx = static_cast<int>(std::round(idx));
 
@@ -115,6 +143,15 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
     }
     else {
         for (int i = 0; i < kNumPartials; ++i) {
+            float final_frame_nor_pos = pos_offset_curve_->data[i] + frame_pos_;
+            {
+                float temp{};
+                final_frame_nor_pos = std::modf(final_frame_nor_pos, &temp);
+            }
+            const auto& resynthsis_frames = synth_.GetResynthsisFrames().frames;
+            size_t frame_idx = static_cast<size_t>((resynthsis_frames.size() - 0.01f) * final_frame_nor_pos);
+            const auto& frame = resynthsis_frames[frame_idx];
+
             auto idx = partials.freqs[i] * (kFFtSize / 2) * formant_ratio - 1.0f;
             //auto int_idx = static_cast<int>(std::round(idx));
             auto norm_idx = idx / static_cast<float>(kFFtSize / 2);
