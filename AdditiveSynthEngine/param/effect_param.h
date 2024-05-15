@@ -13,6 +13,7 @@ struct EffectType : IntChoiceParam<EffectType> {
         kScramble,
         kDecay,
         kHarmonicDelay,
+        kSpectralGate,
         kNumEnums,
     };
 
@@ -24,7 +25,8 @@ struct EffectType : IntChoiceParam<EffectType> {
             "phaser"sv,
             "scramble"sv,
             "decay"sv,
-            "harm delay"sv,
+            "harm.delay"sv,
+            "spec.gate"sv
     };
 };
 
@@ -299,21 +301,34 @@ struct Delay_Feedback : FloatParam<Delay_Feedback> {
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Delay_TimeMap : FloatParam<Delay_TimeMap> {
+struct Delay_CustomTime : FloatParam<Delay_CustomTime> {
     static constexpr int kArgIdx = 3;
-    static constexpr auto kName = "time_map"sv;
+    static constexpr auto kName = "cos.time"sv;
     static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = kNumCurves - 1;
+    static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 0.0f;
     static constexpr auto kTextPrecision = 0;
 };
 
-struct Delay_FeedbackMap : FloatParam<Delay_FeedbackMap> {
+struct Delay_CustomFeedback : FloatParam<Delay_CustomFeedback> {
     static constexpr int kArgIdx = 4;
-    static constexpr auto kName = "fb_map"sv;
+    static constexpr auto kName = "cos.fb"sv;
     static constexpr auto kMin = 0.0f;
-    static constexpr auto kMax = kNumCurves - 1;
+    static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 0.0f;
     static constexpr auto kTextPrecision = 0;
+};
+
+// =========================================================
+// spectral gate
+// =========================================================
+struct SpectralGate_Level : FloatParam<SpectralGate_Level> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "level"sv;
+    static constexpr auto kMin = -60.0f;
+    static constexpr auto kMax = 0.0f;
+    static constexpr auto kDefault = -30.0f;
+    static constexpr auto kTextPrecision = 1;
+    static constexpr auto kStuff = "dB";
 };
 }

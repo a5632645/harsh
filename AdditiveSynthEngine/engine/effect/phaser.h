@@ -117,21 +117,12 @@ public:
         flanger_cycles_ = cycle01 * kNumPartials / 2;
         harmonic_cycles_ = cycle01 * kNumPartials;
 
-        {
-            auto [fs, ss, f] = param::Phaser_Shape::GetInterpIndex(args.args);
-            first_shape_ = fs;
-            second_shape_ = ss;
-            shape_fraction_ = f;
-        }
+        std::tie(first_shape_, second_shape_, shape_fraction_) = param::Phaser_Shape::GetInterpIndex(args.args);
+        std::tie(first_mode_, second_mode_, mode_fraction_) = param::Phaser_Mode::GetInterpIndex(args.args);
+
         mix_ = param::FloatParam<param::Phaser_Mix>::GetNumber(args.args);
         pinch_ = param::FloatParam<param::Phaser_Pinch>::GetNumber(args.args);
         barber_rate_ = param::FloatParam<param::Phaser_BarberRate>::GetNumber(args.args);
-        {
-            auto [fm, sm, f] = param::Phaser_Mode::GetInterpIndex(args.args);
-            first_mode_ = fm;
-            second_mode_ = sm;
-            mode_fraction_ = f;
-        }
 
         float val{};
         float phase_inc = barber_rate_ * inv_update_rate_;

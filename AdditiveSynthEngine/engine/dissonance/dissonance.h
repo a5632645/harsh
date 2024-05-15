@@ -3,7 +3,6 @@
 #include <random>
 #include "engine/oscillor_param.h"
 #include "engine/partials.h"
-#include "param/dissonance_param.h"
 
 namespace mana {
 class Dissonance {
@@ -15,12 +14,14 @@ public:
     void OnNoteOn(int note);
     void OnNoteOff();
 private:
-    BoolParameter* is_enable_param_;
-    IntParameter* diss_type_;
-    std::array<PolyModuFloatParameter*, 2>args_;
+    void DoPitchQuantize(Partials& partials);
+
+    BoolParameter* is_enable_param_{};
+    IntParameter* diss_type_{};
+    std::array<PolyModuFloatParameter*, 2>args_{};
+    CurveManager::Curve* pitch_quantize_map_{};
 
     bool is_enable_;
-    param::DissonanceType::ParamEnum type_;
 
     // string
     float string_stretch_factor_;

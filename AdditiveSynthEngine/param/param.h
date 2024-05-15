@@ -99,30 +99,15 @@ struct FloatChoiceParam {
 
     static constexpr auto GetInterpIndex(float nor) {
         using EnumType = typename DetailParam::ParamEnum;
-        struct R {
-            EnumType first;
-            EnumType second;
-            float frac;
-        };
 
         auto f = nor * GetMaxChoiceIndex();
         auto fd = static_cast<int>(f);
         auto fu = std::min(GetMaxChoiceIndex(), fd + 1);
-        return R{ static_cast<EnumType>(fd), static_cast<EnumType>(fu), f - fd };
+        return std::tuple{ static_cast<EnumType>(fd), static_cast<EnumType>(fu), f - fd };
     }
 
     static constexpr auto GetInterpIndex(PolyModuFloatParameter& nor) {
-        using EnumType = typename DetailParam::ParamEnum;
-        struct R {
-            EnumType first;
-            EnumType second;
-            float frac;
-        };
-
-        auto f = nor.GetClamp() * GetMaxChoiceIndex();
-        auto fd = static_cast<int>(f);
-        auto fu = std::min(GetMaxChoiceIndex(), fd + 1);
-        return R{ static_cast<EnumType>(fd), static_cast<EnumType>(fu), f - fd };
+        return GetInterpIndex(nor.GetClamp());
     }
 
     template<std::ranges::input_range RNG>  requires std::same_as<std::ranges::range_value_t<RNG>, float>

@@ -4,6 +4,7 @@
 #include "param/standard_param.h"
 #include "param/timber_param.h"
 #include "param/param.h"
+#include "engine/synth.h"
 
 namespace mana {
 SynthLayout::SynthLayout(Synth& synth)

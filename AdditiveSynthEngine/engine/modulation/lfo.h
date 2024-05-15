@@ -23,7 +23,6 @@ private:
     BoolParameter* restart_{};
     PolyModuFloatParameter* arg_output_level_{};
     IntParameter* arg_wave_type_{};
-    IntParameter* wave_curve_idx_{};
 
     const int idx_{};
     float inv_update_rate_{};
@@ -31,7 +30,6 @@ private:
     float last_random_value_{};
     float start_phase_{};
     param::LFO_WaveType::ParamEnum wave_type_{};
-    CurveManager* curve_manager_;
     CurveManager::Curve* wave_curve_{};
     std::random_device random_;
     std::uniform_real_distribution<float> urd_;

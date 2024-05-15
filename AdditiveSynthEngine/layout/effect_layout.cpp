@@ -3,6 +3,7 @@
 #include "param/param.h"
 #include "param/effect_param.h"
 #include "layout/gui_param_pack.h"
+#include "engine/synth.h"
 
 namespace mana {
 EffectLayout::EffectLayout(Synth& synth, int effect_idx)
@@ -97,8 +98,12 @@ void EffectLayout::OnEffectTypeChanged(int c) {
         SetGuiKnobs(arg_knobs_,
                     param::Delay_Feedback{},
                     param::Delay_Time{},
-                    param::Delay_TimeMap{},
-                    param::Delay_FeedbackMap{});
+                    param::Delay_CustomFeedback{},
+                    param::Delay_CustomTime{});
+        break;
+    case kSpectralGate:
+        SetGuiKnobs(arg_knobs_,
+                    param::SpectralGate_Level{});
         break;
     default:
         SetGuiKnobs(arg_knobs_);

@@ -19,14 +19,11 @@ public:
     }
 
     void LoadPartials(Partials& partials) {
-        // find particles
-        //const size_t num_processed = count_process_particles(partials);
-        size_t num_processed = kNumPartials;
+        size_t num_processed = count_process_particles(partials);
         processed_partials_ = std::max(processed_partials_, num_processed);
         active_partials_ = std::min(processed_partials_, max_active_partials_);
 
         if (partials.update_phase) {
-            //load_phase_table(particles);
             std::ranges::copy(partials.phases, phase_table_.begin());
             partials.update_phase = false;
         }
@@ -58,13 +55,13 @@ public:
         for (size_t i = 0; i < active_partials_; ++i) {
             output += phase_table_[i].imag() * volume_table_[i];
         }
+        
         return output;
     }
 
     void ResetState() {
         processed_partials_ = 0;
         active_partials_ = 0;
-        //phase_table_.fill(std::complex(1.0f, 0.0f));
     }
 
     void SetNumMaxActivePartials(size_t number) {
@@ -75,21 +72,15 @@ public:
         return (phase_table_);
     }
 private:
-    //void load_phase_table(const Partials& particles) {
-    //    static constexpr auto two_pi = std::numbers::pi_v<float> *2.0f;
-    //    for (size_t i = 0; i < kNumPartials; ++i) {
-    //        m_current_table[i] = std::polar(1.0f, particles.phases[i] * two_pi);
-    //    }
-    //}
-
-    //size_t count_process_particles(const Partials& particles) {
-    //    for (size_t i = kNumPartials - 1; i > 0; --i) {
-    //        if (particles.freqs[i] <= 0.0f || particles.freqs[i] > 1.0f) {
-    //            return i + 1;
-    //        }
-    //    }
-    //    return kNumPartials;
-    //}
+    size_t count_process_particles(const Partials& particles) {
+        // find last not aliasing partial idx
+        for (size_t i = kNumPartials - 1; i > 0; --i) {
+            if (particles.freqs[i] >= 0.0f && particles.freqs[i] <= 1.0f) {
+                return i + 1;
+            }
+        }
+        return 0;
+    }
 
     std::array<float, kNumPartials> target_volume_table_{};
     std::array<float, kNumPartials> volume_table_{};

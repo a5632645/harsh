@@ -29,8 +29,7 @@ void LFO::PrepareParams(OscillorParams& params) {
     restart_ = params.GetParam<BoolParameter>("lfo{}.restart", idx_);
     arg_output_level_ = params.GetPolyFloatParam("lfo{}.level", idx_);
     arg_wave_type_ = params.GetParam<IntParameter>("lfo{}.wave_type", idx_);
-    wave_curve_idx_ = params.GetParam<IntParameter>("lfo{}.wave_curve_idx", idx_);
-    curve_manager_ = &params.GetParentSynthParams().GetCurveManager();
+    wave_curve_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("lfo{}.wave", idx_);
 }
 
 void LFO::OnUpdateTick() {
@@ -38,8 +37,6 @@ void LFO::OnUpdateTick() {
     start_phase_ = param::LFO_Phase::GetNumber(arg_start_phase_->GetClamp());
     auto output_level = param::LFO_Level::GetNumber(arg_output_level_->GetClamp());
     wave_type_ = param::LFO_WaveType::GetEnum(arg_wave_type_->GetInt());
-    auto wave_curve_idx = wave_curve_idx_->GetInt();
-    wave_curve_ = curve_manager_->GetCurvePtr(wave_curve_idx);
 
     auto phase_inc = lfo_rate * inv_update_rate_;
     lfo_phase_ += phase_inc;

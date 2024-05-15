@@ -9,7 +9,7 @@ SynthParams::SynthParams() {
 
     param_bank_.AddOrCreateIfNull<IntParameter>(kDisable, "phase.type");
     for (int arg_idx = 0; arg_idx < 2; ++arg_idx) {
-        param_bank_.AddOrCreateIfNull(kDisable, "phase.arg{}", arg_idx);
+        param_bank_.AddOrCreateIfNull(kPoly, "phase.arg{}", arg_idx);
     }
 
     for (int osc_idx = 0; osc_idx < 2; ++osc_idx) {
@@ -42,7 +42,7 @@ SynthParams::SynthParams() {
     }
 
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "resynthsis.enable");
-    param_bank_.AddOrCreateIfNull<IntParameter>(kDisable, "resynthsis.formant_map");
+    param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "resynthsis.formant_remap");
     for (int arg_idx = 0; arg_idx < 7; ++arg_idx) {
         param_bank_.AddOrCreateIfNull(kPoly, "resynthsis.arg{}", arg_idx);
     }
@@ -61,7 +61,15 @@ SynthParams::SynthParams() {
         param_bank_.AddOrCreateIfNull(kPoly, "lfo{}.level", lfo_idx);
         param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "lfo{}.restart", lfo_idx);
         param_bank_.AddOrCreateIfNull<IntParameter>(kDisable, "lfo{}.wave_type", lfo_idx);
-        param_bank_.AddOrCreateIfNull<IntParameter>(kDisable, "lfo{}.wave_curve_idx", lfo_idx);
     };
+
+    // custom curves
+    curve_manager_.AddCurve(kNumPartials, "resynthsis.formant_remap")
+        .AddCurve(kNumPartials, "effect.harmonic_delay.time")
+        .AddCurve(kNumPartials, "effect.harmonic_delay.feedback")
+        .AddCurve({ 0.0f,1.0f / 11.0f,2.0f / 11.0f,3.0f / 11.0f,4.0f / 11.0f,5.0f / 11.0f,6.0f / 11.0f,7.0f / 11.0f,8.0f / 11.0f,9.0f / 11.0f,10.0f / 11.0f,11.0f / 11.0f }, "dissonance.pitch_quantize");
+    for (int i = 0; i < 8; ++i) {
+        curve_manager_.AddCurve(kNumPartials, "lfo{}.wave", i);
+    }
 }
 }

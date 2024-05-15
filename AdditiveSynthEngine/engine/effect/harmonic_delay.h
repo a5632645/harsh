@@ -35,11 +35,19 @@ public:
 
         for (int i = 0; i < kNumPartials; ++i) {
             auto delay_time = delay_time_ * time_map_->data[i];
-            auto frame_offset_ = delay_time * update_rate_ / 1000.0f;
-            int read_pos = write_pos_ - static_cast<int>(frame_offset_);
+            auto frame_offset = delay_time * update_rate_ / 1000.0f;
+            if (!enable_custom_time_) {
+                frame_offset = frame_offset_;
+            }
+
+            int read_pos = write_pos_ - static_cast<int>(frame_offset);
             read_pos = (read_pos + buffer_size) % buffer_size;
             const auto& read_frame = delay_buffer_.at(read_pos);
+
             auto feedback = feedback_ * feedback_map_->data[i];
+            if (!enable_custom_feedback_) {
+                feedback = feedback_;
+            }
 
             auto delay_in = partials.gains[i] * partials.phases[i] + last_write_.polar_vector[i] * feedback;
             write_frame.polar_vector[i] = delay_in;
@@ -55,12 +63,14 @@ public:
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
         delay_time_ = param::Delay_Time::GetNumber(args.args);
         feedback_ = param::Delay_Feedback::GetNumber(args.args);
-        //frame_offset_ = delay_time_ * update_rate_ / 1000.0f;
+        frame_offset_ = delay_time_ * update_rate_ / 1000.0f;
+        enable_custom_time_ = param::Delay_CustomTime::GetNumber(args.args) > 0.5f;
+        enable_custom_feedback_ = param::Delay_CustomFeedback::GetNumber(args.args) > 0.5f;
+    }
 
-        auto time_map_idx_ = param::Delay_TimeMap::GetNumber(args.args);
-        auto feedback_map_idx_ = param::Delay_FeedbackMap::GetNumber(args.args);
-        time_map_ = curves.GetCurvePtr(time_map_idx_);
-        feedback_map_ = curves.GetCurvePtr(feedback_map_idx_);
+    void PrepareParams(OscillorParams& params) override {
+        time_map_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("effect.harmonic_delay.time");
+        feedback_map_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("effect.harmonic_delay.feedback");
     }
 
     void OnNoteOn(int note) override {}
@@ -74,11 +84,13 @@ private:
     std::vector<DelayFrame> delay_buffer_;
     DelayFrame last_write_;
     float delay_time_{};
-    //float frame_offset_{};
+    float frame_offset_{};
     float update_rate_{};
     float feedback_{};
     int write_pos_{};
     CurveManager::Curve* time_map_{};
     CurveManager::Curve* feedback_map_{};
+    bool enable_custom_time_{};
+    bool enable_custom_feedback_{};
 };
 }

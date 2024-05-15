@@ -68,10 +68,10 @@ void Resynthesis::OnUpdateTick() {
 }
 
 void Resynthesis::PrepareParams(OscillorParams & params) {
-    synth_curve_manager_ = &params.GetParentSynthParams().GetCurveManager();
+    formant_remap_curve_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("resynthsis.formant_remap");
 
     is_enable_arg_ = params.GetParam<BoolParameter>("resynthsis.enable");
-    formant_map_curve_idx_ = params.GetParam<IntParameter>("resynthsis.formant_map");
+    is_formant_remap_ = params.GetParam<BoolParameter>("resynthsis.formant_remap");
     for (int i = 0; auto & parg : args_) {
         parg = params.GetPolyFloatParam("resynthsis.arg{}", i++);
     }
@@ -100,8 +100,7 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
     auto formant_ratio = std::exp2(-formant_shift_ / 12.0f);
     std::array<float, kNumPartials> output{};
 
-    int curve_idx = formant_map_curve_idx_->GetInt();
-    if (curve_idx == 0) { // disable remap
+    if (!is_formant_remap_->GetBool()) { // disable remap
         for (int i = 0; i < kNumPartials; ++i) {
             auto idx = partials.freqs[i] * (kFFtSize / 2) * formant_ratio - 1.0f;
             auto int_idx = static_cast<int>(std::round(idx));
@@ -115,7 +114,6 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
         }
     }
     else {
-        auto& remap_curve = synth_curve_manager_->GetCurve(curve_idx - 1);
         for (int i = 0; i < kNumPartials; ++i) {
             auto idx = partials.freqs[i] * (kFFtSize / 2) * formant_ratio - 1.0f;
             //auto int_idx = static_cast<int>(std::round(idx));
@@ -125,7 +123,7 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials,
                 continue;
             }
 
-            auto remap_norm_idx = utli::warp::AtNormalizeIndex(remap_curve.data, norm_idx);
+            auto remap_norm_idx = utli::warp::AtNormalizeIndex(formant_remap_curve_->data, norm_idx);
             auto remap_idx = static_cast<int>(std::round(remap_norm_idx * kFFtSize / 2));
 
             if (remap_idx < 0 || remap_idx >= kFFtSize / 2) {

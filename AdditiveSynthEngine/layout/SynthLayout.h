@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/synth.h"
+#include "engine/forward_decalre.h"
 #include "ui/oscilloscope.h"
 #include "ui/Knob.h"
 #include "DissonanceLayout.h"

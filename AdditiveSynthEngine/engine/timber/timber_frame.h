@@ -3,11 +3,11 @@
 #include <array>
 #include <cmath>
 #include <numbers>
+#include <complex>
 #include "engine/EngineConfig.h"
 
 namespace mana {
 struct TimberFrame {
-    float base_freq;
     std::array<float, kNumPartials> gains;
 };
 }

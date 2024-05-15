@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/synth.h"
+#include "engine/forward_decalre.h"
 #include "osc_layout.h"
 #include "ui/Knob.h"
 

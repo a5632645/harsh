@@ -3,6 +3,7 @@
 #include <format>
 #include "layout/gui_param_pack.h"
 #include "param/lfo_param.h"
+#include "engine/synth.h"
 
 namespace mana {
 LfoLayout::LfoLayout(Synth& synth, int idx) {
@@ -19,11 +20,6 @@ LfoLayout::LfoLayout(Synth& synth, int idx) {
     restart_.SetText("restart");
     wave_type_.SetParameter(bank.GetParamPtr<IntParameter>(std::format("lfo{}.wave_type", idx)));
     wave_type_.SetChoices(param::LFO_WaveType::kNames);
-    wave_curve_idx_.SetParameter(bank.GetParamPtr<IntParameter>(std::format("lfo{}.wave_curve_idx", idx)));
-    wave_curve_idx_.SetChoices(std::ranges::views::iota(0, kNumCurves) | std::ranges::views::transform(
-        [](int idx) {
-        return std::to_string(idx);
-    }));
 }
 
 void LfoLayout::Paint() {
@@ -32,7 +28,6 @@ void LfoLayout::Paint() {
     level_.display();
     restart_.Paint();
     wave_type_.Paint();
-    wave_curve_idx_.Paint();
 }
 
 void LfoLayout::SetBounds(Rectangle bound) {
@@ -41,6 +36,5 @@ void LfoLayout::SetBounds(Rectangle bound) {
     level_.set_bound({ bound.x + 100,bound.y,50,50 });
     restart_.SetBounds({ bound.x + 150,bound.y, 16,16 });
     wave_type_.SetBounds({ bound.x + 216,bound.y,100,16 });
-    wave_curve_idx_.SetBounds({ bound.x + 316,bound.y,100,16 });
 }
 }

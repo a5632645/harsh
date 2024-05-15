@@ -5,12 +5,12 @@
 #include "param/resynthsis_param.h"
 #include "layout/gui_param_pack.h"
 #include "utli/convert.h"
+#include "engine/synth.h"
 
 namespace mana {
 ResynthsisLayout::ResynthsisLayout(Synth& synth)
     : synth_(synth)
-    , is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.enable"))
-    , formant_remap_selector_(synth.GetParamBank().GetParamPtr<IntParameter>("resynthsis.formant_map")) {
+    , is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.enable")) {
     for (int i = 0; auto & k : arg_knobs_) {
         k.set_parameter(synth.GetParamBank().GetParamPtr(std::format("resynthsis.arg{}", i++)));
     }
@@ -25,9 +25,8 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
 
     is_enable_.SetText("resynthsis");
 
-    using namespace std::string_literals;
-    formant_remap_selector_.SetChoices(std::ranges::views::iota(-1, kNumCurves)
-                                       | std::ranges::views::transform([](int x) {return x == -1 ? "disable"s : std::to_string(x); }));
+    is_formant_remap_.SetText("fm.remap");
+    is_formant_remap_.SetParameter(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.formant_remap"));
 }
 
 void ResynthsisLayout::Paint() {
@@ -40,7 +39,7 @@ void ResynthsisLayout::Paint() {
 
     DrawSpectrum();
     std::ranges::for_each(arg_knobs_, &Knob::display);
-    formant_remap_selector_.Paint();
+    is_formant_remap_.Paint();
 }
 
 void ResynthsisLayout::SetBounds(int x, int y, int w, int h) {
@@ -54,7 +53,7 @@ void ResynthsisLayout::SetBounds(int x, int y, int w, int h) {
         k.set_bound(x + 50 * i, y + 12, 50, 50);
         ++i;
     }
-    formant_remap_selector_.SetBounds({ x_f + 50.0f * arg_knobs_.size(), y + 12.0f, 100.0f, 16.0f });
+    is_formant_remap_.SetBounds({ x + 50.0f * arg_knobs_.size(),y + 12.0f,16.0f,16.0f });
 }
 
 void ResynthsisLayout::CheckAndDoResynthsis() {

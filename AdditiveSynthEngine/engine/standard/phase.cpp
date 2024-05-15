@@ -12,14 +12,24 @@ void PhaseProcessor::Init(float sample_rate, float update_rate) {
 
 void PhaseProcessor::OnUpdateTick() {
     process_type_ = param::PhaseType::GetEnum(type_->GetInt());
-    process_arg0_ = arg0_->Get();
-    process_arg1_ = arg1_->Get();
+    process_arg0_ = arg0_->GetClamp();
+    process_arg1_ = arg1_->GetClamp();
+
+    if (note_on_once_flag_) {
+        for (int i = 0; i < kNumPartials; ++i) {
+            auto bit_r = static_cast<float>(rand_()) / static_cast<float>(std::random_device::max());
+            auto r = 2.0f * bit_r - 1.0f;
+
+            auto omega = std::numbers::pi_v<float> *r; // -pi to pi
+            random_phases_[i] = omega;
+        }
+    }
 }
 
 void PhaseProcessor::PrepareParams(OscillorParams & params) {
     type_ = params.GetParam<IntParameter>("phase.type");
-    arg0_ = params.GetParam<FloatParameter>("phase.arg0");
-    arg1_ = params.GetParam<FloatParameter>("phase.arg1");
+    arg0_ = params.GetPolyFloatParam("phase.arg0");
+    arg1_ = params.GetPolyFloatParam("phase.arg1");
 }
 
 void PhaseProcessor::OnNoteOn(int note) {
@@ -87,11 +97,7 @@ inline void PhaseProcessor::DoSpectralRandom(Partials& partials) {
 
         auto amount = param::PhaseSpRandom_Amount::GetNumber(process_arg0_);
         for (int i = 0; i < kNumPartials; ++i) {
-            auto bit_r = static_cast<float>(rand_()) / static_cast<float>(std::random_device::max());
-            auto r = 2.0f * bit_r - 1.0f;
-
-            auto omega = amount * std::numbers::pi_v<float> *r; // -pi to pi
-            partials.phases[i] = std::polar(1.0f, omega);
+            partials.phases[i] = std::polar(1.0f, random_phases_[i] * amount);
         }
     }
 }

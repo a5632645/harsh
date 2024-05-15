@@ -15,11 +15,14 @@ endif()
 add_subdirectory ("AdditiveSynthEngine")
 add_subdirectory ("raylib-cpp")
 add_subdirectory ("raylib")
+
+add_subdirectory("raygui/projects/CMake")
+
 add_subdirectory ("raygui-cpp")
 add_subdirectory ("AudioFFT")
 add_subdirectory ("AudioFile")
 add_subdirectory ("gcem")
-add_subdirectory("METL")
+
 set(DOWNLOAD_DOCTEST ON)
 add_subdirectory("xsimd")
 
@@ -33,4 +36,3 @@ FetchContent_MakeAvailable(json)
 FetchContent_Declare(rtmidi URL http://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-6.0.0.tar.gz)
 FetchContent_MakeAvailable(rtmidi)
 
-set_property(TARGET metl PROPERTY CXX_STANDARD 14)

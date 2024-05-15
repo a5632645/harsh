@@ -3,8 +3,9 @@
 #include <vector>
 #include <memory>
 #include "ui/WrapDropBox.h"
-#include "engine/synth.h"
+#include "engine/forward_decalre.h"
 #include <unordered_map>
+#include <raygui-cpp/Button.h>
 
 namespace mana {
 class ModulationMatrixLayout {

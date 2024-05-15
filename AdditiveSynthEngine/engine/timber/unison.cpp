@@ -21,7 +21,7 @@ void Unison::PrepareParams(OscillorParams& params) {
 void Unison::Process(Partials& partials) {
     int num_voice = num_voice_->GetInt() + 1;
     if (num_voice != 1) {
-        float avg_gain = 1.0f / static_cast<float>(num_voice);
+        float avg_gain = 1.0f / static_cast<float>((num_voice + 1.0f) / 2.0f);
         for (int i = 0; i < kNumPartials; ++i) {
             float gain = 0.0f;
             for (int j = 0; j < num_voice; ++j) {

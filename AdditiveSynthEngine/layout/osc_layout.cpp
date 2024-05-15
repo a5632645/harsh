@@ -3,6 +3,7 @@
 #include "param/timber_param.h"
 #include "param/param.h"
 #include "gui_param_pack.h"
+#include "engine/synth.h"
 
 namespace mana {
 OscLayout::OscLayout(Synth& synth, int idx)

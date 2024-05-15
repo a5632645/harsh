@@ -23,10 +23,11 @@ private:
     bool note_on_once_flag_{};
     std::default_random_engine rand_;
 
+    std::array<float, kNumPartials> random_phases_{};
     IntParameter* type_;
     param::PhaseType::ParamEnum process_type_{};
-    FloatParameter* arg0_{};
-    FloatParameter* arg1_{};
+    PolyModuFloatParameter* arg0_{};
+    PolyModuFloatParameter* arg1_{};
     float process_arg0_{};
     float process_arg1_{};
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include "lfo_layout.h"
 
 namespace mana {

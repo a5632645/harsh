@@ -3,6 +3,7 @@
 #include "ui/wrap_check_box.h"
 #include "ui/Knob.h"
 #include "engine/modulation/Modulation.h"
+#include "engine/synth.h"
 
 namespace mana {
 class ModulationMatrixLayout::SingleModulationLayout {

@@ -3,7 +3,7 @@
 #include <cassert>
 
 namespace mana {
-TimberGen::TimberGen(int idx) 
+TimberGen::TimberGen(int idx)
     : idx_(idx) {
 }
 

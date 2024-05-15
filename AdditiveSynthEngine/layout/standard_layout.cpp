@@ -3,6 +3,7 @@
 #include "gui_param_pack.h"
 #include "param/standard_param.h"
 #include <algorithm>
+#include "engine/synth.h"
 
 namespace mana {
 StandardLayout::StandardLayout(Synth& synth)

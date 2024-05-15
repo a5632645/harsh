@@ -3,6 +3,7 @@
 #include <ranges>
 #include "param/timber_param.h"
 #include "layout/gui_param_pack.h"
+#include "engine/synth_params.h"
 
 namespace mana {
 UnisonLayout::UnisonLayout(SynthParams& params) {

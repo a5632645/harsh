@@ -27,5 +27,6 @@ public:
     virtual void OnUpdateTick(EffectParams& args, CurveManager& curves) = 0;
     virtual void OnNoteOn(int note) = 0;
     virtual void OnNoteOff() = 0;
+    virtual void PrepareParams(OscillorParams& params) {}
 };
 }

@@ -2,7 +2,7 @@
 
 #include "ui/Knob.h"
 #include "ui/WrapDropBox.h"
-#include "engine/synth_params.h"
+#include "engine/forward_decalre.h"
 
 namespace mana {
 class UnisonLayout {

@@ -26,7 +26,6 @@ void Timber::Process(Partials& partials) {
     std::ranges::transform(osc1_timber_.gains, osc1_timber_.gains.begin(),
                            [this](float v) {return v * osc1_gain_; });
     std::ranges::copy(osc1_timber_.gains, partials.gains.begin());
-
     //auto phase_magic_val = std::numbers::pi_v<float> *beating_phase_;
     /*for (int i = 0; i < kNumPartials; ++i) {
         auto vector_angle = (i + 1.0f) * phase_magic_val;

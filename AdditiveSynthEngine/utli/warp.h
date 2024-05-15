@@ -8,8 +8,8 @@ static float ParabolaWarp(float x, float w) {
 }
 
 static constexpr decltype(auto) AtNormalizeIndex(std::ranges::range auto& arr, float nor_idx) {
-    auto size = std::ranges::size(arr) - 1;
-    auto idx = static_cast<size_t>(size * nor_idx);
+    auto size = std::ranges::size(arr);
+    auto idx = static_cast<size_t>((size - 0.01f) * nor_idx);
     return (arr[idx]);
 }
 }

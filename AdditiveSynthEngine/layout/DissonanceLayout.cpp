@@ -4,6 +4,7 @@
 #include "param/param.h"
 #include "param/dissonance_param.h"
 #include "layout/gui_param_pack.h"
+#include "engine/synth.h"
 
 namespace mana {
 DissonanceLayout::DissonanceLayout(Synth& synth)
@@ -75,6 +76,10 @@ void DissonanceLayout::OnDissonanceTypeChanged(int c) {
         SetGuiKnobs(arg_knobs_,
                     param::Dispersion_Amount{},
                     param::Dispersion_Warp{});
+        break;
+    case kPitchQuantize:
+        SetGuiKnobs(arg_knobs_,
+                    param::PitchQuantize_Amount{});
         break;
     default:
         assert(false && "unkown type");

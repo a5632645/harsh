@@ -1,8 +1,9 @@
 #pragma once
 
-#include "engine/synth.h"
+#include <array>
 #include "ui/WrapDropBox.h"
 #include "ui/Knob.h"
+#include "engine/forward_decalre.h"
 
 namespace mana {
 class FilterLayout {

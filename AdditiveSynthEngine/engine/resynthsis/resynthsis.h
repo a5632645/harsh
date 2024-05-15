@@ -29,8 +29,8 @@ private:
                                                     const ResynthsisFrames::FftFrame& frame) const;
     std::array<PolyModuFloatParameter*, 7> args_{};
     BoolParameter* is_enable_arg_{};
-    IntParameter* formant_map_curve_idx_{};
-    CurveManager* synth_curve_manager_{};
+    BoolParameter* is_formant_remap_{};
+    CurveManager::Curve* formant_remap_curve_{};
     Synth& synth_;
     float sample_rate_{};
     float frame_pos_{};

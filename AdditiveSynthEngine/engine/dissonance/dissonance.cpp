@@ -2,6 +2,8 @@
 
 #include "utli/warp.h"
 #include "engine/oscillor_param.h"
+#include "param/dissonance_param.h"
+#include "utli/convert.h"
 
 static float RatioToPitch(float ratio, float base_pitch) {
     ratio = std::max(ratio, 0.0001f);
@@ -178,6 +180,8 @@ void Dissonance::Init(float sample_rate, float update_rate) {
 }
 
 void Dissonance::PrepareParams(OscillorParams& params) {
+    pitch_quantize_map_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("dissonance.pitch_quantize");
+
     is_enable_param_ = params.GetParam<BoolParameter>("dissonance.enable");
     diss_type_ = params.GetParam<IntParameter>("dissonance.type");
 
@@ -198,7 +202,8 @@ void Dissonance::Process(Partials& partials) {
     }
 
     using enum param::DissonanceType::ParamEnum;
-    switch (type_) {
+    auto diss_type = param::DissonanceType::GetEnum(diss_type_->GetInt());
+    switch (diss_type) {
     case kString:
         DoStringDiss(partials, string_stretch_factor_);
         break;
@@ -220,6 +225,9 @@ void Dissonance::Process(Partials& partials) {
     case kDispersion:
         DoDispersion(partials, dispersion_amount_, dispersion_warp_);
         break;
+    case kPitchQuantize:
+        DoPitchQuantize(partials);
+        break;
     default:
         break;
     }
@@ -227,7 +235,6 @@ void Dissonance::Process(Partials& partials) {
 
 void Dissonance::OnUpdateTick() {
     is_enable_ = is_enable_param_->GetBool();
-    type_ = param::DissonanceType::GetEnum(diss_type_->GetInt());
 
     {
         auto raw_string = param::StringDissStretch::GetNumber(args_);
@@ -263,5 +270,40 @@ void Dissonance::OnNoteOn(int note) {
 }
 
 void Dissonance::OnNoteOff() {
+}
+
+void Dissonance::DoPitchQuantize(Partials& partials) {
+    float amount = param::PitchQuantize_Amount::GetNumber(args_);
+
+    for (int i = 0; i < kNumPartials; ++i) {
+        float ratio = i + 1.0f + partials.ratios[i];
+        if (ratio < 0.0f) {
+            partials.freqs[i] = -1.0f;
+            partials.pitches[i] = -1.0f;
+            partials.ratios[i] = ratio;
+            continue;
+        }
+
+        float raw_pitch = RatioToPitch(ratio, partials.base_pitch);
+        int quantize_pitch = static_cast<int>(std::round(raw_pitch));
+
+        // take apart into octave * 12 + semitone
+        int octave = quantize_pitch / 12;
+        int semitone = quantize_pitch % 12;
+        if (semitone < 0) {
+            semitone += 12;
+            ++octave;
+        }
+
+        // remap semitone
+        float nor_semitone = pitch_quantize_map_->data[semitone];
+        semitone = static_cast<int>(nor_semitone * 11.99f);
+
+        float final_quantize_pitch = octave * 12.0f + semitone;
+        float final_pitch = std::lerp(raw_pitch, final_quantize_pitch, amount);
+        partials.freqs[i] = partials.base_frequency * std::exp2((final_pitch - partials.base_pitch) / 12.0f);
+        partials.pitches[i] = final_pitch;
+        partials.ratios[i] = partials.freqs[i] / partials.base_frequency;
+    }
 }
 }

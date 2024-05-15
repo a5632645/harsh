@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "param/filter_param.h"
 #include "layout/gui_param_pack.h"
+#include "engine/synth.h"
 
 namespace mana {
 mana::FilterLayout::FilterLayout(Synth & synth)

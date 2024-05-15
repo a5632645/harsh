@@ -1,6 +1,7 @@
 #include "sync.h"
 
 #include <numbers>
+#include <complex>
 #include "param/param.h"
 #include "param/timber_param.h"
 #include "engine/VolumeTable.hpp"

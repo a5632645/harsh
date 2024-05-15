@@ -1,7 +1,8 @@
 #pragma once
 
+#include <array>
 #include <future>
-#include "engine/synth.h"
+#include "engine/forward_decalre.h"
 #include "ui/Knob.h"
 #include "raygui-cpp.h"
 #include "utli/spin_lock.h"
@@ -22,11 +23,11 @@ private:
 
     Synth& synth_;
     WrapCheckBox is_enable_;
+    WrapCheckBox is_formant_remap_;
     std::array<Knob, 7> arg_knobs_;
     std::atomic<int> resynthsis_work_counter_;
     rgc::Bounds bound_;
     utli::SpinLock ui_lock_;
     std::vector<std::vector<Color>> render_img_;
-    WrapDropBox formant_remap_selector_;
 };
 }

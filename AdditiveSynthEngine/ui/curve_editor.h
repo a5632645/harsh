@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/modulation/curve.h"
-#include "raylib.h"
+#include <raygui-cpp.h>
 
 namespace mana {
 class CurveEditor {

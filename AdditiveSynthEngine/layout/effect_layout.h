@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include "engine/synth.h"
+#include "engine/forward_decalre.h"
 #include "ui/WrapDropBox.h"
 #include "ui/wrap_check_box.h"
 #include "ui/Knob.h"

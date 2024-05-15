@@ -1,6 +1,7 @@
 #pragma once
 
-#include "engine/synth.h"
+#include <array>
+#include "engine/forward_decalre.h"
 #include "ui/Knob.h"
 #include "ui/WrapDropBox.h"
 #include "ui/wrap_check_box.h"
@@ -17,6 +18,5 @@ private:
     Knob level_;
     WrapCheckBox restart_;
     WrapDropBox wave_type_;
-    WrapDropBox wave_curve_idx_;
 };
 }
