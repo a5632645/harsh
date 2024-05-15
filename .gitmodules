@@ -19,3 +19,6 @@
 [submodule "xsimd"]
 	path = xsimd
 	url = https://github.com/xtensor-stack/xsimd.git
+[submodule "raygui"]
+	path = raygui
+	url = https://github.com/raysan5/raygui.git
