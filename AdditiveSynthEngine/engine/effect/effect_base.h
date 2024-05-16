@@ -19,8 +19,8 @@ public:
 
     EffectBase(const EffectBase&) = default;
     EffectBase& operator=(const EffectBase&) = default;
-    EffectBase(EffectBase&&) = default;
-    EffectBase& operator=(EffectBase&&) = default;
+    EffectBase(EffectBase&&) noexcept = default;
+    EffectBase& operator=(EffectBase&&) noexcept = default;
 
     virtual void Init(float sample_rate, float update_rate) = 0;
     virtual void Process(Partials& partials) = 0;

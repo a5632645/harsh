@@ -59,6 +59,11 @@ void OscLayout::OnTimberTypeChanged(int c) {
                     param::Noise_Dynamic{},
                     param::Noise_Seed{});
         break;
+    case kPwm:
+        SetGuiKnobs(arg_knobs_,
+                    param::Pwm_Tilt{},
+                    param::Pwm_Width{});
+        break;
     default:
         SetGuiKnobs(arg_knobs_);
         assert(false);

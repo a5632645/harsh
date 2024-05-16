@@ -9,10 +9,10 @@ endif()
 
 if(WIN32)
     add_compile_options(/wd4819)
+    add_compile_options("/arch:AVX")
 endif()
 
 # sub modules
-add_subdirectory ("AdditiveSynthEngine")
 add_subdirectory ("raylib-cpp")
 add_subdirectory ("raylib")
 
@@ -36,3 +36,4 @@ FetchContent_MakeAvailable(json)
 FetchContent_Declare(rtmidi URL http://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-6.0.0.tar.gz)
 FetchContent_MakeAvailable(rtmidi)
 
+add_subdirectory ("AdditiveSynthEngine")

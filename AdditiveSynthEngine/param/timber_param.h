@@ -12,6 +12,7 @@ struct TimberType : IntChoiceParam<TimberType> {
         kDualSaw = 0,
         kSync,
         kNoise,
+        kPwm,
         kNumEnums
     };
 
@@ -19,6 +20,7 @@ struct TimberType : IntChoiceParam<TimberType> {
         "dual_saw"sv,
         "sync"sv,
         "noise"sv,
+        "pwm"sv,
     };
 };
 
@@ -172,5 +174,26 @@ struct Noise_Seed : FloatParam<Noise_Seed> {
     static constexpr float kMax = 100.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr int kTextPrecision = 0;
+};
+
+// =========================================================
+// pwm
+// =========================================================
+struct Pwm_Width : FloatParam<Pwm_Width> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "width"sv;
+    static constexpr float kMin = -1.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 2;
+};
+
+struct Pwm_Tilt : FloatParam<Pwm_Tilt> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "tilt"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 2.0f;
+    static constexpr float kDefault = 1.0f;
+    static constexpr int kTextPrecision = 2;
 };
 }

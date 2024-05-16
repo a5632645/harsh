@@ -1,12 +1,24 @@
 #pragma once
 
-#include "timber_gen.h"
 #include "engine/partials.h"
+#include "timber_frame.h"
+#include "engine/forward_decalre.h"
+#include "engine/poly_param.h"
+
+namespace mana {
+class TimberGen;
+}
 
 namespace mana {
 class Timber {
 public:
     Timber();
+    ~Timber();
+
+    Timber(const Timber&) = delete;
+    Timber& operator=(const Timber&) = delete;
+    Timber(Timber&&) noexcept;
+    Timber& operator=(Timber&&) noexcept;
 
     void Init(float sample_rate, float update_rate);
     void Process(Partials& partials);
@@ -17,8 +29,8 @@ public:
 private:
     TimberFrame osc1_timber_{};
     TimberFrame osc2_timber_{};
-    TimberGen osc1_;
-    TimberGen osc2_;
+    std::unique_ptr<TimberGen> osc1_;
+    std::unique_ptr<TimberGen> osc2_;
 
     bool is_work_{};
     PolyModuFloatParameter* arg_osc2_timber_shift_{};

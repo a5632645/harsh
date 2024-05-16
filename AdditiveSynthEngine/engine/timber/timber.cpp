@@ -4,16 +4,21 @@
 #include "param/timber_param.h"
 #include "utli/convert.h"
 #include "engine/oscillor_param.h"
+#include "timber_gen.h"
 
 namespace mana {
 Timber::Timber()
-    : osc1_(0)
-    , osc2_(1) {
+    : osc1_(std::make_unique<TimberGen>(0))
+    , osc2_(std::make_unique<TimberGen>(1)) {
 }
 
+Timber::~Timber() = default;
+Timber::Timber(Timber &&) noexcept = default;
+Timber & Timber::operator=(Timber &&) noexcept = default;
+
 void Timber::Init(float sample_rate, float update_rate) {
-    osc1_.Init(sample_rate, update_rate);
-    osc2_.Init(sample_rate, update_rate);
+    osc1_->Init(sample_rate, update_rate);
+    osc2_->Init(sample_rate, update_rate);
     inv_update_rate_ = 1.0f / update_rate;
 }
 
@@ -23,7 +28,7 @@ void Timber::Process(Partials& partials) {
         return;
     }
 
-    osc1_.Process(osc1_timber_);
+    osc1_->Process(osc1_timber_);
     std::ranges::transform(osc1_timber_.gains, osc1_timber_.gains.begin(),
                            [this](float v) {return v * osc1_gain_; });
     std::ranges::copy(osc1_timber_.gains, partials.gains.begin());
@@ -37,7 +42,7 @@ void Timber::Process(Partials& partials) {
     }*/
 
     if (osc2_gain_ != 0.0f) {
-        osc2_.Process(osc2_timber_);
+        osc2_->Process(osc2_timber_);
         std::ranges::transform(osc2_timber_.gains, osc2_timber_.gains.begin(),
                                [this](float v) {return v * osc2_gain_; });
         int proc_idx = 0;
@@ -57,13 +62,13 @@ void Timber::PrepareParams(OscillorParams & params) {
     arg_osc2_beating_ = params.GetPolyFloatParam("timber.osc2_beating");
     arg_osc1_gain_ = params.GetPolyFloatParam("timber.osc1_gain");
     arg_osc2_gain_ = params.GetPolyFloatParam("timber.osc2_gain");
-    osc1_.PrepareParams(params);
-    osc2_.PrepareParams(params);
+    osc1_->PrepareParams(params);
+    osc2_->PrepareParams(params);
 }
 
 void Timber::OnUpdateTick() {
-    osc1_.OnUpdateTick();
-    osc2_.OnUpdateTick();
+    osc1_->OnUpdateTick();
+    osc2_->OnUpdateTick();
 
     osc2_timber_shift_ = static_cast<int>(param::Timber_Osc2Shift::GetNumber(arg_osc2_timber_shift_->GetClamp()));
     osc2_beating_ = param::Timber_Osc2Beating::GetNumber(arg_osc2_beating_->GetClamp());
@@ -78,8 +83,8 @@ void Timber::OnUpdateTick() {
 }
 
 void Timber::OnNoteOn(int note) {
-    osc1_.OnNoteOn(note);
-    osc2_.OnNoteOn(note);
+    osc1_->OnNoteOn(note);
+    osc2_->OnNoteOn(note);
     is_work_ = true;
 
     if (osc2_beating_ == 0.0f) {
@@ -88,8 +93,8 @@ void Timber::OnNoteOn(int note) {
 }
 
 void Timber::OnNoteOff() {
-    osc1_.OnNoteOff();
-    osc2_.OnNoteOff();
+    osc1_->OnNoteOff();
+    osc2_->OnNoteOff();
     is_work_ = false;
 }
 }

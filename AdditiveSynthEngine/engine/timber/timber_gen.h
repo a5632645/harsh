@@ -6,6 +6,8 @@
 #include "timber_frame.h"
 #include "osc_param.h"
 #include "noise.h"
+#include "my_pwm.h"
+#include <tuple>
 
 namespace mana {
 class TimberGen {
@@ -22,8 +24,9 @@ private:
     const int idx_;
     OscParam osc_param_{};
     IntParameter* timber_type_arg_{};
-    DualSaw dual_saw_;
-    Sync sync_;
-    Noise noise_;
+    //DualSaw dual_saw_;
+    //Sync sync_;
+    //Noise noise_;
+    std::tuple<DualSaw, Sync, Noise, PWM> timber_gens_;
 };
 }
