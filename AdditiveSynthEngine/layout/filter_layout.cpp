@@ -37,15 +37,22 @@ void FilterLayout::SetBounds(int x, int y, int w, int h) {
 }
 
 void FilterLayout::OnFilterTypeChanged(int c) {
+    using enum param::Filter_Type::ParamEnum;
+
     auto type = param::Filter_Type::GetEnum(c);
     switch (type) {
-    case mana::param::Filter_Type::ParamEnum::kLowpass:
+    case kLowpass:
+    case kHighpass:
+    case kBandpass:
+    case kBandstop:
         SetGuiKnobs(arg_knobs_,
                     param::Filter_Cutoff{},
                     param::Filter_Resonance{},
-                    param::Filter_Slope{});
+                    param::Filter_Slope{},
+                    param::Filter_BandWidth{},
+                    param::Filter_Knee{});
         break;
-    case mana::param::Filter_Type::ParamEnum::kCombFilter:
+    case kCombFilter:
         SetGuiKnobs(arg_knobs_,
                     param::Filter_Cutoff{},
                     param::Filter_CombPhase{},
@@ -54,7 +61,7 @@ void FilterLayout::OnFilterTypeChanged(int c) {
                     param::Filter_CombShape{},
                     param::Filter_KeyTracking{});
         break;
-    case mana::param::Filter_Type::ParamEnum::kPhaser:
+    case kPhaser:
         SetGuiKnobs(arg_knobs_,
                     param::Filter_Cutoff{},
                     param::Filter_PhaserShape{},

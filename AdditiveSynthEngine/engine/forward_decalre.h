@@ -8,4 +8,5 @@ struct ResynthsisFrames;
 class Oscillor;
 class OscillorParams;
 class ParamBank;
+class Filter;
 }

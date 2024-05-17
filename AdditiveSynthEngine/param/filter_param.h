@@ -8,13 +8,21 @@ using namespace std::string_view_literals;
 struct Filter_Type : IntChoiceParam<Filter_Type> {
     enum class ParamEnum {
         kLowpass = 0,
+        kHighpass,
+        kBandpass,
+        kBandstop,
         kCombFilter,
         kPhaser,
         kNumEnums
     };
 
     static constexpr std::array kNames{
-        "lowpass"sv, "comb"sv, "phaser"sv
+        "lowpass"sv,
+        "highpass"sv,
+        "bandpass"sv,
+        "bandstop"sv,
+        "comb"sv,
+        "phaser"sv
     };
 };
 
@@ -24,7 +32,7 @@ struct Filter_Type : IntChoiceParam<Filter_Type> {
 struct Filter_Cutoff : FloatParam<Filter_Cutoff> {
     static constexpr int kArgIdx = 0;
     static constexpr float kMin = 0.1f;
-    static constexpr float kMax = 140.0f;
+    static constexpr float kMax = 150.0f;
     static constexpr float kDefault = 65.0f;
     static constexpr int kTextPrecision = 1;
     static constexpr auto kName = "cutoff"sv;
@@ -44,11 +52,30 @@ struct Filter_Resonance : FloatParam<Filter_Resonance> {
 struct Filter_Slope : FloatParam<Filter_Slope> {
     static constexpr int kArgIdx = 2;
     static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 80.0f;
-    static constexpr float kDefault = 20.0f;
+    static constexpr float kMax = 48.0f;
+    static constexpr float kDefault = 6.0f;
     static constexpr int kTextPrecision = 0;
     static constexpr auto kName = "slope"sv;
     static constexpr auto kStuff = "dB"sv;
+};
+
+struct Filter_BandWidth : FloatParam<Filter_BandWidth> {
+    static constexpr int kArgIdx = 4;
+    static constexpr float kMin = 0.1f;
+    static constexpr float kMax = 24.0f;
+    static constexpr float kDefault = 12.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kName = "bw"sv;
+    static constexpr auto kStuff = "st"sv;
+};
+
+struct Filter_Knee : FloatParam<Filter_Knee> {
+    static constexpr auto kName = "knee"sv;
+    static constexpr int kArgIdx = 5;
+    static constexpr float kMin = 0.1f;
+    static constexpr float kMax = 12.0f;
+    static constexpr float kDefault = 0.1f;
+    static constexpr int kTextPrecision = 1;
 };
 
 struct Filter_KeyTracking : FloatParam<Filter_KeyTracking> {

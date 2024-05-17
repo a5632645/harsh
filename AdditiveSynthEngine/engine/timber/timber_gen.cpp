@@ -9,9 +9,6 @@ TimberGen::TimberGen(int idx)
 }
 
 void TimberGen::Init(float sample_rate, float update_rate) {
-    //dual_saw_.Init(sample_rate, update_rate);
-    //sync_.Init(sample_rate, update_rate);
-
     std::apply([sample_rate, update_rate](auto&... t) { int _[]{ (t.Init(sample_rate, update_rate), 0)... }; }, timber_gens_);
 }
 
@@ -21,19 +18,19 @@ void TimberGen::Process(TimberFrame& frame) {
     auto timber_type_ = param::TimberType::GetEnum(timber_type_arg_->GetInt());
     switch (timber_type_) {
     case kDualSaw:
-        //dual_saw_.Process(frame);
         std::get<DualSaw>(timber_gens_).Process(frame);
         break;
     case kSync:
-        //sync_.Process(frame);
         std::get<Sync>(timber_gens_).Process(frame);
         break;
     case kNoise:
-        //noise_.Process(frame);
         std::get<Noise>(timber_gens_).Process(frame);
         break;
     case kPwm:
         std::get<PWM>(timber_gens_).Process(frame);
+        break;
+    case kImpulse:
+        std::get<Impulse>(timber_gens_).Process(frame);
         break;
     default:
         assert("unkown timber type");
@@ -49,9 +46,6 @@ void TimberGen::PrepareParams(OscillorParams & params) {
 }
 
 void TimberGen::OnUpdateTick() {
-    //dual_saw_.OnUpdateTick(osc_param_);
-    //sync_.OnUpdateTick(osc_param_);
-    //noise_.OnUpdateTick(osc_param_);
     std::apply([this](auto&... t) { int _[]{ (t.OnUpdateTick(osc_param_),0)... }; }, timber_gens_);
 }
 

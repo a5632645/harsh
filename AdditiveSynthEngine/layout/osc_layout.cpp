@@ -64,6 +64,10 @@ void OscLayout::OnTimberTypeChanged(int c) {
                     param::Pwm_Tilt{},
                     param::Pwm_Width{});
         break;
+    case kImpulse:
+        SetGuiKnobs(arg_knobs_,
+                    param::Impulse_NumSines{});
+        break;
     default:
         SetGuiKnobs(arg_knobs_);
         assert(false);

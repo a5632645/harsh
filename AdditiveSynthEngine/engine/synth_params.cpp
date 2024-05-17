@@ -40,6 +40,10 @@ SynthParams::SynthParams() {
     for (int arg_idx = 0; arg_idx < 6; ++arg_idx) {
         param_bank_.AddOrCreateIfNull(kPoly, "filter.arg{}", arg_idx);
     }
+    param_bank_.AddOrCreateIfNull<IntParameter>(kDisable, "filter.reso.type");
+    for (int arg_idx = 0; arg_idx < 6; ++arg_idx) {
+        param_bank_.AddOrCreateIfNull(kPoly, "filter.reso.arg{}", arg_idx);
+    }
 
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "resynthsis.enable");
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "resynthsis.formant_remap");

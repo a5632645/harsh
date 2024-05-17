@@ -23,13 +23,17 @@ private:
     // sub processor
     // ===============================================================
     void DoLowPassFilter(Partials& partials);
+    void DoHighPassFilter(Partials& partials);
+    void DoBandPassFilter(Partials& partials);
+    void DoBandStopFilter(Partials& partials);
+    void DoSmoothLowPassFilter(Partials& partials);
     float cutoff_semitone_;
+    float cutoff_knee_;
     float normalized_cutoff_;
+    float filter_width_;
     float resonance_;
+    float resonance_width_;
     float slope_;
-    float key_track_;
-    float final_cutoff_;
-    float final_cutoff_semitone_;
 
     // ===============================================================
     // comb filter
@@ -43,6 +47,7 @@ private:
     float comb_phase_;
     float comb_phaser_;
     float comb_depth_;
+    float key_track_;
 
     // ===============================================================
     // phaser filter

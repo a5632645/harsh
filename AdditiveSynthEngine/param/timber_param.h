@@ -13,6 +13,7 @@ struct TimberType : IntChoiceParam<TimberType> {
         kSync,
         kNoise,
         kPwm,
+        kImpulse,
         kNumEnums
     };
 
@@ -21,6 +22,7 @@ struct TimberType : IntChoiceParam<TimberType> {
         "sync"sv,
         "noise"sv,
         "pwm"sv,
+        "impulse"sv,
     };
 };
 
@@ -195,5 +197,17 @@ struct Pwm_Tilt : FloatParam<Pwm_Tilt> {
     static constexpr float kMax = 2.0f;
     static constexpr float kDefault = 1.0f;
     static constexpr int kTextPrecision = 2;
+};
+
+// =========================================================
+// impulse
+// =========================================================
+struct Impulse_NumSines : FloatParam<Impulse_NumSines> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "num"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = kMax;
+    static constexpr int kTextPrecision = 0;
 };
 }

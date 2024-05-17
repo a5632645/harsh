@@ -78,7 +78,7 @@ private:
     PhaseProcessor phase_;
     Timber timber_;
     Resynthesis resynthsis_;
-    Filter filter_;
+    std::unique_ptr<Filter> filter_;
     Effect effec0_;
     Effect effec1_;
     Effect effec2_;

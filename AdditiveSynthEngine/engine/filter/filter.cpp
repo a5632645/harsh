@@ -2,6 +2,7 @@
 
 #include <numbers>
 #include "param/param.h"
+#include "utli/convert.h"
 #include "param/filter_param.h"
 #include "engine/oscillor_param.h"
 
@@ -11,19 +12,27 @@ void Filter::Init(float sample_rate, float update_rate) {
 }
 
 void Filter::Process(Partials& partials) {
-    final_cutoff_ = std::lerp(normalized_cutoff_, partials.base_frequency, key_track_);
-    final_cutoff_semitone_ = std::lerp(cutoff_semitone_, partials.base_pitch, key_track_);
+    using enum param::Filter_Type::ParamEnum;
 
     switch (filter_type_) {
-    case param::Filter_Type::ParamEnum::kLowpass:
+    case kLowpass:
         DoLowPassFilter(partials);
         break;
-    case param::Filter_Type::ParamEnum::kCombFilter:
+    case kHighpass:
+        DoHighPassFilter(partials);
+        break;
+    case kBandpass:
+        DoBandPassFilter(partials);
+        break;
+    case kBandstop:
+        DoBandStopFilter(partials);
+        break;
+    case kCombFilter:
         SetCombCutoff(std::lerp(normalized_cutoff_, partials.base_frequency * std::exp2(cutoff_semitone_ / 12.0f), key_track_),
                       cutoff_semitone_);
         DoCombFilter(partials);
         break;
-    case param::Filter_Type::ParamEnum::kPhaser:
+    case kPhaser:
         DoPhaserFilter(partials);
         break;
     }
@@ -41,9 +50,12 @@ void Filter::OnUpdateTick() {
 
     cutoff_semitone_ = param::Filter_Cutoff::GetNumber(filter_args_);
     normalized_cutoff_ = std::exp2(cutoff_semitone_ / 12.0f) * 8.1758f * 2.0f / sample_rate_;
-    slope_ = param::Filter_Slope::GetNumber(filter_args_);
+    slope_ = param::Filter_Slope::GetNumber(filter_args_) / 12.0f; // make it db/oct
     key_track_ = param::Filter_KeyTracking::GetNumber(filter_args_);
     resonance_ = std::exp(0.11512925464970228420089957273422f * param::Filter_Resonance::GetNumber(filter_args_));
+    resonance_width_ = param::Filter_BandWidth::GetNumber(filter_args_);
+    cutoff_knee_ = param::Filter_Knee::GetNumber(filter_args_);
+    filter_width_ = param::Filter_BandWidth::GetNumber(filter_args_);
 
     // comb
     comb_shape_ = param::Filter_CombShape::GetNumber(filter_args_);
@@ -72,6 +84,187 @@ void Filter::OnNoteOff() {
 // low pass
 // ===============================================================
 void Filter::DoLowPassFilter(Partials& partials) {
+    // parabola lowpass, idea from compressor
+    float a1 = -slope_ / (4.0f * cutoff_knee_);
+    float b1 = slope_ * (cutoff_semitone_ - cutoff_knee_) / (2.0f * cutoff_knee_);
+    float c1 = -slope_ * (cutoff_semitone_ - cutoff_knee_) * (cutoff_semitone_ - cutoff_knee_) / (4.0f * cutoff_knee_);
+
+    for (int i = 0; i < kNumPartials; ++i) {
+        float output_db{};
+
+        // filter section
+        float knee_begin = cutoff_semitone_ - cutoff_knee_;
+        float knee_end = cutoff_semitone_ + cutoff_knee_;
+        float partial_p = partials.pitches[i];
+
+        if (partial_p < knee_begin) {
+            output_db = 0.0f;
+        }
+        else if (partial_p < knee_end) {
+            output_db = a1 * partial_p * partial_p + b1 * partial_p + c1;
+        }
+        else {
+            output_db = 0.0f - slope_ * (partial_p - cutoff_semitone_);
+        }
+
+        // resonance section
+
+        // gain
+        float gain = utli::DbToGain(output_db);
+        partials.gains[i] *= gain;
+    }
+}
+
+void Filter::DoHighPassFilter(Partials& partials) {
+    // parabola highpass
+    float a1 = -slope_ / (4.0f * cutoff_knee_);
+    float b1 = slope_ * (cutoff_semitone_ + cutoff_knee_) / (2.0f * cutoff_knee_);
+    float c1 = -slope_ * (cutoff_semitone_ + cutoff_knee_) * (cutoff_semitone_ + cutoff_knee_) / (4.0f * cutoff_knee_);
+
+    for (int i = 0; i < kNumPartials; ++i) {
+        float output_db{};
+
+        // filter section
+        float knee_begin = cutoff_semitone_ - cutoff_knee_;
+        float knee_end = cutoff_semitone_ + cutoff_knee_;
+        float partial_p = partials.pitches[i];
+
+        if (partial_p < knee_begin) {
+            output_db = 0.0f - slope_ * (cutoff_semitone_ - partial_p);
+        }
+        else if (partial_p < knee_end) {
+            output_db = a1 * partial_p * partial_p + b1 * partial_p + c1;
+        }
+        else {
+            output_db = 0.0f;
+        }
+
+        // resonance section
+
+        // gain
+        float gain = utli::DbToGain(output_db);
+        partials.gains[i] *= gain;
+    }
+}
+
+void Filter::DoBandPassFilter(Partials& partials) {
+    // point
+    auto lp_c = cutoff_semitone_ + filter_width_;
+    auto hp_c = cutoff_semitone_ - filter_width_;
+    auto hp_begin = hp_c - cutoff_knee_;
+    auto hp_end = hp_c + cutoff_knee_;
+    auto lp_begin = lp_c - cutoff_knee_;
+    auto lp_end = lp_c + cutoff_knee_;
+
+    // parabola lowpass
+    float a1 = -slope_ / (4.0f * cutoff_knee_);
+    float b1 = slope_ * (lp_c - cutoff_knee_) / (2.0f * cutoff_knee_);
+    float c1 = -slope_ * (lp_c - cutoff_knee_) * (lp_c - cutoff_knee_) / (4.0f * cutoff_knee_);
+
+    // parabola high pass
+    float a2 = -slope_ / (4.0f * cutoff_knee_);
+    float b2 = slope_ * (hp_c + cutoff_knee_) / (2.0f * cutoff_knee_);
+    float c2 = -slope_ * (hp_c + cutoff_knee_) * (hp_c + cutoff_knee_) / (4.0f * cutoff_knee_);
+
+    for (int i = 0; i < kNumPartials; ++i) {
+        float partial_p = partials.pitches[i];
+        float output_db{};
+
+        if (partial_p < hp_begin) {
+            output_db = 0.0f - slope_ * (hp_c - partial_p);
+        }
+        else if (partial_p < hp_end) {
+            output_db = a2 * partial_p * partial_p + b2 * partial_p + c2;
+        }
+        else if(partial_p < lp_begin){
+            output_db = 0.0f;
+        }
+        else if (partial_p < lp_end) {
+            output_db = a1 * partial_p * partial_p + b1 * partial_p + c1;
+        }
+        else {
+            output_db = 0.0f - slope_ * (partial_p - lp_c);
+        }
+
+        // gain
+        float gain = utli::DbToGain(output_db);
+        partials.gains[i] *= gain;
+    }
+}
+
+void Filter::DoBandStopFilter(Partials& partials) {
+    // point
+    auto lp_c = cutoff_semitone_ - filter_width_;
+    auto hp_c = cutoff_semitone_ + filter_width_;
+    auto hp_begin = hp_c - cutoff_knee_;
+    auto hp_end = hp_c + cutoff_knee_;
+    auto lp_begin = lp_c - cutoff_knee_;
+    auto lp_end = lp_c + cutoff_knee_;
+
+    // parabola lowpass
+    float a1 = -slope_ / (4.0f * cutoff_knee_);
+    float b1 = slope_ * (lp_c - cutoff_knee_) / (2.0f * cutoff_knee_);
+    float c1 = -slope_ * (lp_c - cutoff_knee_) * (lp_c - cutoff_knee_) / (4.0f * cutoff_knee_);
+
+    // parabola high pass
+    float a2 = -slope_ / (4.0f * cutoff_knee_);
+    float b2 = slope_ * (hp_c + cutoff_knee_) / (2.0f * cutoff_knee_);
+    float c2 = -slope_ * (hp_c + cutoff_knee_) * (hp_c + cutoff_knee_) / (4.0f * cutoff_knee_);
+
+    for (int i = 0; i < kNumPartials; ++i) {
+        float partial_p = partials.pitches[i];
+        float output_db{};
+
+        if (partial_p < lp_begin) {
+            output_db = 0.0f;
+        }
+        else if (partial_p < lp_end) {
+            output_db = a1 * partial_p * partial_p + b1 * partial_p + c1;
+        }
+        else if (partial_p < cutoff_semitone_) {
+            output_db = 0.0f - slope_ * (partial_p - lp_c);
+        }
+        else if(partial_p < hp_begin){
+            output_db = 0.0f - slope_ * (hp_c - partial_p);
+        }
+        else if(partial_p < hp_end){
+            output_db = a2 * partial_p * partial_p + b2 * partial_p + c2;
+        }
+        else {
+            output_db = 0.0f;
+        }
+
+        // gain
+        float gain = utli::DbToGain(output_db);
+        partials.gains[i] *= gain;
+    }
+}
+
+void Filter::DoSmoothLowPassFilter(Partials& partials) {
+    for (int i = 0; i < kNumPartials; ++i) {
+        auto pitch = partials.pitches[i];
+        auto reso_begin = cutoff_semitone_ - resonance_width_;
+        auto reso_end = cutoff_semitone_ + resonance_width_;
+        if (pitch < reso_begin) { // nothing
+        }
+        else if (pitch < cutoff_semitone_) {        // pass to reso
+            auto db = std::lerp(0.0f, resonance_, 0.5f - 0.5f * std::cos(std::numbers::pi_v<float> *(pitch - reso_begin) / resonance_width_));
+            auto gain = utli::DbToGain(db);
+            partials.gains[i] *= gain;
+        }
+        else if (pitch < reso_end) {               // cutoff to reso
+            auto db_at_reso = resonance_ - slope_ * resonance_width_ / 12.0f;
+            auto db = std::lerp(db_at_reso, resonance_, 0.5f + 0.5f * std::cos(std::numbers::pi_v<float> *(pitch - cutoff_semitone_) / resonance_width_));
+            auto gain = utli::DbToGain(db);
+            partials.gains[i] *= gain;
+        }
+        else {                                     // cutoff to stop
+            auto k = -slope_;
+            auto db = resonance_ + k * (pitch - cutoff_semitone_) / 12.0f;
+            auto gain = utli::DbToGain(db);
+            partials.gains[i] *= gain;
+        }
+    }
 }
 
 // ===============================================================
