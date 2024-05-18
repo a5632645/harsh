@@ -28,10 +28,11 @@ void UnisonLayout::Paint() {
 }
 
 void UnisonLayout::SetBounds(Rectangle bound) {
-    type_.SetBounds({ bound.x, bound.y,bound.width / 2 ,16 });
-    num_voice_.SetBounds({ bound.x + bound.width / 2, bound.y,bound.width / 2, 16 });
-    pitch_.set_bound({ bound.x, bound.y + 16,50,50 });
-    phase_.set_bound({ bound.x + 50, bound.y + 16,50,50 });
-    pitch_.set_bound({ bound.x + 100, bound.y + 16,50,50 });
+    auto left_x = bound.x + bound.width - 50.0f;
+    type_.SetBounds({ bound.x + bound.width - 50.0f - 24.0f, bound.y,50 ,16 });
+    num_voice_.SetBounds({ bound.x + bound.width - 24.0f, bound.y,24, 16 });
+    pitch_.set_bound({ left_x, bound.y + 16,50,50 });
+    phase_.set_bound({ left_x, bound.y + 16 + 50,50,50 });
+    pan_.set_bound({ left_x, bound.y + 16 + 100,50,50 });
 }
 }

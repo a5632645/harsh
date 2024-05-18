@@ -19,6 +19,20 @@ private:
     param::Filter_Type::ParamEnum filter_type_;
     float sample_rate_;
 
+    // resonance
+    IntParameter* arg_reso_type_{};
+    std::array<PolyModuFloatParameter*, 6> reso_args_;
+    void RampReso(Partials& partials);
+    void DoubleRampReso(Partials& partials);
+    void CosReso(Partials& partials);
+    void DoubleCosReso(Partials& partials);
+    void ParabolaReso(Partials& partials);
+    void DoubleParabolaReso(Partials& partials);
+    void PhaserReso(Partials& partials);
+    float resonance_;
+    float resonance_width_;
+    float reso_phaser_cycles_;
+
     // ===============================================================
     // sub processor
     // ===============================================================
@@ -31,8 +45,6 @@ private:
     float cutoff_knee_;
     float normalized_cutoff_;
     float filter_width_;
-    float resonance_;
-    float resonance_width_;
     float slope_;
 
     // ===============================================================

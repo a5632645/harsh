@@ -59,7 +59,7 @@ struct Unison_Pitch : FloatParam<Unison_Pitch> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 1.0f;
     static constexpr float kDefault = 0.0f;
-    static constexpr int kTextPrecision = 1;
+    static constexpr int kTextPrecision = 2;
     static constexpr auto kStuff = "st";
 };
 

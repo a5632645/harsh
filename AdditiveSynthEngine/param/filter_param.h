@@ -26,6 +26,68 @@ struct Filter_Type : IntChoiceParam<Filter_Type> {
     };
 };
 
+struct ResonanceType : IntChoiceParam<ResonanceType> {
+    enum class ParamEnum {
+        kRamp = 0,
+        kCos,
+        kParabola,
+        kPhaser,
+        kNumEnums
+    };
+
+    static constexpr std::array kNames{
+        "ramp"sv,
+        "cos"sv,
+        "parabola"sv,
+        "phaser"sv
+    };
+};
+
+// ============================================================
+// ramp, cos, parabola
+// ============================================================
+struct Reso_Resonance : FloatParam<Reso_Resonance> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "resonance"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 20.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kStuff = "dB"sv;
+};
+
+struct Reso_ResonanceWidth : FloatParam<Reso_ResonanceWidth> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "reso.w"sv;
+    static constexpr float kMin = 0.1f;
+    static constexpr float kMax = 24.0f;
+    static constexpr float kDefault = 12.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kStuff = "st"sv;
+};
+
+// ============================================================
+// phaser reso
+// ============================================================
+struct Reso_PhaserCycles : FloatParam<Reso_PhaserCycles> {
+    static constexpr int kArgIdx = 2;
+    static constexpr auto kName = "cycles"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 20.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 1;
+};
+
+struct Reso_PhaserResoWidth : FloatParam<Reso_PhaserResoWidth> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "reso.w"sv;
+    static constexpr float kMin = 0.1f;
+    static constexpr float kMax = 120.0f;
+    static constexpr float kDefault = 12.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kStuff = "st"sv;
+};
+
 // ============================================================
 // low pass
 // ============================================================
@@ -37,16 +99,6 @@ struct Filter_Cutoff : FloatParam<Filter_Cutoff> {
     static constexpr int kTextPrecision = 1;
     static constexpr auto kName = "cutoff"sv;
     static constexpr auto kStuff = "st"sv;
-};
-
-struct Filter_Resonance : FloatParam<Filter_Resonance> {
-    static constexpr int kArgIdx = 1;
-    static constexpr auto kName = "resonance"sv;
-    static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 20.0f;
-    static constexpr float kDefault = 0.0f;
-    static constexpr int kTextPrecision = 1;
-    static constexpr auto kStuff = "dB"sv;
 };
 
 struct Filter_Slope : FloatParam<Filter_Slope> {

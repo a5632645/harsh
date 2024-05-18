@@ -12,9 +12,12 @@ public:
 
     void Paint();
     void SetBounds(int x, int y, int w, int h);
+    void OnResonanceTypeChanged(int c);
 private:
     void OnFilterTypeChanged(int c);
     WrapDropBox filter_type_;
-    std::array<Knob, 6> arg_knobs_;
+    WrapDropBox reso_type_;
+    std::array<Knob, 6> arg_filter_knobs_;
+    std::array<Knob, 6> arg_reso_knobs_;
 };
 }

@@ -44,12 +44,12 @@ void SynthLayout::SetBounds(int x, int y, int w, int h) {
     timber_layout_.SetBounds(x + 0, y + 0, 200, 12 + 70);
     dissonance_layout_.SetBounds(x + 250, y + 0, 100, 152);
     filter_layout_.SetBounds(x + 350, y + 0, 150, 156);
-    unison_layout_.SetBounds({ x + 500.0f, y + 0.0f, 150.0f, 156.0f });
     effect_layout0_.SetBounds(x + 0, y + 156 + 16, 150, 156);
     effect_layout1_.SetBounds(x + 150, y + 156 + 16, 150, 156);
     effect_layout2_.SetBounds(x + 300, y + 156 + 16, 150, 156);
     effect_layout3_.SetBounds(x + 450, y + 156 + 16, 150, 156);
     effect_layout4_.SetBounds(x + 600, y + 156 + 16, 150, 156);
     standard_layout_.SetBounds(x + w - 100, y, 100, 70);
+    unison_layout_.SetBounds({ x + w - 150.0f, y + 170.0f, 150.0f, 156.0f });
 }
 }
