@@ -9,6 +9,7 @@
 namespace mana {
 void Filter::Init(float sample_rate, float update_rate) {
     sample_rate_ = sample_rate;
+    formant_filter_.Init(sample_rate, update_rate);
 }
 
 void Filter::Process(Partials& partials) {
@@ -34,6 +35,9 @@ void Filter::Process(Partials& partials) {
         return;
     case kPhaser:
         DoPhaserFilter(partials);
+        return;
+    case kFormant:
+        formant_filter_.Process(partials);
         return;
     }
 
@@ -80,6 +84,7 @@ void Filter::PrepareParams(OscillorParams & params) {
     for (int i = 0; auto & parg : reso_args_) {
         parg = params.GetPolyFloatParam("filter.reso.arg{}", i++);
     }
+    formant_filter_.PrepareParams(params);
 }
 
 void Filter::OnUpdateTick() {
@@ -112,12 +117,16 @@ void Filter::OnUpdateTick() {
     phaser_shape_ = param::Filter_PhaserShape::GetNumber(filter_args_);
     phaser_begin_pitch_ = cutoff_semitone_ - phaser_width_ * 0.5f;
     phaser_end_pitch_ = cutoff_semitone_ + phaser_width_ * 0.5f;
+
+    formant_filter_.OnUpdateTick();
 }
 
 void Filter::OnNoteOn(int note) {
+    formant_filter_.OnNoteOn(note);
 }
 
 void Filter::OnNoteOff() {
+    formant_filter_.OnNoteOff();
 }
 
 // ===============================================================

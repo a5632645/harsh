@@ -3,6 +3,7 @@
 #include "engine/oscillor_param.h"
 #include "param/filter_param.h"
 #include "engine/partials.h"
+#include "formant_filter.h"
 
 namespace mana {
 class Filter {
@@ -73,5 +74,8 @@ private:
     float phaser_notches_;
     float phaser_begin_pitch_;
     float phaser_end_pitch_;
+
+    // formant
+    FormantFilter formant_filter_;
 };
 }

@@ -13,6 +13,7 @@ struct Filter_Type : IntChoiceParam<Filter_Type> {
         kBandstop,
         kCombFilter,
         kPhaser,
+        kFormant,
         kNumEnums
     };
 
@@ -22,7 +23,8 @@ struct Filter_Type : IntChoiceParam<Filter_Type> {
         "bandpass"sv,
         "bandstop"sv,
         "comb"sv,
-        "phaser"sv
+        "phaser"sv,
+        "formant"sv
     };
 };
 
@@ -203,4 +205,79 @@ struct Filter_PhaserWidth : FloatParam<Filter_PhaserWidth> {
 using Filter_PhaserDepth = Filter_CombDepth;
 using Filter_PhaserShape = Filter_CombShape;
 using Filter_PhaserPhase = Filter_CombPhase;
+
+// ============================================================
+// vowel
+// ============================================================
+struct VowelFilter_Formant : FloatParam<VowelFilter_Formant> {
+    static constexpr int kArgIdx = 0;
+    static constexpr float kMin = -24.0f;
+    static constexpr float kMax = 24.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kName = "formant"sv;
+    static constexpr auto kStuff = "st"sv;
+};
+
+struct VowelFilter_Singer : FloatChoiceParam<VowelFilter_Singer> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "singer"sv;
+    static constexpr std::array kNames{
+        "soprano"sv,
+        "alto"sv,
+        "countertenor"sv,
+        "tenor"sv,
+        "bass"sv
+    };
+
+    enum class ParamEnum {
+        kSoprano = 0,
+        kAlto,
+        kCountertenor,
+        kTenor,
+        kBass,
+        kNumEnums
+    };
+};
+
+struct VowelFilter_Slope : FloatParam<VowelFilter_Slope> {
+    static constexpr int kArgIdx = 2;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 48.0f;
+    static constexpr float kDefault = 12.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kName = "slope"sv;
+    static constexpr auto kStuff = "dB"sv;
+};
+
+struct VowelFilter_Resonance : FloatParam<VowelFilter_Resonance> {
+    static constexpr int kArgIdx = 3;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 20.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kName = "resonance"sv;
+    static constexpr auto kStuff = "dB"sv;
+};
+
+struct VowelFilter_Select : FloatChoiceParam<VowelFilter_Select> {
+    static constexpr int kArgIdx = 4;
+    static constexpr auto kName = "resonance"sv;
+    static constexpr std::array kNames{
+        "a"sv,
+        "e"sv,
+        "i"sv,
+        "o"sv,
+        "u"sv
+    };
+
+    enum class ParamEnum {
+        kA = 0,
+        kE,
+        kI,
+        kO,
+        kU,
+        kNumEnums
+    };
+};
 }

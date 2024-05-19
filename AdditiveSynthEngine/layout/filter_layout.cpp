@@ -117,6 +117,14 @@ void FilterLayout::OnFilterTypeChanged(int c) {
                     param::Filter_PhaserDepth{},
                     param::Filter_PhaserWidth{});
         break;
+    case kFormant:
+        SetGuiKnobs(arg_filter_knobs_,
+                    param::VowelFilter_Formant{},
+                    param::VowelFilter_Resonance{},
+                    param::VowelFilter_Select{},
+                    param::VowelFilter_Singer{},
+                    param::VowelFilter_Slope{});
+        break;
     }
 }
 }
