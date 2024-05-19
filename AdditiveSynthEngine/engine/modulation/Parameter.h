@@ -28,8 +28,8 @@ public:
         FloatParameter(ModulationType modulation_type, std::format_string<T...> format_text, T&&... args) : id_(std::format(format_text, std::forward<T>(args)...)), modulation_type_(modulation_type) {}
 
     virtual ~FloatParameter() = default;
-    FloatParameter(FloatParameter const&) = default;
-    FloatParameter(FloatParameter&&) = default;
+    FloatParameter(FloatParameter const&) = delete;
+    FloatParameter(FloatParameter&&) = delete;
     FloatParameter& operator=(FloatParameter const&) = default;
     FloatParameter& operator=(FloatParameter&&) = default;
 
