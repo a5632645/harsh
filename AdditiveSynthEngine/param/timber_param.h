@@ -8,6 +8,8 @@ namespace mana::param {
 using namespace std::string_view_literals;
 
 struct TimberType : IntChoiceParam<TimberType> {
+    static constexpr auto kName = "type"sv;
+
     enum class ParamEnum {
         kDualSaw = 0,
         kSync,

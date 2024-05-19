@@ -21,5 +21,13 @@ struct PolyModuFloatParameter {
         auto nor_v = synth_param_ref->Get01Value() + modulation_value;
         return std::clamp(nor_v, 0.0f, 1.0f);
     }
+
+    float GetValueNoModu() const {
+        return synth_param_ref->GetValue();
+    }
+
+    float Get01ValueNoModu() const {
+        return synth_param_ref->Get01Value();
+    }
 };
 }

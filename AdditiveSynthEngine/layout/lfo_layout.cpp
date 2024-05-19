@@ -18,7 +18,7 @@ LfoLayout::LfoLayout(Synth& synth, int idx) {
 
     restart_.SetParameter(bank.GetParamPtr<BoolParameter>(std::format("lfo{}.restart", idx)));
     restart_.SetText("restart");
-    wave_type_.SetParameter(bank.GetParamPtr<IntParameter>(std::format("lfo{}.wave_type", idx)));
+    wave_type_.SetParameter(bank.GetParamPtr<IntChoiceParameter>(std::format("lfo{}.wave_type", idx)));
     wave_type_.SetChoices(param::LFO_WaveType::kNames);
 }
 

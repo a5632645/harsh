@@ -18,7 +18,7 @@ public:
 private:
     const int effect_idx_;
     BoolParameter* is_enable_{};
-    IntParameter* effect_type_arg_{};
+    IntChoiceParameter* effect_type_arg_{};
     EffectParams effect_args_;
     CurveManager* curve_manager_;
     param::EffectType::ParamEnum effect_type_{};

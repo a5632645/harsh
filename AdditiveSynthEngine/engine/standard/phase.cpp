@@ -27,7 +27,7 @@ void PhaseProcessor::OnUpdateTick() {
 }
 
 void PhaseProcessor::PrepareParams(OscillorParams & params) {
-    type_ = params.GetParam<IntParameter>("phase.type");
+    type_ = params.GetParam<IntChoiceParameter>("phase.type");
     arg0_ = params.GetPolyFloatParam("phase.arg0");
     arg1_ = params.GetPolyFloatParam("phase.arg1");
 }

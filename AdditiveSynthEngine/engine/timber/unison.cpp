@@ -11,8 +11,8 @@ void Unison::Init(float sample_rate, float update_rate) {
 }
 
 void Unison::PrepareParams(OscillorParams& params) {
-    unison_type_ = params.GetParam<IntParameter>("unison.type");
-    num_voice_ = params.GetParam<IntParameter>("unison.num_voice");
+    unison_type_ = params.GetParam<IntChoiceParameter>("unison.type");
+    num_voice_ = params.GetParam<IntChoiceParameter>("unison.num_voice");
     pitch_ = params.GetPolyFloatParam("unison.pitch");
     phase_ = params.GetPolyFloatParam("unison.phase");
     pan_ = params.GetPolyFloatParam("unison.pan");

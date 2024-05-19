@@ -31,7 +31,7 @@ void Effect::Init(float sample_rate, float update_rate) {
 
 void Effect::PrepareParams(OscillorParams& params) {
     is_enable_ = params.GetParam<BoolParameter>("effect{}.enable", effect_idx_);
-    effect_type_arg_ = params.GetParam<IntParameter>("effect{}.type", effect_idx_);
+    effect_type_arg_ = params.GetParam<IntChoiceParameter>("effect{}.type", effect_idx_);
 
     for (int i = 0; auto & parg : effect_args_.args) {
         parg = params.GetPolyFloatParam("effect{}.arg{}", effect_idx_, i++);

@@ -24,7 +24,7 @@ private:
     std::default_random_engine rand_;
 
     std::array<float, kNumPartials> random_phases_{};
-    IntParameter* type_;
+    IntChoiceParameter* type_;
     param::PhaseType::ParamEnum process_type_{};
     PolyModuFloatParameter* arg0_{};
     PolyModuFloatParameter* arg1_{};

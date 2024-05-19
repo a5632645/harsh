@@ -22,7 +22,7 @@ private:
     PolyModuFloatParameter* arg_lfo_rate_{};
     BoolParameter* restart_{};
     PolyModuFloatParameter* arg_output_level_{};
-    IntParameter* arg_wave_type_{};
+    IntChoiceParameter* arg_wave_type_{};
 
     const int idx_{};
     float inv_update_rate_{};

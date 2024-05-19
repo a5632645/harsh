@@ -24,7 +24,7 @@ public:
 private:
     const int idx_;
     OscParam osc_param_{};
-    IntParameter* timber_type_arg_{};
+    IntChoiceParameter* timber_type_arg_{};
     std::tuple<DualSaw,
         Sync,
         Noise,

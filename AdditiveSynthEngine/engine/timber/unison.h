@@ -21,8 +21,8 @@ private:
     std::array<float, 9> voice_ratios_;
     std::array<float, 9> voice_phases_;
 
-    IntParameter* unison_type_{};
-    IntParameter* num_voice_{};
+    IntChoiceParameter* unison_type_{};
+    IntChoiceParameter* num_voice_{};
     PolyModuFloatParameter* pitch_{};
     PolyModuFloatParameter* phase_{};
     PolyModuFloatParameter* pan_{};

@@ -17,7 +17,7 @@ private:
     void DoPitchQuantize(Partials& partials);
 
     BoolParameter* is_enable_param_{};
-    IntParameter* diss_type_{};
+    IntChoiceParameter* diss_type_{};
     std::array<PolyModuFloatParameter*, 2>args_{};
     CurveManager::Curve* pitch_quantize_map_{};
 

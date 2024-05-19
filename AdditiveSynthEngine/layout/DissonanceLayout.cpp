@@ -9,7 +9,7 @@
 namespace mana {
 DissonanceLayout::DissonanceLayout(Synth& synth)
     : is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("dissonance.enable"))
-    , type_(synth.GetParamBank().GetParamPtr<IntParameter>("dissonance.type")) {
+    , type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("dissonance.type")) {
     type_.SetChoices(param::DissonanceType::kNames);
     type_.on_choice_changed = [this](int c) {OnDissonanceTypeChanged(c); };
 

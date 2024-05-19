@@ -6,13 +6,19 @@
 #include <ranges>
 #include <raygui-cpp/DropdownBox.h>
 #include "engine/modulation/Parameter.h"
+#include <cassert>
 
 namespace mana {
 class WrapDropBox : public rgc::DropdownBox {
 public:
-    WrapDropBox(IntParameter* p = nullptr) : parameter(p) { SetActive(&m_item_selected); }
+    WrapDropBox(IntChoiceParameter* p = nullptr) : parameter(p) { SetActive(&m_item_selected); }
 
-    void SetParameter(IntParameter* p) { parameter = p; }
+    void SetParameter(IntChoiceParameter* p) {
+        assert(p != nullptr);
+
+        parameter = p;
+        SetChoices(p->choices_);
+    }
 
     void Paint();
 
@@ -24,7 +30,7 @@ public:
     || std::same_as<std::decay_t<std::ranges::range_value_t<rng>>, std::string_view>
         void SetChoices(rng&& choices) {
         m_concated_string.clear();
-        
+
         for (auto&& c : choices) {
             choice_strings_.emplace_back(c);
         }
@@ -44,7 +50,7 @@ public:
 
     std::function<void(int)> on_choice_changed = [](int) {};
 private:
-    IntParameter* parameter;
+    IntChoiceParameter* parameter;
     std::string m_concated_string;
     std::vector<std::string> choice_strings_;
     bool m_is_edit_mode{};

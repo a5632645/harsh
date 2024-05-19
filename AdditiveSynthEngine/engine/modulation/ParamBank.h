@@ -12,17 +12,31 @@
 namespace mana {
 class ParamBank {
 public:
-    template<IsParamter Type = FloatParameter>
-    ParamBank& AddOrCreateIfNull(ModulationType type, ParamRange range, std::string_view id) {
-        parameters_[std::string(id)] = std::make_unique<Type>(type, std::move(range), id);
-        return *this;
+    /*template<IsParamter Type = FloatParameter>
+    Type& AddOrCreateIfNull(ModulationType type, ParamRange range, std::string_view id) {
+        auto e = std::make_unique<Type>(type, std::move(range), id);
+        auto& v = *e;
+        parameters_[std::string(id)] = std::move(e);
+        return v;
+    }*/
+
+    template<IsParamter Type = FloatParameter, class... T>/* requires (sizeof...(T) >= 1)*/
+    Type& AddOrCreateIfNull(ModulationType type,
+                            ParamRange range,
+                            std::string_view name,
+                            std::format_string<T...> format_text, T&&...args) {
+        auto e = std::make_unique<Type>(type, std::move(range), name, format_text, std::forward<T>(args)...);
+        auto& v = *e;
+        parameters_[e->GetIdStringRef()] = std::move(e);
+        return v;
     }
 
-    template<IsParamter Type = FloatParameter, class... T> requires (sizeof...(T) >= 1)
-        ParamBank& AddOrCreateIfNull(ModulationType type, ParamRange range, std::format_string<T...> format_text, T&&...args) {
-        auto id = std::format(format_text, std::forward<T>(args)...);
-        parameters_[id] = std::make_unique<Type>(type, range, id);
-        return *this;
+    template<IsParamter Type>
+    void AddParameter(std::unique_ptr<Type> param) {
+        assert(param != nullptr);
+        const auto& str_id = param->GetIdStringRef();
+        assert(!parameters_.contains(str_id));
+        parameters_[str_id] = std::move(param);
     }
 
     template<IsParamter Type = FloatParameter, class... T> requires (sizeof...(T) >= 1)

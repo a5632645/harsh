@@ -8,13 +8,12 @@
 namespace mana {
 StandardLayout::StandardLayout(Synth& synth)
     : synth_(synth)
-    , phase_type_(synth.GetParamBank().GetParamPtr<IntParameter>("phase.type")) {
+    , phase_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("phase.type")) {
     const auto& bank = synth.GetParamBank();
-    pitch_bend_.set_parameter(bank.GetParamPtr("pitch_bend"));
-    output_gain_.set_parameter(bank.GetParamPtr("output_gain"));
-
-    SetSingeKnobInfo(pitch_bend_, param::PitchBend{});
-    SetSingeKnobInfo(output_gain_, param::OutputGain{});
+    pitch_bend_.set_parameter(bank.GetParamPtr("pitch_bend"))
+        .set_title(param::PitchBend::kName);
+    output_gain_.set_parameter(bank.GetParamPtr("output_gain"))
+        .set_title(param::OutputGain::kName);
 
     // phases
     phase_type_.SetChoices(param::PhaseType::kNames);

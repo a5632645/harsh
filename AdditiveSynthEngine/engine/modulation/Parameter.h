@@ -6,6 +6,7 @@
 #include <atomic>
 #include <format>
 #include "param_range.h"
+#include <functional>
 
 namespace mana {
 enum class ModulationType {
@@ -24,12 +25,15 @@ public:
 
     static constexpr auto kTypeEnum = ParamType::kFloat;
 
-    FloatParameter(ModulationType modulation_type, ParamRange range, std::string_view id)
-        : id_(id), modulation_type_(modulation_type), range_(std::move(range)) {}
+    //FloatParameter(ModulationType modulation_type, ParamRange range, std::string_view id)
+    //    : id_(id), modulation_type_(modulation_type), range_(std::move(range)) {}
 
-    template<class...T> requires (sizeof...(T) >= 1)
-        FloatParameter(ModulationType modulation_type, ParamRange range, std::format_string<T...> format_text, T&&... args)
-        : id_(std::format(format_text, std::forward<T>(args)...)), modulation_type_(modulation_type), range_(std::move(range)) {}
+    template<class...T>/* requires (sizeof...(T) >= 1)*/
+    FloatParameter(ModulationType modulation_type, ParamRange range, std::string_view name, std::format_string<T...> format_text, T&&... args)
+        : id_(std::format(format_text, std::forward<T>(args)...))
+        , modulation_type_(modulation_type)
+        , range_(std::move(range))
+        , name_(name) {}
 
     virtual ~FloatParameter() = default;
     FloatParameter(FloatParameter const&) = delete;
@@ -44,17 +48,22 @@ public:
     void Set01Value(float new_val) { value_.store(new_val); }
 
     ModulationType GetModulationType() const { return modulation_type_; }
-    std::string_view GetId() const { return id_; }
+    std::string_view GetIdStringView() const { return id_; }
+    const std::string& GetIdStringRef() const { return id_; }
     const ParamRange& GetRange() const { return range_; }
     virtual ParamType GetParamType() const { return ParamType::kFloat; }
+
+    std::function<std::string(float v)> value_to_text = [](float v) {return std::to_string(v); };
+    std::string GetValueText() const { return value_to_text(GetValue()); }
 protected:
     std::string id_;
+    std::string name_;
     ModulationType modulation_type_;
     ParamRange range_;
     std::atomic<float> value_{};
 };
 
-class IntParameter : public FloatParameter {
+class IntChoiceParameter : public FloatParameter {
 public:
     static constexpr auto kTypeEnum = ParamType::kInt;
 
@@ -63,8 +72,10 @@ public:
     void SetInt(int v) { SetValue(static_cast<float>(v)); }
     int GetInt() const { return static_cast<int>(std::round(GetValue())); }
     operator int() const { return GetInt(); }
-
+    decltype(auto) GetChoices() const { return (choices_); }
     ParamType GetParamType() const override { return ParamType::kInt; }
+
+    std::vector<std::string_view> choices_;
 };
 
 class BoolParameter : public FloatParameter {
@@ -81,5 +92,5 @@ public:
 };
 
 template<class Type>
-concept IsParamter = std::same_as<Type, FloatParameter> || std::same_as<Type, IntParameter> || std::same_as<Type, BoolParameter>;
+concept IsParamter = std::same_as<Type, FloatParameter> || std::same_as<Type, IntChoiceParameter> || std::same_as<Type, BoolParameter>;
 }

@@ -16,7 +16,7 @@ void mana::OscillorParams::ConnectSynthParam(SynthParams& synth_param) {
         if (v->GetModulationType() == ModulationType::kPoly) {
             // add to oscillor params
             auto& p = poly_modu_params_.emplace_back(std::make_unique<PolyModuFloatParameter>(v.get()));
-            oscillor_param_table_[v->GetId()] = p.get();
+            oscillor_param_table_[v->GetIdStringView()] = p.get();
         }
     }
 }

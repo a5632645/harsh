@@ -72,15 +72,14 @@ void Filter::Process(Partials& partials) {
         }
         break;
     }
-    
 }
 
 void Filter::PrepareParams(OscillorParams & params) {
-    filter_type_arg_ = params.GetParam<IntParameter>("filter.type");
+    filter_type_arg_ = params.GetParam<IntChoiceParameter>("filter.type");
     for (int i = 0; auto & parg : filter_args_) {
         parg = params.GetPolyFloatParam("filter.arg{}", i++);
     }
-    arg_reso_type_ = params.GetParam<IntParameter>("filter.reso.type");
+    arg_reso_type_ = params.GetParam<IntChoiceParameter>("filter.reso.type");
     for (int i = 0; auto & parg : reso_args_) {
         parg = params.GetPolyFloatParam("filter.reso.arg{}", i++);
     }
@@ -223,7 +222,7 @@ void Filter::DoBandPassFilter(Partials& partials) {
         else if (partial_p < hp_end) {
             output_db = a2 * partial_p * partial_p + b2 * partial_p + c2;
         }
-        else if(partial_p < lp_begin){
+        else if (partial_p < lp_begin) {
             output_db = 0.0f;
         }
         else if (partial_p < lp_end) {
@@ -271,10 +270,10 @@ void Filter::DoBandStopFilter(Partials& partials) {
         else if (partial_p < cutoff_semitone_) {
             output_db = 0.0f - slope_ * (partial_p - lp_c);
         }
-        else if(partial_p < hp_begin){
+        else if (partial_p < hp_begin) {
             output_db = 0.0f - slope_ * (hp_c - partial_p);
         }
-        else if(partial_p < hp_end){
+        else if (partial_p < hp_end) {
             output_db = a2 * partial_p * partial_p + b2 * partial_p + c2;
         }
         else {
@@ -461,7 +460,7 @@ inline static constexpr float SimpleCosReso(float c, float b, float r, float p) 
 }
 
 void Filter::CosReso(Partials& partials) {
-    for(int i = 0; i < kNumPartials; ++i) {
+    for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
         auto db = SimpleCosReso(cutoff_semitone_, resonance_width_, resonance_, partial_p);
         auto gain = utli::DbToGain(db);
@@ -470,7 +469,7 @@ void Filter::CosReso(Partials& partials) {
 }
 
 void Filter::DoubleCosReso(Partials& partials) {
-    for(int i = 0; i < kNumPartials; ++i) {
+    for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
         auto db_left = SimpleCosReso(cutoff_semitone_ - filter_width_, resonance_width_, resonance_, partial_p);
         auto db_right = SimpleCosReso(cutoff_semitone_ + filter_width_, resonance_width_, resonance_, partial_p);
@@ -514,7 +513,7 @@ inline static constexpr float SimpleParabolaReso(const ParabolaResoCoeff& c, flo
 }
 
 void Filter::ParabolaReso(Partials& partials) {
-    ParabolaResoCoeff c{cutoff_semitone_, resonance_width_, resonance_};
+    ParabolaResoCoeff c{ cutoff_semitone_, resonance_width_, resonance_ };
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
         auto db = SimpleParabolaReso(c, partial_p);
@@ -524,8 +523,8 @@ void Filter::ParabolaReso(Partials& partials) {
 }
 
 void Filter::DoubleParabolaReso(Partials& partials) {
-    ParabolaResoCoeff left{cutoff_semitone_ - filter_width_, resonance_width_, resonance_};
-    ParabolaResoCoeff right{cutoff_semitone_ + filter_width_, resonance_width_, resonance_};
+    ParabolaResoCoeff left{ cutoff_semitone_ - filter_width_, resonance_width_, resonance_ };
+    ParabolaResoCoeff right{ cutoff_semitone_ + filter_width_, resonance_width_, resonance_ };
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
         auto db_left = SimpleParabolaReso(left, partial_p);
@@ -546,7 +545,6 @@ void Filter::PhaserReso(Partials& partials) {
         float partial_p = partials.pitches[i];
 
         if (partial_p < reso_begin || partial_p > reso_end) {
-
         }
         else if (partial_p < cutoff_semitone_) {
             float cos_v = std::cos(f * (partial_p - cutoff_semitone_)) * 0.5f + 0.5f;

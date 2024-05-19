@@ -8,8 +8,8 @@
 namespace mana {
 UnisonLayout::UnisonLayout(SynthParams& params) {
     auto& bank = params.GetParamBank();
-    type_.SetParameter(bank.GetParamPtr<IntParameter>("unison.type"));
-    num_voice_.SetParameter(bank.GetParamPtr<IntParameter>("unison.num_voice"));
+    type_.SetParameter(bank.GetParamPtr<IntChoiceParameter>("unison.type"));
+    num_voice_.SetParameter(bank.GetParamPtr<IntChoiceParameter>("unison.num_voice"));
     pitch_.set_parameter(bank.GetParamPtr("unison.pitch"));
     SetSingeKnobInfo(pitch_, param::Unison_Pitch{});
     phase_.set_parameter(bank.GetParamPtr("unison.phase"));

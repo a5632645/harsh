@@ -183,7 +183,7 @@ void Dissonance::PrepareParams(OscillorParams& params) {
     pitch_quantize_map_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("dissonance.pitch_quantize");
 
     is_enable_param_ = params.GetParam<BoolParameter>("dissonance.enable");
-    diss_type_ = params.GetParam<IntParameter>("dissonance.type");
+    diss_type_ = params.GetParam<IntChoiceParameter>("dissonance.type");
 
     for (int i = 0; auto & arg : args_) {
         arg = params.GetPolyFloatParam("dissonance.arg{}", i++);

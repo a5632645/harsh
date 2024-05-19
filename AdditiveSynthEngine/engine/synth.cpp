@@ -76,7 +76,7 @@ void Synth::Render(size_t numFrame) {
         }
     }
 
-    auto output_gain = utli::DbToGain(param::OutputGain::GetNumber(output_gain_->Get01Value()));
+    auto output_gain = utli::DbToGain(output_gain_->GetValue());
     std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [output_gain](float v) {return v * output_gain; });
 }
 

@@ -28,7 +28,7 @@ void LFO::PrepareParams(OscillorParams& params) {
     arg_lfo_rate_ = params.GetPolyFloatParam("lfo{}.rate", idx_);
     restart_ = params.GetParam<BoolParameter>("lfo{}.restart", idx_);
     arg_output_level_ = params.GetPolyFloatParam("lfo{}.level", idx_);
-    arg_wave_type_ = params.GetParam<IntParameter>("lfo{}.wave_type", idx_);
+    arg_wave_type_ = params.GetParam<IntChoiceParameter>("lfo{}.wave_type", idx_);
     wave_curve_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("lfo{}.wave", idx_);
 }
 

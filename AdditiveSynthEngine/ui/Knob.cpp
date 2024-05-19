@@ -41,7 +41,7 @@ void Knob::display() {
         m_value = newValue;
 
         if (m_parameter != nullptr) {
-            m_parameter->SetValue(m_value);
+            m_parameter->Set01Value(m_value);
         }
     }
     else if (isNowDown && !m_isPressed) {
@@ -66,7 +66,7 @@ void Knob::display() {
         m_counter = 0;
         m_isPressed = false;
         if (m_parameter != nullptr) {
-            m_parameter->SetValue(m_value);
+            m_parameter->Set01Value(m_value);
         }
     }
 
@@ -90,8 +90,13 @@ void Knob::display() {
         .width = m_bounds.width,
         .height = static_cast<float>(m_number_font_size)
     };
+
     // draw number
-    auto const numberText = value_to_text_function(m_value);
+    auto num_val = m_value;
+    if (m_parameter != nullptr) {
+        num_val = m_parameter->GetRange().ConvertFrom01(num_val);
+    }
+    auto const numberText = value_to_text_function(num_val);
     auto const numberTextWidth = MeasureText(numberText.c_str(), m_number_font_size);
     auto const exSpace = text_bound.width - numberTextWidth;
     DrawText(numberText.c_str(), m_bounds.x + exSpace * 0.5F, text_bound.y, m_number_font_size, m_fore_color);
@@ -203,8 +208,9 @@ Knob& Knob::set_parameter(FloatParameter* parameter) {
 
     m_parameter = parameter;
     const auto& rng = parameter->GetRange();
-    this->set_range(rng.vmin, rng.vmax, std::max(rng.vstep, 0.005f), rng.vdefault);
-    this->set_value(parameter->GetValue());
+    this->set_range(0.0f, 1.0f, 1.0f / 200.0f, rng.ConvertTo01(rng.vdefault));
+    this->set_value(parameter->Get01Value());
+    this->value_to_text_function = parameter->value_to_text;
     return *this;
 }
 

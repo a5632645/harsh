@@ -7,7 +7,7 @@
 
 namespace mana {
 mana::FilterLayout::FilterLayout(Synth & synth)
-    : filter_type_(synth.GetParamBank().GetParamPtr<IntParameter>("filter.type")) {
+    : filter_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("filter.type")) {
     filter_type_.SetChoices(param::Filter_Type::kNames);
     filter_type_.on_choice_changed = [this](int c) {OnFilterTypeChanged(c); };
 
@@ -17,9 +17,9 @@ mana::FilterLayout::FilterLayout(Synth & synth)
     OnFilterTypeChanged(0);
 
     reso_type_.SetChoices(param::ResonanceType::kNames);
-    reso_type_.SetParameter(synth.GetParamBank().GetParamPtr<IntParameter>("filter.reso.type"));
-    reso_type_.on_choice_changed = [this](int c){OnResonanceTypeChanged(c); };
-    for(int i=0;auto& k : arg_reso_knobs_){
+    reso_type_.SetParameter(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("filter.reso.type"));
+    reso_type_.on_choice_changed = [this](int c) {OnResonanceTypeChanged(c); };
+    for (int i = 0; auto & k : arg_reso_knobs_) {
         k.set_parameter(synth.GetParamBank().GetParamPtr(std::format("filter.reso.arg{}", i++)));
     }
     OnResonanceTypeChanged(0);

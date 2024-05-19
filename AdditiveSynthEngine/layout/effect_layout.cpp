@@ -8,7 +8,7 @@
 namespace mana {
 EffectLayout::EffectLayout(Synth& synth, int effect_idx)
     : is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>(std::format("effect{}.enable", effect_idx)))
-    , effect_type_(synth.GetParamBank().GetParamPtr<IntParameter>(std::format("effect{}.type", effect_idx)))
+    , effect_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>(std::format("effect{}.type", effect_idx)))
     , effect_idx(effect_idx) {
     effect_type_.SetChoices(param::EffectType::kNames);
     effect_type_.on_choice_changed = [this](int c) {OnEffectTypeChanged(c); };

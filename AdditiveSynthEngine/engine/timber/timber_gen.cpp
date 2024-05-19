@@ -39,7 +39,7 @@ void TimberGen::Process(TimberFrame& frame) {
 }
 
 void TimberGen::PrepareParams(OscillorParams & params) {
-    timber_type_arg_ = params.GetParam<IntParameter>("timber.osc{}.type", idx_);
+    timber_type_arg_ = params.GetParam<IntChoiceParameter>("timber.osc{}.type", idx_);
     for (int i = 0; auto & parg : osc_param_.args) {
         parg = params.GetPolyFloatParam("timber.osc{}.arg{}", idx_, i++);
     }

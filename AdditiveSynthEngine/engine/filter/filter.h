@@ -16,12 +16,12 @@ public:
     void OnNoteOff();
 private:
     std::array<PolyModuFloatParameter*, 6> filter_args_;
-    IntParameter* filter_type_arg_;
+    IntChoiceParameter* filter_type_arg_;
     param::Filter_Type::ParamEnum filter_type_;
     float sample_rate_;
 
     // resonance
-    IntParameter* arg_reso_type_{};
+    IntChoiceParameter* arg_reso_type_{};
     std::array<PolyModuFloatParameter*, 6> reso_args_;
     void RampReso(Partials& partials);
     void DoubleRampReso(Partials& partials);
