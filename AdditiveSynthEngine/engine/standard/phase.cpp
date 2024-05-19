@@ -12,8 +12,8 @@ void PhaseProcessor::Init(float sample_rate, float update_rate) {
 
 void PhaseProcessor::OnUpdateTick() {
     process_type_ = param::PhaseType::GetEnum(type_->GetInt());
-    process_arg0_ = arg0_->GetClamp();
-    process_arg1_ = arg1_->GetClamp();
+    process_arg0_ = arg0_->GetValue();
+    process_arg1_ = arg1_->GetValue();
 
     if (note_on_once_flag_) {
         for (int i = 0; i < kNumPartials; ++i) {

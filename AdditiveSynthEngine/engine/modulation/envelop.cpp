@@ -15,10 +15,10 @@ void Envelop::PrepareParams(OscillorParams& params) {
 }
 
 void Envelop::OnUpdateTick() {
-    auto att_t = param::Env_Attack::GetNumber(arg_attack_ms_->GetClamp());
-    auto dec_t = param::Env_Decay::GetNumber(arg_decay_ms_->GetClamp());
-    auto sus_v = param::Env_Sustain::GetNumber(arg_sustain_level_->GetClamp());
-    auto rel_t = param::Env_Release::GetNumber(arg_release_ms_->GetClamp());
+    auto att_t = param::Env_Attack::GetNumber(arg_attack_ms_->GetValue());
+    auto dec_t = param::Env_Decay::GetNumber(arg_decay_ms_->GetValue());
+    auto sus_v = param::Env_Sustain::GetNumber(arg_sustain_level_->GetValue());
+    auto rel_t = param::Env_Release::GetNumber(arg_release_ms_->GetValue());
 
     if (env_state_ == State::kInit) {
         output_value_ = 0.0f;
@@ -71,12 +71,12 @@ void Envelop::OnNoteOn(int note) {
     state_offset_ms_ = 0.0f;
 
     env_state_ = State::kAttack;
-    if (arg_attack_ms_->GetClamp() != 0.0f) {
+    if (arg_attack_ms_->GetValue() != 0.0f) {
         return;
     }
 
     env_state_ = State::kDecay;
-    if (arg_decay_ms_->GetClamp() != 0.0f) {
+    if (arg_decay_ms_->GetValue() != 0.0f) {
         return;
     }
 

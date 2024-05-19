@@ -4,11 +4,11 @@
 
 namespace mana {
 struct ParamRange {
-    inline constexpr float ConvertFrom01(float x) {
+    inline constexpr float ConvertFrom01(float x) const {
         return std::lerp(vmin, vmax, x);
     }
 
-    inline constexpr float ConvertTo01(float x) {
+    inline constexpr float ConvertTo01(float x) const {
         return (x - vmin) / (vmax - vmin);
     }
 

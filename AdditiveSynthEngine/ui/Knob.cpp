@@ -1,11 +1,11 @@
-#include "raylib.h"
-#include "Knob.h"
 #include <algorithm>
-#include <numbers>
+#include <cassert>
 #include <cmath>
+#include <numbers>
 #include <string>
-#include <format>
 #include "engine/modulation/Parameter.h"
+#include "Knob.h"
+#include "raylib.h"
 
 namespace mana {
 inline static Knob* s_currentKnob = nullptr;
@@ -41,7 +41,7 @@ void Knob::display() {
         m_value = newValue;
 
         if (m_parameter != nullptr) {
-            m_parameter->Set(m_value);
+            m_parameter->SetValue(m_value);
         }
     }
     else if (isNowDown && !m_isPressed) {
@@ -66,7 +66,7 @@ void Knob::display() {
         m_counter = 0;
         m_isPressed = false;
         if (m_parameter != nullptr) {
-            m_parameter->Set(m_value);
+            m_parameter->SetValue(m_value);
         }
     }
 
@@ -199,9 +199,12 @@ Knob& Knob::set_bound(int x, int y, int w, int h) {
 }
 
 Knob& Knob::set_parameter(FloatParameter* parameter) {
+    assert(parameter != nullptr);
+
     m_parameter = parameter;
-    this->set_range(0.0f, 1.0f, 0.005f, 0.0f);
-    this->set_value(parameter->Get());
+    const auto& rng = parameter->GetRange();
+    this->set_range(rng.vmin, rng.vmax, std::max(rng.vstep, 0.005f), rng.vdefault);
+    this->set_value(parameter->GetValue());
     return *this;
 }
 

@@ -1,31 +1,28 @@
 #pragma once
 
-#include <vector>
-#include <ranges>
-#include <unordered_map>
-#include <memory>
 #include <cassert>
 #include <format>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include "param_range.h"
 #include "Parameter.h"
 
 namespace mana {
 class ParamBank {
 public:
     template<IsParamter Type = FloatParameter>
-    Type& AddOrCreateIfNull(ModulationType type, std::string_view id) {
-        auto e = std::make_unique<Type>(type, id);
-        auto& v = *e;
-        parameters_[std::string(id)] = std::move(e);
-        return v;
+    ParamBank& AddOrCreateIfNull(ModulationType type, ParamRange range, std::string_view id) {
+        parameters_[std::string(id)] = std::make_unique<Type>(type, std::move(range), id);
+        return *this;
     }
 
     template<IsParamter Type = FloatParameter, class... T> requires (sizeof...(T) >= 1)
-        Type& AddOrCreateIfNull(ModulationType type, std::format_string<T...> format_text, T&&...args) {
+        ParamBank& AddOrCreateIfNull(ModulationType type, ParamRange range, std::format_string<T...> format_text, T&&...args) {
         auto id = std::format(format_text, std::forward<T>(args)...);
-        auto e = std::make_unique<Type>(type, id);
-        auto& v = *e;
-        parameters_[id] = std::move(e);
-        return v;
+        parameters_[id] = std::make_unique<Type>(type, range, id);
+        return *this;
     }
 
     template<IsParamter Type = FloatParameter, class... T> requires (sizeof...(T) >= 1)

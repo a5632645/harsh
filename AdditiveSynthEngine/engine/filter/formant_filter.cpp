@@ -181,11 +181,11 @@ void FormantFilter::PrepareParams(OscillorParams & params) {
 }
 
 void FormantFilter::Process(Partials& partials) {
-    auto singer_enum = param::VowelFilter_Singer::GetEnum(arg_singer_->GetClamp());
-    auto select = param::VowelFilter_Select::GetChoiceIndex(arg_select_->GetClamp());
-    auto slope = param::VowelFilter_Slope::GetNumber(arg_slope_->GetClamp()) / 12.0f;
-    auto resonance = param::VowelFilter_Resonance::GetNumber(arg_resonance_->GetClamp());
-    auto shift = param::VowelFilter_Formant::GetNumber(arg_formant_shift_->GetClamp());
+    auto singer_enum = param::VowelFilter_Singer::GetEnum(arg_singer_->GetValue());
+    auto select = param::VowelFilter_Select::GetChoiceIndex(arg_select_->GetValue());
+    auto slope = param::VowelFilter_Slope::GetNumber(arg_slope_->GetValue()) / 12.0f;
+    auto resonance = param::VowelFilter_Resonance::GetNumber(arg_resonance_->GetValue());
+    auto shift = param::VowelFilter_Formant::GetNumber(arg_formant_shift_->GetValue());
 
     const auto& singer_infos = GetVowelInfoArray(singer_enum);
     const auto& vowel_info = singer_infos.at(select);
@@ -205,11 +205,11 @@ void FormantFilter::Process(Partials& partials) {
 void FormantFilter::OnUpdateTick() {
     using sgr = param::VowelFilter_Singer::ParamEnum;
 
-    auto singer_enum = param::VowelFilter_Singer::GetEnum(arg_singer_->GetClamp());
-    auto select = param::VowelFilter_Select::GetChoiceIndex(arg_select_->GetClamp());
-    auto slope = param::VowelFilter_Slope::GetNumber(arg_slope_->GetClamp());
-    auto resonance = param::VowelFilter_Resonance::GetNumber(arg_resonance_->GetClamp());
-    auto shift = param::VowelFilter_Formant::GetNumber(arg_formant_shift_->GetClamp());
+    auto singer_enum = param::VowelFilter_Singer::GetEnum(arg_singer_->GetValue());
+    auto select = param::VowelFilter_Select::GetChoiceIndex(arg_select_->GetValue());
+    auto slope = param::VowelFilter_Slope::GetNumber(arg_slope_->GetValue());
+    auto resonance = param::VowelFilter_Resonance::GetNumber(arg_resonance_->GetValue());
+    auto shift = param::VowelFilter_Formant::GetNumber(arg_formant_shift_->GetValue());
 
     const auto& singer_infos = GetVowelInfoArray(singer_enum);
     const auto& vowel_info = singer_infos.at(select);

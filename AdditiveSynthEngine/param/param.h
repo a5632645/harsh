@@ -29,7 +29,7 @@ struct FloatParam {
     static constexpr float GetNumber(PolyModuFloatParameter& nor) {
         static_assert(requires {DetailParam::kMin; DetailParam::kMax; });
 
-        auto v = nor.GetClamp();
+        auto v = nor.GetValue();
         if constexpr (remap_func != nullptr) {
             v = remap_func(v);
         }
@@ -52,7 +52,7 @@ struct FloatParam {
         static_assert(kHasArgIdx, "must have an arg index.");
         static_assert(DetailParam::kArgIdx < N, "arg idx out of bounds.");
 
-        return GetNumber(arr[DetailParam::kArgIdx]->GetClamp());
+        return GetNumber(arr[DetailParam::kArgIdx]->GetValue());
     }
 
     static std::string GetText(float nor) {
@@ -94,7 +94,7 @@ struct FloatChoiceParam {
     template<std::ranges::input_range RNG> requires std::same_as<std::ranges::range_value_t<RNG>, PolyModuFloatParameter*>
     static constexpr auto GetChoiceIndex(RNG&& args) {
         static_assert(requires{DetailParam::kArgIdx; });
-        return GetChoiceIndex(args[DetailParam::kArgIdx]->GetClamp());
+        return GetChoiceIndex(args[DetailParam::kArgIdx]->GetValue());
     }
 
     static constexpr auto GetInterpIndex(float nor) {
@@ -107,7 +107,7 @@ struct FloatChoiceParam {
     }
 
     static constexpr auto GetInterpIndex(PolyModuFloatParameter& nor) {
-        return GetInterpIndex(nor.GetClamp());
+        return GetInterpIndex(nor.GetValue());
     }
 
     template<std::ranges::input_range RNG>  requires std::same_as<std::ranges::range_value_t<RNG>, float>
@@ -119,7 +119,7 @@ struct FloatChoiceParam {
     template<std::ranges::input_range RNG> requires std::same_as<std::ranges::range_value_t<RNG>, PolyModuFloatParameter*>
     static constexpr auto GetInterpIndex(RNG&& args) {
         static_assert(requires{DetailParam::kArgIdx; });
-        return GetInterpIndex(args[DetailParam::kArgIdx]->GetClamp());
+        return GetInterpIndex(args[DetailParam::kArgIdx]->GetValue());
     }
 
     static constexpr auto GetEnum(float nor) {

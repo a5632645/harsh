@@ -1,16 +1,25 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include "modulation/Parameter.h"
 
 namespace mana {
 struct PolyModuFloatParameter {
-    PolyModuFloatParameter(FloatParameter* ref) : synth_param_ref(ref) {}
+    PolyModuFloatParameter(FloatParameter* ref) : synth_param_ref(ref) { assert(ref != nullptr); }
 
+    // synth param ref
     FloatParameter* synth_param_ref;
-    float ouput_value{};
+    // modulation value are 01 normalized
     float modulation_value{};
 
-    float GetClamp() const { return std::clamp(ouput_value + modulation_value, 0.0f, 1.0f); }
+    float GetValue() const {
+        return synth_param_ref->GetRange().ConvertFrom01(Get01Value());
+    }
+
+    float Get01Value() const {
+        auto nor_v = synth_param_ref->Get01Value() + modulation_value;
+        return std::clamp(nor_v, 0.0f, 1.0f);
+    }
 };
 }

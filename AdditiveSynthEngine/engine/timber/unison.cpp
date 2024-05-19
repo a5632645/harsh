@@ -36,7 +36,7 @@ void Unison::Process(Partials& partials) {
 }
 
 void Unison::OnUpdateTick() {
-    float pitch_scale = param::Unison_Pitch::GetNumber(pitch_->GetClamp());
+    float pitch_scale = param::Unison_Pitch::GetNumber(pitch_->GetValue());
     int num_voice = num_voice_->GetInt() + 1;
 
     for (int i = 0; i < num_voice; ++i) {

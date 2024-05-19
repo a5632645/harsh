@@ -23,7 +23,6 @@ void mana::OscillorParams::ConnectSynthParam(SynthParams& synth_param) {
 
 void OscillorParams::UpdateParams() {
     for (auto& p : poly_modu_params_) {
-        p->ouput_value = p->synth_param_ref->Get();
         p->modulation_value = 0.0f;
     }
 

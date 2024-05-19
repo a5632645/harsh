@@ -13,7 +13,7 @@ struct ResynthsisFrames {
     };
 
     std::vector<FftFrame> frames;
-    float frame_interval_sample;
-    float base_freq;
+    float frame_interval_sample{};
+    float base_freq{};
 };
 }
