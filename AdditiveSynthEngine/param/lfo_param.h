@@ -3,7 +3,7 @@
 #include "param/param.h"
 
 namespace mana::param {
-struct LFO_Rate : FloatParam < LFO_Rate, [](float v) {return v * v * v; } > {
+struct LFO_Rate : FloatParam <LFO_Rate> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 50.0f;
     static constexpr float kDefault = 0.0f;
@@ -29,6 +29,8 @@ struct LFO_Level : FloatParam<LFO_Level> {
 };
 
 struct LFO_WaveType : IntChoiceParam<LFO_WaveType> {
+    static constexpr auto kName = "type"sv;
+
     enum class ParamEnum {
         kSine = 0,
         kTri,

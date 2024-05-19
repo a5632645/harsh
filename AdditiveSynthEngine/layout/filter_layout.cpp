@@ -8,7 +8,7 @@
 namespace mana {
 mana::FilterLayout::FilterLayout(Synth & synth)
     : filter_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("filter.type")) {
-    filter_type_.SetChoices(param::Filter_Type::kNames);
+    //filter_type_.SetChoices(param::Filter_Type::kNames);
     filter_type_.on_choice_changed = [this](int c) {OnFilterTypeChanged(c); };
 
     for (int i = 0; auto & knob : arg_filter_knobs_) {

@@ -6,6 +6,8 @@ namespace mana::param {
 using namespace std::string_view_literals;
 
 struct Filter_Type : IntChoiceParam<Filter_Type> {
+    static constexpr auto kName = "type"sv;
+
     enum class ParamEnum {
         kLowpass = 0,
         kHighpass,
@@ -29,6 +31,8 @@ struct Filter_Type : IntChoiceParam<Filter_Type> {
 };
 
 struct ResonanceType : IntChoiceParam<ResonanceType> {
+    static constexpr auto kName = "type"sv;
+
     enum class ParamEnum {
         kRamp = 0,
         kCos,

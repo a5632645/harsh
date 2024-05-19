@@ -11,7 +11,7 @@
 namespace mana::param {
 using namespace std::string_view_literals;
 
-template<typename DetailParam, float(*remap_func)(float) = nullptr>
+template<typename DetailParam>
 struct FloatParam {
     template<typename P = DetailParam> requires requires{
         P::kMin;
@@ -58,11 +58,6 @@ struct FloatParam {
     }
     static constexpr float GetNumber(float nor) {
         static_assert(requires {P::kMin; P::kMax; });
-
-        if constexpr (remap_func != nullptr) {
-            nor = remap_func(nor);
-        }
-
         return std::lerp(P::kMin, P::kMax, nor);
     }
 
@@ -74,10 +69,6 @@ struct FloatParam {
         static_assert(requires {P::kMin; P::kMax; });
 
         auto v = nor.GetValue();
-        if constexpr (remap_func != nullptr) {
-            v = remap_func(v);
-        }
-
         return std::lerp(P::kMin, P::kMax, v);
     }
 
@@ -242,6 +233,47 @@ struct IntChoiceParam {
         static_assert(static_cast<size_t>(EnumType::kNumEnums) == std::size(DetailParam::kNames));
 
         return std::string{ DetailParam::kNames[GetChoiceIndex(x)] };
+    }
+
+    static std::string GetTextFromFloat(float x) {
+        return GetText(std::round(x));
+    }
+};
+
+template<typename DetailParam>
+struct IntParam {
+    template<typename P = DetailParam> requires requires{
+        P::kMin;
+        P::kMax;
+        P::kDefault;
+    }
+    static constexpr ParamRange CreateRange() {
+        return ParamRange{ P::kMin, P::kMax, P::kDefault };
+    }
+
+    template<typename P = DetailParam> requires requires {
+        P::kId;
+    }
+    static constexpr std::unique_ptr<IntParameter> CreateParam(ModulationType type) {
+        return CreateParam(type, P::kId);
+    }
+
+    template<typename P = DetailParam, class... T> requires requires {
+        P::kName;
+    }
+    static constexpr std::unique_ptr<IntParameter> CreateParam(ModulationType type,
+                                                               std::format_string<T...> id_format_text,
+                                                               T&&... id_args) {
+        auto p = std::make_unique<IntParameter>(type,
+                                                CreateRange(),
+                                                P::kName,
+                                                id_format_text, std::forward<T>(id_args)...);
+        p->value_to_text = GetTextFromFloat;
+        return p;
+    }
+
+    static constexpr std::string GetText(int x) {
+        return std::to_string(x);
     }
 
     static std::string GetTextFromFloat(float x) {

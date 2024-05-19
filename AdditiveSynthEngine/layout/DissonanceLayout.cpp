@@ -8,10 +8,10 @@
 
 namespace mana {
 DissonanceLayout::DissonanceLayout(Synth& synth)
-    : is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("dissonance.enable"))
-    , type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("dissonance.type")) {
-    type_.SetChoices(param::DissonanceType::kNames);
+    : is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("dissonance.enable")) {
+    //type_.SetChoices(param::DissonanceType::kNames);
     type_.on_choice_changed = [this](int c) {OnDissonanceTypeChanged(c); };
+    type_.SetParameter(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("dissonance.type"));
 
     arg_knobs_[0].set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg0"));
     arg_knobs_[1].set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg1"));

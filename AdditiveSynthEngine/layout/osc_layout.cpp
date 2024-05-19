@@ -9,7 +9,7 @@ namespace mana {
 OscLayout::OscLayout(Synth& synth, int idx)
     : timber_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>(std::format("timber.osc{}.type", idx)))
     , idx_(idx) {
-    timber_type_.SetChoices(param::TimberType::kNames);
+    //timber_type_.SetChoices(param::TimberType::kNames);
     timber_type_.on_choice_changed = [this](int c) {OnTimberTypeChanged(c); };
 
     for (int i = 0; auto & k : arg_knobs_) {

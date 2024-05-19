@@ -15,12 +15,12 @@ TimberLayout::TimberLayout(Synth& synth)
     osc1_gain_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc1_gain"));
     osc2_gain_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_gain"));
 
-    SetSingeKnobInfo(osc2_beating_, param::Timber_Osc2Beating{});
-    SetSingeKnobInfo(osc2_shift_, param::Timber_Osc2Shift{});
-    SetSingeKnobInfo(osc1_gain_, param::Timber_OscGain{});
-    SetSingeKnobInfo(osc2_gain_, param::Timber_OscGain{});
-    osc1_gain_.set_title("osc1_gain");
-    osc2_gain_.set_title("osc2_gain");
+    //SetSingeKnobInfo(osc2_beating_, param::Timber_Osc2Beating{});
+    //SetSingeKnobInfo(osc2_shift_, param::Timber_Osc2Shift{});
+    //SetSingeKnobInfo(osc1_gain_, param::Timber_OscGain{});
+    //SetSingeKnobInfo(osc2_gain_, param::Timber_OscGain{});
+    //osc1_gain_.set_title("osc1_gain");
+    //osc2_gain_.set_title("osc2_gain");
 }
 
 void TimberLayout::Paint() {

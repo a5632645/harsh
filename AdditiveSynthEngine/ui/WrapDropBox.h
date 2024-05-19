@@ -11,13 +11,24 @@
 namespace mana {
 class WrapDropBox : public rgc::DropdownBox {
 public:
-    WrapDropBox(IntChoiceParameter* p = nullptr) : parameter(p) { SetActive(&m_item_selected); }
+    WrapDropBox() { SetActive(&m_item_selected); }
+    WrapDropBox(IntParameter* p) : WrapDropBox() { SetParameter(p); }
+    WrapDropBox(IntChoiceParameter* p) : WrapDropBox() { SetParameter(p); }
 
     void SetParameter(IntChoiceParameter* p) {
         assert(p != nullptr);
 
-        parameter = p;
+        parameter_ = p;
         SetChoices(p->choices_);
+    }
+
+    void SetParameter(IntParameter* p) {
+        assert(p != nullptr);
+
+        int_parameter_ = p;
+        auto vmax = static_cast<int>(p->GetRange().vmax);
+        auto vmin = static_cast<int>(p->GetRange().vmin);
+        SetChoices(std::views::iota(vmin, vmax + 1) | std::views::transform([](int x) {return std::to_string(x); }));
     }
 
     void Paint();
@@ -50,7 +61,10 @@ public:
 
     std::function<void(int)> on_choice_changed = [](int) {};
 private:
-    IntChoiceParameter* parameter;
+    struct Adapter;
+
+    IntChoiceParameter* parameter_{};
+    IntParameter* int_parameter_{};
     std::string m_concated_string;
     std::vector<std::string> choice_strings_;
     bool m_is_edit_mode{};

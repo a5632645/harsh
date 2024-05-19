@@ -1,7 +1,7 @@
 #include "unison_layout.h"
 
 #include <ranges>
-#include "param/timber_param.h"
+#include "param/unison_param.h"
 #include "layout/gui_param_pack.h"
 #include "engine/synth_params.h"
 
@@ -9,14 +9,14 @@ namespace mana {
 UnisonLayout::UnisonLayout(SynthParams& params) {
     auto& bank = params.GetParamBank();
     type_.SetParameter(bank.GetParamPtr<IntChoiceParameter>("unison.type"));
-    num_voice_.SetParameter(bank.GetParamPtr<IntChoiceParameter>("unison.num_voice"));
+    num_voice_.SetParameter(bank.GetParamPtr<IntParameter>("unison.num_voice"));
     pitch_.set_parameter(bank.GetParamPtr("unison.pitch"));
-    SetSingeKnobInfo(pitch_, param::Unison_Pitch{});
+    //SetSingeKnobInfo(pitch_, param::Unison_Pitch{});
     phase_.set_parameter(bank.GetParamPtr("unison.phase"));
     pan_.set_parameter(bank.GetParamPtr("unison.pan"));
 
-    num_voice_.SetChoices(std::ranges::views::iota(1, 9 + 1) | std::ranges::views::transform(
-        [](int v) {return std::to_string(v); }));
+    /*num_voice_.SetChoices(std::ranges::views::iota(1, 9 + 1) | std::ranges::views::transform(
+        [](int v) {return std::to_string(v); }));*/
 }
 
 void UnisonLayout::Paint() {

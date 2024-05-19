@@ -10,16 +10,16 @@ LfoLayout::LfoLayout(Synth& synth, int idx) {
     const auto& bank = synth.GetParamBank();
 
     rate_.set_parameter(bank.GetParamPtr(std::format("lfo{}.rate", idx)));
-    SetSingeKnobInfo(rate_, param::LFO_Rate{});
+    //SetSingeKnobInfo(rate_, param::LFO_Rate{});
     start_phase_.set_parameter(bank.GetParamPtr(std::format("lfo{}.start_phase", idx)));
-    SetSingeKnobInfo(start_phase_, param::LFO_Phase{});
+    //SetSingeKnobInfo(start_phase_, param::LFO_Phase{});
     level_.set_parameter(bank.GetParamPtr(std::format("lfo{}.level", idx)));
-    SetSingeKnobInfo(level_, param::LFO_Level{});
+    //SetSingeKnobInfo(level_, param::LFO_Level{});
 
     restart_.SetParameter(bank.GetParamPtr<BoolParameter>(std::format("lfo{}.restart", idx)));
     restart_.SetText("restart");
     wave_type_.SetParameter(bank.GetParamPtr<IntChoiceParameter>(std::format("lfo{}.wave_type", idx)));
-    wave_type_.SetChoices(param::LFO_WaveType::kNames);
+    //wave_type_.SetChoices(param::LFO_WaveType::kNames);
 }
 
 void LfoLayout::Paint() {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "param/param.h"
-#include "engine/EngineConfig.h"
 
 namespace mana::param {
 struct EffectType : IntChoiceParam<EffectType> {
@@ -73,7 +72,7 @@ struct Reverb_Amount : FloatParam<Reverb_Amount> {
     static constexpr auto kTextPrecision = 2;
 };
 
-struct Reverb_Decay : FloatParam < Reverb_Decay, [](float v) {return v * v * v; } > {
+struct Reverb_Decay : FloatParam < Reverb_Decay> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "decay"sv;
     static constexpr auto kMin = 0.0f;
@@ -237,7 +236,7 @@ struct Phaser_Mode : FloatChoiceParam<Phaser_Mode> {
 // =========================================================
 // scramble
 // =========================================================
-struct Scramble_Rate : FloatParam < Scramble_Rate, [](float v) {return v * v * v; } > {
+struct Scramble_Rate : FloatParam < Scramble_Rate> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "rate"sv;
     static constexpr auto kMin = 0.0f;

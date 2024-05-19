@@ -32,11 +32,13 @@ public:
     }
 
     template<IsParamter Type>
-    void AddParameter(std::unique_ptr<Type> param) {
+    Type& AddParameter(std::unique_ptr<Type> param) {
         assert(param != nullptr);
         const auto& str_id = param->GetIdStringRef();
         assert(!parameters_.contains(str_id));
+        auto& v = *param;
         parameters_[str_id] = std::move(param);
+        return v;
     }
 
     template<IsParamter Type = FloatParameter, class... T> requires (sizeof...(T) >= 1)

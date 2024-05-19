@@ -10,13 +10,13 @@ StandardLayout::StandardLayout(Synth& synth)
     : synth_(synth)
     , phase_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("phase.type")) {
     const auto& bank = synth.GetParamBank();
-    pitch_bend_.set_parameter(bank.GetParamPtr("pitch_bend"))
-        .set_title(param::PitchBend::kName);
-    output_gain_.set_parameter(bank.GetParamPtr("output_gain"))
-        .set_title(param::OutputGain::kName);
+    pitch_bend_.set_parameter(bank.GetParamPtr("pitch_bend"));
+    //.set_title(param::PitchBend::kName);
+    output_gain_.set_parameter(bank.GetParamPtr("output_gain"));
+    //.set_title(param::OutputGain::kName);
 
-    // phases
-    phase_type_.SetChoices(param::PhaseType::kNames);
+// phases
+//phase_type_.SetChoices(param::PhaseType::kNames);
     phase_type_.on_choice_changed = [this](int c) {OnPhaseTypeChanged(c); };
 
     for (int i = 0; auto & arg_knob : phase_arg_knobs_) {

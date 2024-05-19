@@ -10,8 +10,11 @@ void mana::WrapDropBox::Paint() {
             m_is_edit_mode = false;
             if (old_choice != m_item_selected) {
                 on_choice_changed(m_item_selected);
-                if (parameter != nullptr) {
-                    parameter->SetInt(m_item_selected);
+                if (parameter_ != nullptr) {
+                    parameter_->SetInt(m_item_selected);
+                }
+                if (int_parameter_ != nullptr) {
+                    int_parameter_->SetInt(m_item_selected);
                 }
             }
         }

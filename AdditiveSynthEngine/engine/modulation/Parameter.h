@@ -20,7 +20,8 @@ public:
     enum class ParamType {
         kFloat,
         kInt,
-        kBool
+        kBool,
+        kChoice
     };
 
     static constexpr auto kTypeEnum = ParamType::kFloat;
@@ -65,7 +66,7 @@ protected:
     std::atomic<float> value_{};
 };
 
-class IntChoiceParameter : public FloatParameter {
+class IntParameter : public FloatParameter {
 public:
     static constexpr auto kTypeEnum = ParamType::kInt;
 
@@ -74,8 +75,20 @@ public:
     void SetInt(int v) { SetValue(static_cast<float>(v)); }
     int GetInt() const { return static_cast<int>(std::round(GetValue())); }
     operator int() const { return GetInt(); }
-    decltype(auto) GetChoices() const { return (choices_); }
     ParamType GetParamType() const override { return ParamType::kInt; }
+};
+
+class IntChoiceParameter : public FloatParameter {
+public:
+    static constexpr auto kTypeEnum = ParamType::kChoice;
+
+    using FloatParameter::FloatParameter;
+
+    void SetInt(int v) { SetValue(static_cast<float>(v)); }
+    int GetInt() const { return static_cast<int>(std::round(GetValue())); }
+    operator int() const { return GetInt(); }
+    decltype(auto) GetChoices() const { return (choices_); }
+    ParamType GetParamType() const override { return ParamType::kChoice; }
 
     std::vector<std::string_view> choices_;
 };
@@ -94,5 +107,5 @@ public:
 };
 
 template<class Type>
-concept IsParamter = std::same_as<Type, FloatParameter> || std::same_as<Type, IntChoiceParameter> || std::same_as<Type, BoolParameter>;
+concept IsParamter = std::same_as<Type, FloatParameter> || std::same_as<Type, IntChoiceParameter> || std::same_as<Type, BoolParameter> || std::same_as<Type, IntParameter>;
 }
