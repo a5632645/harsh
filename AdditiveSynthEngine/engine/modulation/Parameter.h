@@ -53,6 +53,8 @@ public:
     const ParamRange& GetRange() const { return range_; }
     virtual ParamType GetParamType() const { return ParamType::kFloat; }
 
+    std::string_view GetName() const { return name_; }
+
     std::function<std::string(float v)> value_to_text = [](float v) {return std::to_string(v); };
     std::string GetValueText() const { return value_to_text(GetValue()); }
 protected:

@@ -210,6 +210,7 @@ Knob& Knob::set_parameter(FloatParameter* parameter) {
     const auto& rng = parameter->GetRange();
     this->set_range(0.0f, 1.0f, 1.0f / 200.0f, rng.ConvertTo01(rng.vdefault));
     this->set_value(parameter->Get01Value());
+    this->set_title(parameter->GetName());
     this->value_to_text_function = parameter->value_to_text;
     return *this;
 }
