@@ -4,6 +4,7 @@
 #include <ranges>
 #include <algorithm>
 #include "lfo.h"
+#include "envelop.h"
 
 namespace mana {
 ModulatorBank::ModulatorBank() {
@@ -15,6 +16,10 @@ ModulatorBank::ModulatorBank() {
     modulators_.emplace_back(std::make_shared<LFO>("lfo6", 5));
     modulators_.emplace_back(std::make_shared<LFO>("lfo7", 6));
     modulators_.emplace_back(std::make_shared<LFO>("lfo8", 7));
+
+    for (int i = 0; i < 8; ++i) {
+        modulators_.emplace_back(std::make_shared<Envelop>(std::format("env{}", i), i));
+    }
 }
 
 Modulator* ModulatorBank::GetModulatorPtr(std::string_view id) {

@@ -45,12 +45,14 @@ SynthParams::SynthParams() {
         param_bank_.AddOrCreateIfNull(kPoly, "filter.reso.arg{}", arg_idx);
     }
 
+    // resynthsis
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "resynthsis.enable");
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "resynthsis.formant_remap");
     for (int arg_idx = 0; arg_idx < 7; ++arg_idx) {
         param_bank_.AddOrCreateIfNull(kPoly, "resynthsis.arg{}", arg_idx);
     }
 
+    // effect
     for (int effect_idx = 0; effect_idx < 5; ++effect_idx) {
         param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "effect{}.enable", effect_idx);
         param_bank_.AddOrCreateIfNull<IntParameter>(kDisable, "effect{}.type", effect_idx);
@@ -59,12 +61,21 @@ SynthParams::SynthParams() {
         }
     }
 
+    // lfo
     for (int lfo_idx = 0; lfo_idx < 8; ++lfo_idx) {
         param_bank_.AddOrCreateIfNull(kPoly, "lfo{}.rate", lfo_idx);
         param_bank_.AddOrCreateIfNull(kPoly, "lfo{}.start_phase", lfo_idx);
         param_bank_.AddOrCreateIfNull(kPoly, "lfo{}.level", lfo_idx);
         param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, "lfo{}.restart", lfo_idx);
         param_bank_.AddOrCreateIfNull<IntParameter>(kDisable, "lfo{}.wave_type", lfo_idx);
+    };
+
+    // envelop
+    for (int env_idx = 0; env_idx < 8; ++env_idx) {
+        param_bank_.AddOrCreateIfNull(kPoly, "envelop{}.attack", env_idx);
+        param_bank_.AddOrCreateIfNull(kPoly, "envelop{}.decay", env_idx);
+        param_bank_.AddOrCreateIfNull(kPoly, "envelop{}.sustain", env_idx);
+        param_bank_.AddOrCreateIfNull(kPoly, "envelop{}.release", env_idx);
     };
 
     // custom curves
