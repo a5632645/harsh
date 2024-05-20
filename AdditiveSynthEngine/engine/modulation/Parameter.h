@@ -38,9 +38,9 @@ public:
 
     virtual ~FloatParameter() = default;
     FloatParameter(FloatParameter const&) = delete;
-    FloatParameter(FloatParameter&&) = delete;
     FloatParameter& operator=(FloatParameter const&) = default;
-    FloatParameter& operator=(FloatParameter&&) = default;
+    FloatParameter(FloatParameter&&) noexcept = delete;
+    FloatParameter& operator=(FloatParameter&&) noexcept = default;
 
     void SetValue(float new_val) { value_.store(range_.ConvertTo01(new_val)); }
     float GetValue() const { return range_.ConvertFrom01(value_.load()); }

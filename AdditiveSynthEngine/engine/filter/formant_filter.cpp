@@ -181,15 +181,6 @@ void FormantFilter::PrepareParams(OscillorParams & params) {
 }
 
 void FormantFilter::Process(Partials& partials) {
-    auto singer_enum = param::VowelFilter_Singer::GetEnum(arg_singer_->GetValue());
-    auto select = param::VowelFilter_Select::GetChoiceIndex(arg_select_->GetValue());
-    auto slope = param::VowelFilter_Slope::GetNumber(arg_slope_->GetValue()) / 12.0f;
-    auto resonance = param::VowelFilter_Resonance::GetNumber(arg_resonance_->GetValue());
-    auto shift = param::VowelFilter_Formant::GetNumber(arg_formant_shift_->GetValue());
-
-    const auto& singer_infos = GetVowelInfoArray(singer_enum);
-    const auto& vowel_info = singer_infos.at(select);
-
     for (int i = 0; i < kNumPartials; ++i) {
         float gain = 0.0f;
         float partial_p = partials.pitches[i];

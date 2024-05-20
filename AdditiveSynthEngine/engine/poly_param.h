@@ -22,12 +22,20 @@ struct PolyModuFloatParameter {
         return std::clamp(nor_v, 0.0f, 1.0f);
     }
 
+    int GetInt() const {
+        return static_cast<int>(std::round(GetValue()));
+    }
+
     float GetValueNoModu() const {
         return synth_param_ref->GetValue();
     }
 
     float Get01ValueNoModu() const {
         return synth_param_ref->Get01Value();
+    }
+
+    int GetIntNoModu() const {
+        return static_cast<int>(std::round(GetValueNoModu()));
     }
 };
 }

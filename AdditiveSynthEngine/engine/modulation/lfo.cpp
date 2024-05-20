@@ -33,9 +33,9 @@ void LFO::PrepareParams(OscillorParams& params) {
 }
 
 void LFO::OnUpdateTick() {
-    auto lfo_rate = param::LFO_Rate::GetNumber(arg_lfo_rate_->GetValue());
-    start_phase_ = param::LFO_Phase::GetNumber(arg_start_phase_->GetValue());
-    auto output_level = param::LFO_Level::GetNumber(arg_output_level_->GetValue());
+    auto lfo_rate = arg_lfo_rate_->GetValue();
+    start_phase_ = arg_start_phase_->GetValue();
+    auto output_level = arg_output_level_->GetValue();
     wave_type_ = param::LFO_WaveType::GetEnum(arg_wave_type_->GetInt());
 
     auto phase_inc = lfo_rate * inv_update_rate_;

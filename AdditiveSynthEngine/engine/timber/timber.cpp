@@ -70,15 +70,15 @@ void Timber::OnUpdateTick() {
     osc1_->OnUpdateTick();
     osc2_->OnUpdateTick();
 
-    osc2_timber_shift_ = static_cast<int>(param::Timber_Osc2Shift::GetNumber(arg_osc2_timber_shift_->GetValue()));
-    osc2_beating_ = param::Timber_Osc2Beating::GetNumber(arg_osc2_beating_->GetValue());
+    osc2_timber_shift_ = arg_osc2_timber_shift_->GetInt();
+    osc2_beating_ = arg_osc2_beating_->GetValue();
     auto inc = osc2_beating_ * inv_update_rate_;
     beating_phase_ += inc;
     beating_phase_ -= static_cast<int>(beating_phase_);
 
-    osc1_gain_ = utli::DbToGain(param::Timber_OscGain::GetNumber(arg_osc1_gain_->GetValue()),
+    osc1_gain_ = utli::DbToGain(arg_osc1_gain_->GetValue(),
                                 param::Timber_OscGain::kMin);
-    osc2_gain_ = utli::DbToGain(param::Timber_OscGain::GetNumber(arg_osc2_gain_->GetValue()),
+    osc2_gain_ = utli::DbToGain(arg_osc2_gain_->GetValue(),
                                 param::Timber_OscGain::kMin);
 }
 
