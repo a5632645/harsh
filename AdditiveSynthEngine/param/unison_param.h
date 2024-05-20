@@ -10,11 +10,16 @@ struct Unison_Type : IntChoiceParam<Unison_Type> {
     static constexpr auto kName = "num_voice"sv;
 
     enum class ParamEnum {
+        kPUniform = 0,
+        kHzUniform,
+        kRandom,
         kNumEnums
     };
 
     static constexpr std::array kNames{
-        "test"sv
+        "p.uniform"sv,
+        "hz.uniform"sv,
+        "random"sv
     };
 };
 
@@ -31,7 +36,7 @@ struct Unison_Pitch : FloatParam<Unison_Pitch> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 1.0f;
     static constexpr float kDefault = 0.0f;
-    static constexpr int kTextPrecision = 2;
+    static constexpr int kTextPrecision = 3;
     static constexpr auto kStuff = "st";
 };
 

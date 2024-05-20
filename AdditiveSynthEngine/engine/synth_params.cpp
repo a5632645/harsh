@@ -49,11 +49,12 @@ SynthParams::SynthParams() {
     param_bank_.AddParameter(param::Timber_OscGain::CreateParam(kPoly, "timber.osc1_gain"));
     param_bank_.AddParameter(param::Timber_OscGain::CreateParam(kPoly, "timber.osc2_gain"));
 
-    param_bank_.AddOrCreateIfNull<IntChoiceParameter>(kDisable, kUnitRange, "type", "unison.type");
+    //param_bank_.AddOrCreateIfNull<IntChoiceParameter>(kDisable, kUnitRange, "type", "unison.type");
+    param_bank_.AddParameter(param::Unison_Type::CreateParam(kDisable, "unison.type"));
     param_bank_.AddParameter(param::Unison_NumVoice::CreateParam(kDisable, "unison.num_voice"));
     param_bank_.AddParameter(param::Unison_Pitch::CreateParam(kPoly, "unison.pitch"));
-    param_bank_.AddParameter(param::Unison_Pan::CreateParam(kPoly, "unison.phase"));
-    param_bank_.AddParameter(param::Unison_Phase::CreateParam(kPoly, "unison.pan"));
+    param_bank_.AddParameter(param::Unison_Phase::CreateParam(kPoly, "unison.phase"));
+    param_bank_.AddParameter(param::Unison_Pan::CreateParam(kPoly, "unison.pan"));
 
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, kUnitRange, "enable", "dissonance.enable");
     param_bank_.AddParameter(param::DissonanceType::CreateParam(kDisable, "dissonance.type"));
