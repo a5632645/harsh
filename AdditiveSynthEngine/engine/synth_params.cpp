@@ -42,7 +42,6 @@ SynthParams::SynthParams() {
         param_bank_.AddParameter(param::TimberType::CreateParam(kDisable, "timber.osc{}.type", osc_idx));
         for (int arg_idx = 0; arg_idx < 4; ++arg_idx) {
             param_bank_.AddParameter(CreateAlterParam(kPoly, "arg{1}", "timber.osc{}.arg{}", osc_idx, arg_idx));
-            //param_bank_.AddOrCreateIfNull(kPoly, kUnitRange, "", "timber.osc{}.arg{}", osc_idx, arg_idx);
         }
     }
     param_bank_.AddParameter(param::Timber_Osc2Shift::CreateParam(kPoly, "timber.osc2_shift"));
@@ -59,19 +58,13 @@ SynthParams::SynthParams() {
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, kUnitRange, "enable", "dissonance.enable");
     param_bank_.AddParameter(param::DissonanceType::CreateParam(kDisable, "dissonance.type"));
     for (int arg_idx = 0; arg_idx < 2; ++arg_idx) {
-        //param_bank_.AddOrCreateIfNull(kPoly, kUnitRange, std::format("arg{}", arg_idx), "dissonance.arg{}", arg_idx);
         param_bank_.AddParameter(CreateAlterParam(kPoly, "arg{}", "dissonance.arg{}", arg_idx));
     }
 
     param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, kUnitRange, "enable", "filter.enable");
     param_bank_.AddParameter(param::Filter_Type::CreateParam(kDisable, "filter.type"));
     for (int arg_idx = 0; arg_idx < 8; ++arg_idx) {
-        //param_bank_.AddOrCreateIfNull(kPoly, kUnitRange, std::format("arg{}", arg_idx), "filter.arg{}", arg_idx);
         param_bank_.AddParameter(CreateAlterParam(kPoly, "arg{}", "filter.arg{}", arg_idx));
-    }
-    param_bank_.AddParameter(param::ResonanceType::CreateParam(kDisable, "filter.reso.type"));
-    for (int arg_idx = 0; arg_idx < 6; ++arg_idx) {
-        param_bank_.AddOrCreateIfNull(kPoly, kUnitRange, "", "filter.reso.arg{}", arg_idx);
     }
 
     // resynthsis

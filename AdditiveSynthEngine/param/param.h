@@ -172,6 +172,12 @@ struct FloatChoiceParam {
         return static_cast<EnumType>(GetChoiceIndex(nor));
     }
 
+    static constexpr auto GetEnum(int nor) {
+        using EnumType = typename DetailParam::ParamEnum;
+
+        return static_cast<EnumType>(nor);
+    }
+
     static constexpr std::string GetText(float nor) {
         using EnumType = typename DetailParam::ParamEnum;
 

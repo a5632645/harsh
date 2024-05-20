@@ -15,7 +15,8 @@ void Filter::Init(float sample_rate, float update_rate) {
 void Filter::Process(Partials& partials) {
     using enum param::Filter_Type::ParamEnum;
 
-    switch (filter_type_) {
+    auto filter_type = param::Filter_Type::GetEnum(filter_type_arg_->GetInt());
+    switch (filter_type) {
     case kLowpass:
         DoLowPassFilter(partials);
         break;
@@ -41,11 +42,11 @@ void Filter::Process(Partials& partials) {
         return;
     }
 
-    auto reso_type = param::ResonanceType::GetEnum(arg_reso_type_->GetInt());
-    using rt = param::ResonanceType::ParamEnum;
+    auto reso_type = param::Filter_ResonanceType::GetEnum(filter_args_[param::Filter_ResonanceType::kArgIdx]->Get01Value());
+    using rt = param::Filter_ResonanceType::ParamEnum;
     switch (reso_type) {
     case rt::kCos:
-        if (filter_type_ == kBandpass || filter_type_ == kBandstop) {
+        if (filter_type == kBandpass || filter_type == kBandstop) {
             DoubleCosReso(partials);
         }
         else {
@@ -53,7 +54,7 @@ void Filter::Process(Partials& partials) {
         }
         break;
     case rt::kParabola:
-        if (filter_type_ == kBandpass || filter_type_ == kBandstop) {
+        if (filter_type == kBandpass || filter_type == kBandstop) {
             DoubleParabolaReso(partials);
         }
         else {
@@ -64,7 +65,7 @@ void Filter::Process(Partials& partials) {
         PhaserReso(partials);
         break;
     case rt::kRamp:
-        if (filter_type_ == kBandpass || filter_type_ == kBandstop) {
+        if (filter_type == kBandpass || filter_type == kBandstop) {
             DoubleRampReso(partials);
         }
         else {
@@ -79,27 +80,17 @@ void Filter::PrepareParams(OscillorParams & params) {
     for (int i = 0; auto & parg : filter_args_) {
         parg = params.GetPolyFloatParam("filter.arg{}", i++);
     }
-    arg_reso_type_ = params.GetParam<IntChoiceParameter>("filter.reso.type");
-    for (int i = 0; auto & parg : reso_args_) {
-        parg = params.GetPolyFloatParam("filter.reso.arg{}", i++);
-    }
     formant_filter_.PrepareParams(params);
 }
 
 void Filter::OnUpdateTick() {
     // filter
-    filter_type_ = param::Filter_Type::GetEnum(filter_type_arg_->GetInt());
     cutoff_semitone_ = param::Filter_Cutoff::GetNumber(filter_args_);
     normalized_cutoff_ = std::exp2(cutoff_semitone_ / 12.0f) * 8.1758f * 2.0f / sample_rate_;
     slope_ = param::Filter_Slope::GetNumber(filter_args_) / 12.0f; // make it db/oct
     key_track_ = param::Filter_KeyTracking::GetNumber(filter_args_);
     cutoff_knee_ = param::Filter_Knee::GetNumber(filter_args_);
     filter_width_ = param::Filter_BandWidth::GetNumber(filter_args_);
-
-    // reso
-    resonance_ = param::Reso_Resonance::GetNumber(reso_args_);
-    resonance_width_ = param::Reso_ResonanceWidth::GetNumber(reso_args_);
-    reso_phaser_cycles_ = param::Reso_PhaserCycles::GetNumber(reso_args_);
 
     // comb
     comb_shape_ = param::Filter_CombShape::GetNumber(filter_args_);
@@ -286,33 +277,6 @@ void Filter::DoBandStopFilter(Partials& partials) {
     }
 }
 
-void Filter::DoSmoothLowPassFilter(Partials& partials) {
-    for (int i = 0; i < kNumPartials; ++i) {
-        auto pitch = partials.pitches[i];
-        auto reso_begin = cutoff_semitone_ - resonance_width_;
-        auto reso_end = cutoff_semitone_ + resonance_width_;
-        if (pitch < reso_begin) { // nothing
-        }
-        else if (pitch < cutoff_semitone_) {        // pass to reso
-            auto db = std::lerp(0.0f, resonance_, 0.5f - 0.5f * std::cos(std::numbers::pi_v<float> *(pitch - reso_begin) / resonance_width_));
-            auto gain = utli::DbToGain(db);
-            partials.gains[i] *= gain;
-        }
-        else if (pitch < reso_end) {               // cutoff to reso
-            auto db_at_reso = resonance_ - slope_ * resonance_width_ / 12.0f;
-            auto db = std::lerp(db_at_reso, resonance_, 0.5f + 0.5f * std::cos(std::numbers::pi_v<float> *(pitch - cutoff_semitone_) / resonance_width_));
-            auto gain = utli::DbToGain(db);
-            partials.gains[i] *= gain;
-        }
-        else {                                     // cutoff to stop
-            auto k = -slope_;
-            auto db = resonance_ + k * (pitch - cutoff_semitone_) / 12.0f;
-            auto gain = utli::DbToGain(db);
-            partials.gains[i] *= gain;
-        }
-    }
-}
-
 // ===============================================================
 // comb filter
 // ===============================================================
@@ -427,19 +391,25 @@ inline static constexpr float SimpleRampReso(float c, float b, float r, float p)
 }
 
 void Filter::RampReso(Partials& partials) {
+    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
+    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
-        auto db = SimpleRampReso(cutoff_semitone_, resonance_width_, resonance_, partial_p);
+        auto db = SimpleRampReso(cutoff_semitone_, resonance_width, resonance, partial_p);
         auto gain = utli::DbToGain(db);
         partials.gains[i] *= gain;
     }
 }
 
 void Filter::DoubleRampReso(Partials& partials) {
+    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
+    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
-        auto db_left = SimpleRampReso(cutoff_semitone_ - filter_width_, resonance_width_, resonance_, partial_p);
-        auto db_right = SimpleRampReso(cutoff_semitone_ + filter_width_, resonance_width_, resonance_, partial_p);
+        auto db_left = SimpleRampReso(cutoff_semitone_ - filter_width_, resonance_width, resonance, partial_p);
+        auto db_right = SimpleRampReso(cutoff_semitone_ + filter_width_, resonance_width, resonance, partial_p);
         auto gain = utli::DbToGain(db_left + db_right);
         partials.gains[i] *= gain;
     }
@@ -460,19 +430,25 @@ inline static constexpr float SimpleCosReso(float c, float b, float r, float p) 
 }
 
 void Filter::CosReso(Partials& partials) {
+    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
+    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
-        auto db = SimpleCosReso(cutoff_semitone_, resonance_width_, resonance_, partial_p);
+        auto db = SimpleCosReso(cutoff_semitone_, resonance_width, resonance, partial_p);
         auto gain = utli::DbToGain(db);
         partials.gains[i] *= gain;
     }
 }
 
 void Filter::DoubleCosReso(Partials& partials) {
+    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
+    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
-        auto db_left = SimpleCosReso(cutoff_semitone_ - filter_width_, resonance_width_, resonance_, partial_p);
-        auto db_right = SimpleCosReso(cutoff_semitone_ + filter_width_, resonance_width_, resonance_, partial_p);
+        auto db_left = SimpleCosReso(cutoff_semitone_ - filter_width_, resonance_width, resonance, partial_p);
+        auto db_right = SimpleCosReso(cutoff_semitone_ + filter_width_, resonance_width, resonance, partial_p);
         auto gain = utli::DbToGain(db_left + db_right);
         partials.gains[i] *= gain;
     }
@@ -513,7 +489,10 @@ inline static constexpr float SimpleParabolaReso(const ParabolaResoCoeff& c, flo
 }
 
 void Filter::ParabolaReso(Partials& partials) {
-    ParabolaResoCoeff c{ cutoff_semitone_, resonance_width_, resonance_ };
+    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
+    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+
+    ParabolaResoCoeff c{ cutoff_semitone_, resonance_width, resonance };
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
         auto db = SimpleParabolaReso(c, partial_p);
@@ -523,8 +502,11 @@ void Filter::ParabolaReso(Partials& partials) {
 }
 
 void Filter::DoubleParabolaReso(Partials& partials) {
-    ParabolaResoCoeff left{ cutoff_semitone_ - filter_width_, resonance_width_, resonance_ };
-    ParabolaResoCoeff right{ cutoff_semitone_ + filter_width_, resonance_width_, resonance_ };
+    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
+    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+
+    ParabolaResoCoeff left{ cutoff_semitone_ - filter_width_, resonance_width, resonance };
+    ParabolaResoCoeff right{ cutoff_semitone_ + filter_width_, resonance_width, resonance };
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
         auto db_left = SimpleParabolaReso(left, partial_p);
@@ -535,11 +517,14 @@ void Filter::DoubleParabolaReso(Partials& partials) {
 }
 
 void Filter::PhaserReso(Partials& partials) {
-    float reso_width = param::Reso_PhaserResoWidth::GetNumber(reso_args_);
-    float f = reso_phaser_cycles_ * std::numbers::pi_v<float> / reso_width;
-    float reso_begin = cutoff_semitone_ - reso_width;
-    float reso_end = cutoff_semitone_ + reso_width;
-    float k = resonance_ / reso_width;
+    float resonance_width = param::Reso_PhaserResoWidth::GetNumber(filter_args_);
+    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+    float reso_phaser_cycles = param::Filter_PhaserResoCycles::GetNumber(filter_args_);
+
+    float f = reso_phaser_cycles * std::numbers::pi_v<float> / 150.0f;
+    float reso_begin = cutoff_semitone_ - resonance_width;
+    float reso_end = cutoff_semitone_ + resonance_width;
+    float k = resonance / resonance_width;
 
     for (int i = 0; i < kNumPartials; ++i) {
         float partial_p = partials.pitches[i];
@@ -548,14 +533,14 @@ void Filter::PhaserReso(Partials& partials) {
         }
         else if (partial_p < cutoff_semitone_) {
             float cos_v = std::cos(f * (partial_p - cutoff_semitone_)) * 0.5f + 0.5f;
-            float window_v = resonance_ - k * (cutoff_semitone_ - partial_p);
+            float window_v = resonance - k * (cutoff_semitone_ - partial_p);
             float db = window_v * cos_v;
             auto gain = utli::DbToGain(db);
             partials.gains[i] *= gain;
         }
         else {
             float cos_v = std::cos(f * (partial_p - cutoff_semitone_)) * 0.5f + 0.5f;
-            float window_v = resonance_ - k * (partial_p - cutoff_semitone_);
+            float window_v = resonance - k * (partial_p - cutoff_semitone_);
             float db = window_v * cos_v;
             auto gain = utli::DbToGain(db);
             partials.gains[i] *= gain;
