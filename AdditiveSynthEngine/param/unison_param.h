@@ -2,10 +2,22 @@
 
 #include "param/param.h"
 
-namespace mana::param {
 // =========================================================
 // unison
 // =========================================================
+namespace mana::param {
+struct Unison_Type : IntChoiceParam<Unison_Type> {
+    static constexpr auto kName = "num_voice"sv;
+
+    enum class ParamEnum {
+        kNumEnums
+    };
+
+    static constexpr std::array kNames{
+        "test"sv
+    };
+};
+
 struct Unison_NumVoice : IntParam<Unison_NumVoice> {
     static constexpr auto kName = "num_voice"sv;
     static constexpr int kMin = 1;

@@ -15,8 +15,7 @@ public:
     void OnNoteOn();
     void OnNoteOff();
 private:
-    int time_{};
-    int update_skip_{};
+    float update_skip_{};
 
     std::array<float, 9> voice_ratios_;
     std::array<float, 9> voice_phases_;

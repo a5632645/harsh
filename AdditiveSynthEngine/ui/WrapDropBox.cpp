@@ -14,7 +14,7 @@ void mana::WrapDropBox::Paint() {
                     parameter_->SetInt(m_item_selected);
                 }
                 if (int_parameter_ != nullptr) {
-                    int_parameter_->SetInt(m_item_selected);
+                    int_parameter_->Set01Value(static_cast<float>(m_item_selected) / (choice_strings_.size() - 1.0f));
                 }
             }
         }
