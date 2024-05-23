@@ -1,11 +1,14 @@
 #pragma once
 
 #include "engine/forward_decalre.h"
-#include "ui/oscilloscope.h"
-#include "layout/SynthLayout.h"
-#include "layout/curve_layout.h"
-#include "layout/modulator_layout.h"
-#include "layout/modulation_matrix_layout.h"
+
+#include "synth/synth_layout.h"
+#include "matrix/modulation_matrix_layout.h"
+#include "effect/final_fx_layout.h"
+#include "about/about_layout.h"
+#include "resynthsis/resynthsis_layout.h"
+#include "modulators/modulators_layout.h"
+#include "master_layout.h"
 
 namespace mana {
 class MainWindow {
@@ -14,27 +17,33 @@ public:
 
     void paint();
     void SetBounds(int x, int y, int w, int h);
-    Oscilloscope& GetOscilloscope() { return synth_layout_.GetOscilloscope(); }
+
+    Oscilloscope& GetWaveScope() { return master_.GetWaveScope(); }
 private:
     enum class Layout {
         kSynth,
-        kCurve,
-        kModulators,
-        kMatrix
+        kEffect,
+        kResynthsis,
+        kMatrix,
+        kAbout
     };
 
     Synth& synth_;
+    ModulatorsLayout modulators_layout_;
+    MasterLayout master_;
 
     SynthLayout synth_layout_;
-    CurveLayout curve_layout_;
-    ModulatorLayout modulator_layout_;
     ModulationMatrixLayout modulation_matrix_layout_;
+    FinalFxLayout effect_layout_;
+    AboutLayout about_layout_;
+    ResynthsisLayout resynthsis_layout_;
 
     // swich page
     Layout current_layout_{ Layout::kSynth };
     rgc::Button synth_button_;
-    rgc::Button curve_button_;
-    rgc::Button modulator_button_;
-    rgc::Button modulation_matrix_button_;
+    rgc::Button effect_button_;
+    rgc::Button resynthsis_button;
+    rgc::Button matrix_button_;
+    rgc::Button about_button_;
 };
 }

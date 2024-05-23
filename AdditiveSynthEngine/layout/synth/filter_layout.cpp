@@ -6,12 +6,12 @@
 #include "engine/synth.h"
 
 namespace mana {
-mana::FilterLayout::FilterLayout(Synth & synth)
-    : filter_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("filter.type")) {
+mana::FilterLayout::FilterLayout(Synth& synth, int idx)
+    : filter_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("filter{}.type", idx)) {
     filter_type_.on_choice_changed = [this](int c) {OnFilterTypeChanged(c); };
 
     for (int i = 0; auto & knob : arg_filter_knobs_) {
-        knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("filter.arg{}", i++)));
+        knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("filter{}.arg{}", idx, i++)));
     }
 
     OnFilterTypeChanged(0);

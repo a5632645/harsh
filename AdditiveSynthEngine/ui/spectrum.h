@@ -1,19 +1,18 @@
 #pragma once
 
+#include <vector>
 #include <raylib.h>
 #include "engine/forward_decalre.h"
-#include "ui/Knob.h"
 
 namespace mana {
-class EnvelopLayout {
+class Spectrum {
 public:
-    EnvelopLayout(Synth& synth, int idx);
+    Spectrum(Synth& synth) : synth_(synth) {}
+
     void Paint();
     void SetBounds(Rectangle bound);
 private:
-    Knob attack_;
-    Knob decay_;
-    Knob sustain_;
-    Knob release_;
+    Synth& synth_;
+    Rectangle bound_;
 };
 }

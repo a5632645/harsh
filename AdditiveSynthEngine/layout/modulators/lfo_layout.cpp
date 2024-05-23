@@ -6,7 +6,9 @@
 #include "engine/synth.h"
 
 namespace mana {
-LfoLayout::LfoLayout(Synth& synth, int idx) {
+LfoLayout::LfoLayout(Synth& synth, int idx, std::string_view id) {
+    id_ = id;
+
     const auto& bank = synth.GetParamBank();
 
     rate_.set_parameter(bank.GetParamPtr(std::format("lfo{}.rate", idx)));

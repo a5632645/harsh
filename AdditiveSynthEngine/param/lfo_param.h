@@ -5,7 +5,7 @@
 namespace mana::param {
 struct LFO_Rate : FloatParam <LFO_Rate> {
     static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 50.0f;
+    static constexpr float kMax = 200.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr auto kName = "rate"sv;
     static constexpr auto kStuff = "hz"sv;

@@ -1,9 +1,12 @@
 #include "WrapDropBox.h"
 
 void mana::WrapDropBox::Paint() {
+    SetText(m_concated_string.c_str());
+    SetEditMode(m_is_edit_mode);
+    SetActive(&m_item_selected);
+
     int old_choice = m_item_selected;
 
-    SetEditMode(m_is_edit_mode);
     if (Show()) {
         if (m_is_edit_mode) {
             // close it
@@ -27,7 +30,6 @@ void mana::WrapDropBox::Paint() {
 
 void mana::WrapDropBox::set_text(std::string_view text) {
     m_concated_string = text;
-    SetText(m_concated_string.c_str());
 }
 
 void mana::WrapDropBox::set_text(const std::vector<std::string_view>& text) {
@@ -39,5 +41,4 @@ void mana::WrapDropBox::set_text(const std::vector<std::string_view>& text) {
     if (!m_concated_string.empty()) {
         m_concated_string.pop_back();
     }
-    SetText(m_concated_string.c_str());
 }

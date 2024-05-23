@@ -8,7 +8,7 @@
 namespace mana {
 class FilterLayout {
 public:
-    FilterLayout(Synth& synth);
+    FilterLayout(Synth& synth, int idx);
 
     void Paint();
     void SetBounds(int x, int y, int w, int h);

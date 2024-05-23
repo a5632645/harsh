@@ -11,8 +11,23 @@ struct VowelInfo {
     std::array<float, 5> bws;
 };
 
+template<size_t N>
+static constexpr auto ConvertToPitchTable(const std::array<VowelInfo, N>& table) {
+    std::array<FormantFilter::ConvertVowlInfo, N> out{};
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < 5; ++j) {
+            out[i].cut_pitch[j] = utli::cp::FreqToPitch(table[i].freqs[j]);
+            out[i].p_begin[j] = utli::cp::FreqToPitch(table[i].freqs[j] - table[i].bws[j] / 2.0f);
+            out[i].p_end[j] = utli::cp::FreqToPitch(table[i].freqs[j] + table[i].bws[j] / 2.0f);
+            out[i].amps[j] = table[i].amps[j];
+            out[i].magic_coef[j] = 1.0f / std::min(-0.01f, out[i].p_begin[j] - out[i].p_end[j]);
+        }
+    }
+    return out;
+}
+
 // https://www.classes.cs.uchicago.edu/archive/1999/spring/CS295/Computing_Resources/Csound/CsManual3.48b1.HTML/Appendices/table3.html
-static constexpr std::array kSopranoVowels = {
+static constexpr std::array kSopranoVowels = ConvertToPitchTable(std::array{
     VowelInfo {
         {800.0f, 1150.0f,2900.0f,3900.0f,4950.0f},
         {0.0f,-6.0f,-32.0f,-20.0f,-50.0f},
@@ -38,8 +53,9 @@ static constexpr std::array kSopranoVowels = {
         {0.0f,-16.0f,-35.0f,-40.0f,-60.0f,},
         {50.0f,60.0f,170.0f,180.0f,200.0f,}
     }
-};
-static constexpr std::array kAltoVowel{
+});
+
+static constexpr std::array kAltoVowel = ConvertToPitchTable(std::array{
     VowelInfo{
         {800.0f,1150.0f,2800.0f,3500.0f,4950.0f,},
         {0.0f,-4.0f,-20.0f,-36.0f,-60.0f,},
@@ -65,8 +81,9 @@ static constexpr std::array kAltoVowel{
         {0.0f,-12.0f,-30.0f,-40.0f,-64.0f,},
         {50.0f,60.0f,170.0f,180.0f,200.0f,}
     }
-};
-static constexpr std::array kCountertenorVowel{
+});
+
+static constexpr std::array kCountertenorVowel = ConvertToPitchTable(std::array{
     VowelInfo{
         {660.0f,1120.0f,2750.0f,3000.0f,3350.0f,},
         {0.0f,-6.0f,-23.0f,-24.0f,-38.0f,},
@@ -92,8 +109,9 @@ static constexpr std::array kCountertenorVowel{
         {0.0f,-20.0f,-23.0f,-30.0f,-34.0f,},
         {40.0f,60.0f,100.0f,120.0f,120.0f,}
     },
-};
-static constexpr std::array kTenorVowel{
+});
+
+static constexpr std::array kTenorVowel = ConvertToPitchTable(std::array{
     VowelInfo{
         {650.0f,1080.0f,2650.0f,2900.0f,3250.0f,},
         {0.0f,-6.0f,-7.0f,-8.0f,-22.0f,},
@@ -119,8 +137,9 @@ static constexpr std::array kTenorVowel{
         {0.0f,-20.0f,-17.0f,-14.0f,-26.0f,},
         {40.0f,60.0f,100.0f,120.0f,120.0f,}
     }
-};
-static constexpr std::array kBassVowel{
+});
+
+static constexpr std::array kBassVowel = ConvertToPitchTable(std::array{
     VowelInfo{
         {600.0f,1040.0f,2250.0f,2450.0f,2750.0f,},
         {0.0f,-7.0f,-9.0f,-9.0f,-20.0f,},
@@ -146,9 +165,9 @@ static constexpr std::array kBassVowel{
         {0.0f,-20.0f,-32.0f,-28.0f,-36.0f,},
         {40.0f,80.0f,100.0f,120.0f,120.0f,}
     }
-};
+});
 
-inline static const std::array<VowelInfo, 5>& GetVowelInfoArray(param::VowelFilter_Singer::ParamEnum e) {
+inline static const auto& GetVowelInfoArray(param::VowelFilter_Singer::ParamEnum e) {
     using sgr = param::VowelFilter_Singer::ParamEnum;
 
     switch (e) {
@@ -173,48 +192,54 @@ void FormantFilter::Init(float sample_rate, float update_rate) {
 }
 
 void FormantFilter::PrepareParams(OscillorParams & params) {
-    arg_formant_shift_ = params.GetPolyFloatParam("filter.arg{}", param::VowelFilter_Formant::kArgIdx);
-    arg_resonance_ = params.GetPolyFloatParam("filter.arg{}", param::VowelFilter_Resonance::kArgIdx);
-    arg_singer_ = params.GetPolyFloatParam("filter.arg{}", param::VowelFilter_Singer::kArgIdx);
-    arg_slope_ = params.GetPolyFloatParam("filter.arg{}", param::VowelFilter_Slope::kArgIdx);
-    arg_select_ = params.GetPolyFloatParam("filter.arg{}", param::VowelFilter_Select::kArgIdx);
+    arg_formant_shift_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Formant::kArgIdx);
+    arg_resonance_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Resonance::kArgIdx);
+    arg_singer_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Singer::kArgIdx);
+    arg_slope_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Slope::kArgIdx);
+    arg_select_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Select::kArgIdx);
 }
 
-void FormantFilter::Process(Partials& partials) {
-    for (int i = 0; i < kNumPartials; ++i) {
-        float gain = 0.0f;
-        float partial_p = partials.pitches[i];
+void FormantFilter::Process(Partials& partials, std::vector<float>& out) {
+    auto slope = param::VowelFilter_Slope::GetNumber(arg_slope_->GetValue());
+    auto resonance = param::VowelFilter_Resonance::GetNumber(arg_resonance_->GetValue());
+    auto shift = param::VowelFilter_Formant::GetNumber(arg_formant_shift_->GetValue());
 
-        for (auto& reso : resos_) {
-            gain += utli::DbToGain(reso.Filter(partial_p));
+    std::ranges::fill(out, 0.0f);
+    for (int filter_idx = 0; filter_idx < 5; ++filter_idx) {
+        auto p_begin = vowel_info_.p_begin[filter_idx] + shift;
+        auto p_end = vowel_info_.p_end[filter_idx] + shift;
+        auto cut_pitch = vowel_info_.cut_pitch[filter_idx] + shift;
+        auto amptide = vowel_info_.amps[filter_idx];
+        auto parabola_a = vowel_info_.magic_coef[filter_idx] * slope;
+
+        for (int i = 0; i < kNumPartials; ++i) {
+            float gain = 0.0f;
+            float partial_p = partials.pitches[i];
+
+            if (partial_p < p_begin) {
+                gain = (p_begin - partial_p) * (-slope);
+            }
+            else if (partial_p > p_end) {
+                gain = (partial_p - p_end) * (-slope);
+            }
+            else {
+                auto xxx = partial_p - cut_pitch;
+                gain = parabola_a * xxx * xxx;
+            }
+
+            out[i] += utli::DbToGain(gain + amptide + 2.0 * slope);
         }
-
-        partials.gains[i] *= gain;
     }
 }
 
 void FormantFilter::OnUpdateTick() {
     using sgr = param::VowelFilter_Singer::ParamEnum;
 
-    auto singer_enum = param::VowelFilter_Singer::GetEnum(arg_singer_->GetValue());
-    auto select = param::VowelFilter_Select::GetChoiceIndex(arg_select_->GetValue());
-    auto slope = param::VowelFilter_Slope::GetNumber(arg_slope_->GetValue());
-    auto resonance = param::VowelFilter_Resonance::GetNumber(arg_resonance_->GetValue());
-    auto shift = param::VowelFilter_Formant::GetNumber(arg_formant_shift_->GetValue());
+    auto singer_enum = param::VowelFilter_Singer::GetEnum(arg_singer_->Get01Value());
+    auto select = param::VowelFilter_Select::GetChoiceIndex(arg_select_->Get01Value());
 
     const auto& singer_infos = GetVowelInfoArray(singer_enum);
     const auto& vowel_info = singer_infos.at(select);
-
-    for (int i = 0; auto & reso : resos_) {
-        auto f_cut = vowel_info.freqs[i];
-        auto p_cut = utli::FreqToPitch(f_cut);
-        auto f_begin = vowel_info.freqs[i] - vowel_info.bws[i];
-        auto p_begin = utli::FreqToPitch(f_cut);
-        auto f_end = vowel_info.freqs[i] + vowel_info.bws[i];
-        auto p_end = utli::FreqToPitch(f_end);
-        auto p_bw = p_end - p_begin;
-        reso.SetParam(slope, p_cut + shift, p_bw, vowel_info.amps[i]);
-        i++;
-    }
+    vowel_info_ = vowel_info;
 }
 }

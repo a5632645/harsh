@@ -62,10 +62,13 @@ SynthParams::SynthParams() {
         param_bank_.AddParameter(CreateAlterParam(kPoly, "arg{}", "dissonance.arg{}", arg_idx));
     }
 
-    param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, kUnitRange, "enable", "filter.enable");
-    param_bank_.AddParameter(param::Filter_Type::CreateParam(kDisable, "filter.type"));
-    for (int arg_idx = 0; arg_idx < 8; ++arg_idx) {
-        param_bank_.AddParameter(CreateAlterParam(kPoly, "arg{}", "filter.arg{}", arg_idx));
+    param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, kUnitRange, "filter_stream", "filter.stream_type");
+    for (int filter_idx = 0; filter_idx < 2; ++filter_idx) {
+        param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, kUnitRange, std::format("filter{} enable", filter_idx), "filter{}.enable", filter_idx);
+        param_bank_.AddParameter(param::Filter_Type::CreateParam(kDisable, "filter{}.type", filter_idx));
+        for (int arg_idx = 0; arg_idx < 8; ++arg_idx) {
+            param_bank_.AddParameter(CreateAlterParam(kPoly, "arg{1}", "filter{}.arg{}", filter_idx, arg_idx));
+        }
     }
 
     // resynthsis
@@ -97,8 +100,8 @@ SynthParams::SynthParams() {
     for (int env_idx = 0; env_idx < 8; ++env_idx) {
         param_bank_.AddParameter(param::Env_Attack::CreateParam(kPoly, "envelop{}.attack", env_idx));
         param_bank_.AddParameter(param::Env_Decay::CreateParam(kPoly, "envelop{}.decay", env_idx));
-        param_bank_.AddParameter(param::Env_Release::CreateParam(kPoly, "envelop{}.sustain", env_idx));
-        param_bank_.AddParameter(param::Env_Sustain::CreateParam(kPoly, "envelop{}.release", env_idx));
+        param_bank_.AddParameter(param::Env_Sustain::CreateParam(kPoly, "envelop{}.sustain", env_idx));
+        param_bank_.AddParameter(param::Env_Release::CreateParam(kPoly, "envelop{}.release", env_idx));
     };
 
     // custom curves

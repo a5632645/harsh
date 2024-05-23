@@ -68,6 +68,7 @@ ModulationMatrixLayout::ModulationMatrixLayout(Synth& synth)
     sections_.assign(section_view.begin(), section_view.end());
     section_selector_.SetChoices(section_view);
     section_selector_.on_choice_changed = [this](int c) {
+        param_selector_.ResetItemSelect();
         param_selector_.SetChoices(split_param_ids[sections_[c]] | std::views::transform([](SplitParamId& id) {
             return id.detail;
         }));

@@ -18,7 +18,7 @@ static void ThisAudioCallback(void* buffer, unsigned int frames) {
     std::scoped_lock lock{ synth_.GetSynthLock() };
     synth_.Render(frames);
     std::ranges::copy(synth_.getBuffer(), static_cast<float*>(buffer));
-    synth_layout_.GetOscilloscope().PushBuffer(synth_.getBuffer());
+    synth_layout_.GetWaveScope().PushBuffer(synth_.getBuffer());
 }
 
 static void ThisRtMidiCallback(double timeStamp, std::vector<unsigned char> *message, void *userData) {
@@ -73,7 +73,7 @@ int main(void) {
 
             synth_layout_.paint();
 
-            mana::Partials drawing_partials_;
+            /*mana::Partials drawing_partials_;
             {
                 std::scoped_lock lock{ synth_.GetSynthLock() };
                 drawing_partials_ = synth_.GetDisplayOscillor().GetPartials();
@@ -89,7 +89,7 @@ int main(void) {
                 int x = static_cast<int>(800 * x_nor);
                 int y = static_cast<int>(600 * (1.0f - y_nor));
                 DrawLine(x, y, x, 600, WHITE);
-            }
+            }*/
         }
         EndDrawing();
     }

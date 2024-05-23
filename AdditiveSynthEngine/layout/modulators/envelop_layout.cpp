@@ -5,17 +5,19 @@
 #include "layout/gui_param_pack.h"
 
 namespace mana {
-EnvelopLayout::EnvelopLayout(Synth& synth, int idx) {
+EnvelopLayout::EnvelopLayout(Synth& synth, int idx, std::string_view id) {
+    id_ = id;
+
     const auto& param_bank = synth.GetParamBank();
 
     attack_.set_parameter(param_bank.GetParamPtr("envelop{}.attack", idx));
-    SetSingeKnobInfo(attack_, param::Env_Attack{});
+    //SetSingeKnobInfo(attack_, param::Env_Attack{});
     decay_.set_parameter(param_bank.GetParamPtr("envelop{}.decay", idx));
-    SetSingeKnobInfo(decay_, param::Env_Decay{});
+    //SetSingeKnobInfo(decay_, param::Env_Decay{});
     sustain_.set_parameter(param_bank.GetParamPtr("envelop{}.sustain", idx));
-    SetSingeKnobInfo(sustain_, param::Env_Sustain{});
+    //SetSingeKnobInfo(sustain_, param::Env_Sustain{});
     release_.set_parameter(param_bank.GetParamPtr("envelop{}.release", idx));
-    SetSingeKnobInfo(release_, param::Env_Release{});
+    //SetSingeKnobInfo(release_, param::Env_Release{});
 }
 
 void EnvelopLayout::Paint() {

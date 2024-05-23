@@ -1,7 +1,6 @@
 #include "unison_layout.h"
 
 #include <ranges>
-#include "param/unison_param.h"
 #include "layout/gui_param_pack.h"
 #include "engine/synth_params.h"
 
@@ -11,12 +10,8 @@ UnisonLayout::UnisonLayout(SynthParams& params) {
     type_.SetParameter(bank.GetParamPtr<IntChoiceParameter>("unison.type"));
     num_voice_.SetParameter(bank.GetParamPtr<IntParameter>("unison.num_voice"));
     pitch_.set_parameter(bank.GetParamPtr("unison.pitch"));
-    //SetSingeKnobInfo(pitch_, param::Unison_Pitch{});
     phase_.set_parameter(bank.GetParamPtr("unison.phase"));
     pan_.set_parameter(bank.GetParamPtr("unison.pan"));
-
-    /*num_voice_.SetChoices(std::ranges::views::iota(1, 9 + 1) | std::ranges::views::transform(
-        [](int v) {return std::to_string(v); }));*/
 }
 
 void UnisonLayout::Paint() {

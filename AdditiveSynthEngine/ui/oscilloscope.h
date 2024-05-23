@@ -21,7 +21,7 @@ private:
     int write_pos_{};
     float last_sample_{};
     int counter_{};
-    int nsample_per_pixel_{2};
+    int nsample_per_pixel_{ 4 };
 
     int x_{};
     int w_{};

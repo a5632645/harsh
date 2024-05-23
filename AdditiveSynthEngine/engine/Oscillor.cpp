@@ -17,13 +17,12 @@ Oscillor::Oscillor(Synth& synth)
     , effec2_(2)
     , effec3_(3)
     , effec4_(4)
-    , oscillor_param_(std::make_unique<OscillorParams>(synth.GetSynthParams()))
-    , filter_(std::make_unique<Filter>()) {
+    , oscillor_param_(std::make_unique<OscillorParams>(synth.GetSynthParams())) {
     freq_.PrepareParams(*oscillor_param_);
     phase_.PrepareParams(*oscillor_param_);
     timber_.PrepareParams(*oscillor_param_);
     resynthsis_.PrepareParams(*oscillor_param_);
-    filter_->PrepareParams(*oscillor_param_);
+    filter_.PrepareParams(*oscillor_param_);
     effec0_.PrepareParams(*oscillor_param_);
     effec1_.PrepareParams(*oscillor_param_);
     effec2_.PrepareParams(*oscillor_param_);
@@ -46,7 +45,7 @@ void Oscillor::Init(size_t bufferSize, float sampleRate, float update_rate) {
     phase_.Init(sampleRate, update_rate);
     timber_.Init(sampleRate, update_rate);
     resynthsis_.Init(sampleRate, update_rate);
-    filter_->Init(sampleRate, update_rate);
+    filter_.Init(sampleRate, update_rate);
     effec0_.Init(sampleRate, update_rate);
     effec1_.Init(sampleRate, update_rate);
     effec2_.Init(sampleRate, update_rate);
@@ -69,7 +68,7 @@ void Oscillor::NoteOn(int note_number, float velocity) {
     phase_.OnNoteOn(note_number);
     timber_.OnNoteOn(note_number);
     resynthsis_.OnNoteOn(note_number);
-    filter_->OnNoteOn(note_number);
+    filter_.OnNoteOn(note_number);
     effec0_.OnNoteOn(note_number);
     effec1_.OnNoteOn(note_number);
     effec2_.OnNoteOn(note_number);
@@ -87,7 +86,7 @@ void Oscillor::NoteOff() {
     phase_.OnNoteOff();
     timber_.OnNoteOff();
     resynthsis_.OnNoteOff();
-    filter_->OnNoteOff();
+    filter_.OnNoteOff();
     effec0_.OnNoteOff();
     effec1_.OnNoteOff();
     effec2_.OnNoteOff();
@@ -112,7 +111,7 @@ void Oscillor::update_state(int step) {
     phase_.OnUpdateTick();
     timber_.OnUpdateTick();
     resynthsis_.OnUpdateTick();
-    filter_->OnUpdateTick();
+    filter_.OnUpdateTick();
     effec0_.OnUpdateTick();
     effec1_.OnUpdateTick();
     effec2_.OnUpdateTick();
@@ -132,7 +131,7 @@ void Oscillor::update_state(int step) {
     // after mix with resynthsis, do unison
     unison_.Process(partials_);
 
-    filter_->Process(partials_);
+    filter_.Process(partials_);
     effec0_.Process(partials_);
     effec1_.Process(partials_);
     effec2_.Process(partials_);

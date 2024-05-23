@@ -11,9 +11,9 @@
 namespace mana {
 class WrapDropBox : public rgc::DropdownBox {
 public:
-    WrapDropBox() { SetActive(&m_item_selected); }
-    WrapDropBox(IntParameter* p) : WrapDropBox() { SetParameter(p); }
-    WrapDropBox(IntChoiceParameter* p) : WrapDropBox() { SetParameter(p); }
+    WrapDropBox() = default;
+    WrapDropBox(IntParameter* p) { SetParameter(p); }
+    WrapDropBox(IntChoiceParameter* p) { SetParameter(p); }
 
     void SetParameter(IntChoiceParameter* p) {
         assert(p != nullptr);
@@ -53,10 +53,10 @@ public:
         if (!m_concated_string.empty()) {
             m_concated_string.pop_back();
         }
-        SetText(m_concated_string.c_str());
     }
 
     int get_item_selected() const { return m_item_selected; }
+    void ResetItemSelect() { m_item_selected = 0; }
     std::string_view GetChoiceText(int c) const { return choice_strings_.at(c); }
 
     std::function<void(int)> on_choice_changed = [](int) {};

@@ -8,13 +8,18 @@
 namespace mana {
 class Filter {
 public:
+    Filter(int idx);
+
     void Init(float sample_rate, float update_rate);
-    void Process(Partials & partials);
+    const std::vector<float>& Process(Partials& partials);
     void PrepareParams(OscillorParams& params);
     void OnUpdateTick();
     void OnNoteOn(int note);
     void OnNoteOff();
 private:
+    const int idx_;
+    std::vector<float> filter_output_;
+
     std::array<PolyModuFloatParameter*, 8> filter_args_;
     IntChoiceParameter* filter_type_arg_;
     float sample_rate_;

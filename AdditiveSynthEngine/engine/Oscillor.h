@@ -10,7 +10,7 @@
 #include "resynthsis/resynthsis.h"
 #include "standard/freq.h"
 #include "standard/phase.h"
-#include "filter/filter.h"
+#include "filter/filter_wrap.h"
 #include "effect/effect.h"
 #include "dissonance/dissonance.h"
 #include "timber/timber.h"
@@ -78,7 +78,7 @@ private:
     PhaseProcessor phase_;
     Timber timber_;
     Resynthesis resynthsis_;
-    std::unique_ptr<Filter> filter_;
+    FilterWrap filter_;
     Effect effec0_;
     Effect effec1_;
     Effect effec2_;

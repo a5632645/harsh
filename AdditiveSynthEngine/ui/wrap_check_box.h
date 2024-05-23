@@ -11,7 +11,10 @@ namespace mana {
 class WrapCheckBox : public rgc::CheckBox {
 public:
     WrapCheckBox(BoolParameter* p = nullptr) : parameter(p) {}
-    void SetParameter(BoolParameter* p) { parameter = p; }
+    void SetParameter(BoolParameter* p) {
+        parameter = p;
+        SetText(p->GetName().data());
+    }
     void Paint();
 private:
     BoolParameter* parameter;

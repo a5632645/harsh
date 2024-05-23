@@ -32,11 +32,16 @@ add_subdirectory("xsimd")
 include(FetchContent)
 
 # json library
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_Declare(json 
+URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 FetchContent_MakeAvailable(json)
 
 # rtmidi
-FetchContent_Declare(rtmidi URL http://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-6.0.0.tar.gz)
+set_property(CACHE RTMIDI_TARGETNAME_UNINSTALL PROPERTY VALUE "my_uninstall")
+FetchContent_Declare(rtmidi
+URL http://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-6.0.0.tar.gz
+DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 FetchContent_MakeAvailable(rtmidi)
 
 add_subdirectory ("AdditiveSynthEngine")

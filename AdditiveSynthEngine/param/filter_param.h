@@ -214,8 +214,8 @@ using Filter_PhaserPhase = Filter_CombPhase;
 // ============================================================
 struct VowelFilter_Formant : FloatParam<VowelFilter_Formant> {
     static constexpr int kArgIdx = 0;
-    static constexpr float kMin = -24.0f;
-    static constexpr float kMax = 24.0f;
+    static constexpr float kMin = -12.0f;
+    static constexpr float kMax = 12.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr int kTextPrecision = 1;
     static constexpr auto kName = "formant"sv;
@@ -246,8 +246,8 @@ struct VowelFilter_Singer : FloatChoiceParam<VowelFilter_Singer> {
 struct VowelFilter_Slope : FloatParam<VowelFilter_Slope> {
     static constexpr int kArgIdx = 2;
     static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 48.0f;
-    static constexpr float kDefault = 12.0f;
+    static constexpr float kMax = 6.0f;
+    static constexpr float kDefault = 6.0f;
     static constexpr int kTextPrecision = 1;
     static constexpr auto kName = "slope"sv;
     static constexpr auto kStuff = "dB"sv;
@@ -255,12 +255,11 @@ struct VowelFilter_Slope : FloatParam<VowelFilter_Slope> {
 
 struct VowelFilter_Resonance : FloatParam<VowelFilter_Resonance> {
     static constexpr int kArgIdx = 3;
-    static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 20.0f;
+    static constexpr float kMin = 1.0f;
+    static constexpr float kMax = 5.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr int kTextPrecision = 1;
     static constexpr auto kName = "resonance"sv;
-    static constexpr auto kStuff = "dB"sv;
 };
 
 struct VowelFilter_Select : FloatChoiceParam<VowelFilter_Select> {

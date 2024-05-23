@@ -2,7 +2,7 @@
 
 #include "param/timber_param.h"
 #include "param/param.h"
-#include "gui_param_pack.h"
+#include "layout/gui_param_pack.h"
 #include "engine/synth.h"
 
 namespace mana {
