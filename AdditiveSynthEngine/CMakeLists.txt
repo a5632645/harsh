@@ -1,31 +1,26 @@
-﻿add_executable (AdditiveSynthEngine
+﻿project ("AdditiveSynthEngine")
+if(WIN32)
+    add_compile_options(/wd4819)
+    add_compile_options("/arch:AVX")
+endif()
+
+add_executable (AdditiveSynthEngine
 "AdditiveSynthEngine.cpp"
 "engine/Oscillor.h"
 "engine/Oscillor.cpp"
 "engine/synth.cpp"
-
-
-
-
 "engine/standard/freq.h"
 "engine/standard/freq.cpp"
-
 "engine/modulation/Parameter.h"
-
 "engine/modulation/ParamBank.h"
-
 "engine/modulation/Modulator.h"
-
 "engine/modulation/Modulation.h"
-
-
 "param/timber_param.h"
 "engine/timber/timber.cpp"
 "engine/timber/dual_saw.h"
 "engine/timber/dual_saw.cpp"
 "engine/timber/sync.h"
 "engine/timber/sync.cpp"
-
 "param/param.h"
 "engine/oscillor_param.h"
 
@@ -162,14 +157,16 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET AdditiveSynthEngine PROPERTY CXX_STANDARD 20)
 endif()
 
-target_link_libraries(AdditiveSynthEngine PUBLIC raylib)
-target_link_libraries(AdditiveSynthEngine PUBLIC raylib_cpp)
-target_link_libraries(AdditiveSynthEngine PUBLIC raygui_cpp)
-target_link_libraries(AdditiveSynthEngine PUBLIC AudioFFT)
-target_link_libraries(AdditiveSynthEngine PUBLIC AudioFile)
-target_link_libraries(AdditiveSynthEngine PUBLIC gcem)
-target_link_libraries(AdditiveSynthEngine PUBLIC xsimd)
+target_link_libraries(AdditiveSynthEngine PRIVATE raylib)
+target_link_libraries(AdditiveSynthEngine PRIVATE raylib_cpp)
+target_link_libraries(AdditiveSynthEngine PRIVATE raygui_cpp)
+target_link_libraries(AdditiveSynthEngine PRIVATE AudioFFT)
+target_link_libraries(AdditiveSynthEngine PRIVATE AudioFile)
+target_link_libraries(AdditiveSynthEngine PRIVATE gcem)
+target_link_libraries(AdditiveSynthEngine PRIVATE xsimd)
 target_link_libraries(AdditiveSynthEngine PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(AdditiveSynthEngine PRIVATE rtmidi)
 #target_link_libraries(AdditiveSynthEngine PRIVATE raygui)
 target_include_directories(AdditiveSynthEngine PRIVATE .)
+
+add_subdirectory("plugin")

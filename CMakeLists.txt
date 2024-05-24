@@ -2,29 +2,19 @@
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project ("AdditiveSynthEngine")
-
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-
-if(WIN32)
-    add_compile_options(/wd4819)
-    add_compile_options("/arch:AVX")
-endif()
-
-# sub modules
 add_subdirectory ("raylib-cpp")
 add_subdirectory ("raylib")
-
 add_subdirectory("raygui/projects/CMake")
-
 add_subdirectory ("raygui-cpp")
 add_subdirectory ("AudioFFT")
 add_subdirectory ("AudioFile")
 add_subdirectory ("gcem")
+add_subdirectory("JUCE")
 
 set(DOWNLOAD_DOCTEST ON)
 add_subdirectory("xsimd")

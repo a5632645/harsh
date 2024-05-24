@@ -26,10 +26,7 @@ public:
 
     static constexpr auto kTypeEnum = ParamType::kFloat;
 
-    //FloatParameter(ModulationType modulation_type, ParamRange range, std::string_view id)
-    //    : id_(id), modulation_type_(modulation_type), range_(std::move(range)) {}
-
-    template<class...T>/* requires (sizeof...(T) >= 1)*/
+    template<class...T>
     FloatParameter(ModulationType modulation_type, ParamRange range, std::string_view name, std::format_string<T...> format_text, T&&... args)
         : id_(std::format(format_text, std::forward<T>(args)...))
         , modulation_type_(modulation_type)
@@ -38,8 +35,8 @@ public:
 
     virtual ~FloatParameter() = default;
     FloatParameter(FloatParameter const&) = delete;
-    FloatParameter& operator=(FloatParameter const&) = default;
-    FloatParameter(FloatParameter&&) noexcept = delete;
+    FloatParameter& operator=(FloatParameter const&) = delete;
+    FloatParameter(FloatParameter&&) noexcept = default;
     FloatParameter& operator=(FloatParameter&&) noexcept = default;
 
     void SetValue(float new_val) { value_.store(range_.ConvertTo01(new_val)); }
