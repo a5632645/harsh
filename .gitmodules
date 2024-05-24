@@ -22,3 +22,6 @@
 [submodule "raygui"]
 	path = raygui
 	url = https://github.com/raysan5/raygui.git
+[submodule "JUCE"]
+	path = JUCE
+	url = https://github.com/juce-framework/JUCE.git
