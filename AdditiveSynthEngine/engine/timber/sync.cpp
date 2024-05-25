@@ -3,6 +3,7 @@
 #include <numbers>
 #include <complex>
 #include "param/param.h"
+#include "param/param_helper.h"
 #include "param/timber_param.h"
 #include "engine/VolumeTable.hpp"
 
@@ -87,12 +88,12 @@ void Sync::Process(TimberFrame& frame) {
 }
 
 void Sync::OnUpdateTick(OscParam& params) {
-    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(params.args);
+    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(params.args[param::Sync_WaveShape::kArgIdx]->Get01Value());
     first_shape_ = a;
     second_shape_ = b;
     fraction_ = c;
 
-    auto semitone = param::Sync_Sync::GetNumber(params.args);
+    auto semitone = helper::GetAlterParamValue(params.args, param::Sync_Sync{});
     sync_ratio_ = std::exp2(semitone / 12.0f);
 }
 

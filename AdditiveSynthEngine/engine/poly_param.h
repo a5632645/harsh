@@ -14,7 +14,7 @@ struct PolyModuFloatParameter {
     float modulation_value{};
 
     float GetValue() const {
-        return synth_param_ref->GetRange().ConvertFrom01(Get01Value());
+        return synth_param_ref->ConvertFrom01(Get01Value());
     }
 
     float Get01Value() const {

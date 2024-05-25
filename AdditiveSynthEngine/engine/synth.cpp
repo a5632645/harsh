@@ -1,4 +1,5 @@
 #include "synth.h"
+#include "synth.h"
 
 #include "resynthsis/window.h"
 #include "param/standard_param.h"
@@ -7,7 +8,8 @@
 #include "utli/convert.h"
 
 namespace mana {
-Synth::Synth() {
+Synth::Synth(std::shared_ptr<ParamCreator> creator)
+    : synth_params_(creator) {
     m_oscillators.reserve(kNumOscillors);
     for (int i = 0; i < kNumOscillors; ++i) {
         m_oscillators.emplace_back(*this);
@@ -78,6 +80,23 @@ void Synth::Render(size_t numFrame) {
 
     auto output_gain = utli::DbToGain(output_gain_->GetValue());
     std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [output_gain](float v) {return v * output_gain; });
+}
+
+void Synth::Render(float* buffer, int num_frame) {
+    auto output_gain = utli::DbToGain(output_gain_->GetValue());
+
+    auto ptr_begin = buffer;
+    for (Oscillor& o : m_oscillators) {
+        if (!o.IsPlaying()) {
+            continue;
+        }
+
+        for (int i = 0; i < num_frame; ++i) {
+            *buffer++ += o.SrTick();
+        };
+    }
+
+    std::transform(ptr_begin, ptr_begin + num_frame, ptr_begin, [output_gain](float v) {return v * output_gain; });
 }
 
 void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {

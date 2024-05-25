@@ -53,16 +53,16 @@ public:
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
         inv_system_rate_ = 1.0f / update_rate_;
 
-        amount_ = param::Reverb_Amount::GetNumber(args.args);
-        decay_time_ = param::Reverb_Decay::GetNumber(args.args);
-        attack_ = param::Reverb_Attack::GetNumber(args.args);
-        damp_ = param::Reverb_Damp::GetNumber(args.args);
+        amount_ = helper::GetAlterParamValue(args.args, param::Reverb_Amount{});
+        decay_time_ = helper::GetAlterParamValue(args.args, param::Reverb_Decay{});
+        attack_ = helper::GetAlterParamValue(args.args, param::Reverb_Attack{});
+        damp_ = helper::GetAlterParamValue(args.args, param::Reverb_Damp{});
 
         attack_a_ = utli::Calc1stSmoothFilterCoeff(attack_ / 1000.0f, update_rate_);
         constexpr auto kSilenceDb = -60.0f;
         decay_a_ = utli::Calc1stSmoothFilterCoeffByDecayRate((-kSilenceDb * 1000.0f) / decay_time_, update_rate_);
 
-        auto noise_speed = param::Reverb_Speed::GetNumber(args.args);
+        auto noise_speed = helper::GetAlterParamValue(args.args, param::Reverb_Speed{});
         dp_ff_ = std::exp2(noise_speed / 12.0f);
     }
     void OnNoteOn(int note) override {}

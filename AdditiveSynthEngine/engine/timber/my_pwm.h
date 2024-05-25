@@ -3,6 +3,7 @@
 #include "timber_frame.h"
 #include "osc_param.h"
 #include "param/timber_param.h"
+#include "param/param_helper.h"
 #include <numbers>
 
 namespace mana {
@@ -17,8 +18,8 @@ public:
     }
 
     void OnUpdateTick(OscParam& params) {
-        pwm_width_ = param::Pwm_Width::GetNumber(params.args);
-        pwm_tilt_ = param::Pwm_Tilt::GetNumber(params.args);
+        pwm_width_ = helper::GetAlterParamValue(params.args, param::Pwm_Width{});
+        pwm_tilt_ = helper::GetAlterParamValue(params.args, param::Pwm_Tilt{});
     }
 
     void OnNoteOn(int note) {}

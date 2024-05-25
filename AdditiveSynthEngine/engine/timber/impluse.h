@@ -2,6 +2,7 @@
 
 #include "timber_frame.h"
 #include "osc_param.h"
+#include "param/param_helper.h"
 #include "param/timber_param.h"
 #include <numbers>
 #include <ranges>
@@ -21,7 +22,7 @@ public:
     }
 
     void OnUpdateTick(OscParam& params) {
-        num_sines_ = param::Impulse_NumSines::GetNumber(params.args) * kNumPartials;
+        num_sines_ = helper::GetAlterParamValue(params.args, param::Impulse_NumSines{}) * kNumPartials;
         num_sines_ = std::clamp<float>(num_sines_, 1.0f, kNumPartials);
     }
 

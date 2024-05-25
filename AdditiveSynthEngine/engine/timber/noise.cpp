@@ -3,6 +3,7 @@
 #include <ranges>
 #include <algorithm>
 #include "param/timber_param.h"
+#include "param/param_helper.h"
 #include "utli/convert.h"
 
 namespace mana {
@@ -36,10 +37,10 @@ void Noise::Process(TimberFrame& frame) {
 }
 
 void Noise::OnUpdateTick(OscParam& params) {
-    dynamic_amount_ = param::Noise_Dynamic::GetNumber(params.args);
-    color_ = param::Noise_Color::GetNumber(params.args);
+    dynamic_amount_ = helper::GetAlterParamValue(params.args, param::Noise_Dynamic{});
+    color_ = helper::GetAlterParamValue(params.args, param::Noise_Color{});
 
-    int new_seed = static_cast<int>(std::round(param::Noise_Seed::GetNumber(params.args)));
+    int new_seed = static_cast<int>(std::round(helper::GetAlterParamValue(params.args, param::Noise_Seed{})));
     if (new_seed != seed_) {
         seed_ = new_seed;
         random_.seed(new_seed);

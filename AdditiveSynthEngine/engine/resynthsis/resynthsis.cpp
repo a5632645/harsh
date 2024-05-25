@@ -3,6 +3,7 @@
 #include "engine/synth.h"
 #include "param/resynthsis_param.h"
 #include "utli/warp.h"
+#include "param/param_helper.h"
 
 namespace mana {
 void Resynthesis::Init(float sample_rate, float update_rate) {
@@ -50,12 +51,12 @@ void Resynthesis::Process(Partials& partials) {
 void Resynthesis::OnUpdateTick() {
     is_enable_ = is_enable_arg_->GetBool();
 
-    formant_mix_ = param::Resynthsis_FormantMix::GetNumber(args_);
-    formant_shift_ = param::Resynthsis_FormantShift::GetNumber(args_);
-    freq_scale_ = param::Resynthsis_FreqScale::GetNumber(args_);
-    frame_offset_ = param::Resynthsis_FrameOffset::GetNumber(args_);
-    frame_speed_ = param::Resynthsis_FrameSpeed::GetNumber(args_);
-    gain_mix_ = param::Resynthsis_GainMix::GetNumber(args_);
+    formant_mix_ = helper::GetAlterParamValue(args_, param::Resynthsis_FormantMix{});
+    formant_shift_ = helper::GetAlterParamValue(args_, param::Resynthsis_FormantShift{});
+    freq_scale_ = helper::GetAlterParamValue(args_, param::Resynthsis_FreqScale{});
+    frame_offset_ = helper::GetAlterParamValue(args_, param::Resynthsis_FrameOffset{});
+    frame_speed_ = helper::GetAlterParamValue(args_, param::Resynthsis_FrameSpeed{});
+    gain_mix_ = helper::GetAlterParamValue(args_, param::Resynthsis_GainMix{});
 
     if (!IsWork()) return;
 

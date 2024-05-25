@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "param/effect_param.h"
 #include "effect_base.h"
-#include <engine/oscillor_param.h>
+#include "engine/oscillor_param.h"
 
 namespace mana {
 class Effect {

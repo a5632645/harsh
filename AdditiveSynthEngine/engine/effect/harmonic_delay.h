@@ -6,6 +6,7 @@
 #include "effect_base.h"
 #include "param/effect_param.h"
 #include "param/param.h"
+#include "param/param_helper.h"
 #include "engine/modulation/curve.h"
 #include "engine/synth.h"
 
@@ -61,11 +62,11 @@ public:
     }
 
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
-        delay_time_ = param::Delay_Time::GetNumber(args.args);
-        feedback_ = param::Delay_Feedback::GetNumber(args.args);
         frame_offset_ = delay_time_ * update_rate_ / 1000.0f;
-        enable_custom_time_ = param::Delay_CustomTime::GetNumber(args.args) > 0.5f;
-        enable_custom_feedback_ = param::Delay_CustomFeedback::GetNumber(args.args) > 0.5f;
+        delay_time_ = helper::GetAlterParamValue(args.args, param::Delay_Time{});
+        feedback_ = helper::GetAlterParamValue(args.args, param::Delay_Feedback{});
+        enable_custom_time_ = helper::GetAlterParamValue(args.args, param::Delay_CustomTime{}) > 0.5f;
+        enable_custom_feedback_ = helper::GetAlterParamValue(args.args, param::Delay_CustomFeedback{}) > 0.5f;
     }
 
     void PrepareParams(OscillorParams& params) override {

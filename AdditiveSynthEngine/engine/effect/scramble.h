@@ -25,8 +25,8 @@ public:
     }
 
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
-        scramble_range_ = param::Scramble_Range::GetNumber(args.args);
-        lfo_rate_ = param::Scramble_Rate::GetNumber(args.args);
+        scramble_range_ = helper::GetAlterParamValue(args.args, param::Scramble_Range{});
+        lfo_rate_ = helper::GetAlterParamValue(args.args, param::Scramble_Rate{});
         UpdateLfoAndIndexTable();
     }
     void OnNoteOn(int note) override {}

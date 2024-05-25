@@ -2,7 +2,7 @@
 
 #include "engine/oscillor_param.h"
 #include "resynthsis_data.h"
-#include <engine/partials.h>
+#include "engine/partials.h"
 #include "engine/modulation/curve.h"
 
 namespace mana {

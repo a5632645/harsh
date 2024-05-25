@@ -27,10 +27,10 @@ public:
     }
 
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
-        amount_ = param::Chorus_Amount::GetNumber(args.args);
-        depth_num_samples_ = param::Chorus_Depth::GetNumber(args.args) * sample_rate_ / 1000.0f;
-        offset_num_samples_ = param::Chorus_Offset::GetNumber(args.args) * sample_rate_ / 1000.0f;
-        lfo_rate_ = param::Chorus_Speed::GetNumber(args.args);
+        amount_ = param::Chorus_Amount::GetNumber(args.args[param::Chorus_Amount::kArgIdx]->Get01Value());
+        depth_num_samples_ = param::Chorus_Depth::GetNumber(args.args[param::Chorus_Depth::kArgIdx]->Get01Value()) * sample_rate_ / 1000.0f;
+        offset_num_samples_ = param::Chorus_Offset::GetNumber(args.args[param::Chorus_Offset::kArgIdx]->Get01Value()) * sample_rate_ / 1000.0f;
+        lfo_rate_ = param::Chorus_Speed::GetNumber(args.args[param::Chorus_Speed::kArgIdx]->Get01Value());
 
         // update lfo
         float val{};

@@ -27,8 +27,8 @@ public:
     }
 
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
-        decay_slope_ = param::Decay_Slope::GetNumber(args.args);
-        decay_time_ = param::Decay_Time::GetNumber(args.args);
+        decay_slope_ = param::Decay_Slope::GetNumber(args.args[param::Decay_Slope::kArgIdx]->Get01Value());
+        decay_time_ = param::Decay_Time::GetNumber(args.args[param::Decay_Time::kArgIdx]->Get01Value());
 
         constexpr auto kSilenceDb = -60.0f;
         decay_a_ = utli::Calc1stSmoothFilterCoeffByDecayRate((-kSilenceDb * 1000.0f) / decay_time_, update_rate_);

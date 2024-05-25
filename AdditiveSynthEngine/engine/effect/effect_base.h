@@ -3,7 +3,7 @@
 #include "engine/partials.h"
 #include "engine/poly_param.h"
 #include "engine/modulation/curve.h"
-#include <engine/oscillor_param.h>
+#include "engine/oscillor_param.h"
 
 namespace mana {
 struct EffectParams {

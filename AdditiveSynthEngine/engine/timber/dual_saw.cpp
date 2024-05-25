@@ -6,6 +6,7 @@
 #include <engine/EngineConfig.h>
 #include "param/timber_param.h"
 #include "param/param.h"
+#include "param/param_helper.h"
 
 namespace mana {
 static constexpr auto kSawHarmonicGains = makeHarmonicArray<kNumPartials>([](float v) {
@@ -47,10 +48,10 @@ void DualSaw::Process(TimberFrame& frame) {
 }
 
 void DualSaw::OnUpdateTick(OscParam& params) {
-    ratio_ = param::DualSaw_Ratio::GetNumber(params.args);
-    beating_rate_ = param::DualSaw_BeatingRate::GetNumber(params.args);
-    saw_square_ = param::DualSaw_SawSquare::GetNumber(params.args);
-    second_amp_ = param::DualSaw_SecondAmp::GetNumber(params.args);
+    ratio_ = helper::GetAlterParamValue(params.args, param::DualSaw_Ratio{});
+    beating_rate_ = helper::GetAlterParamValue(params.args, param::DualSaw_BeatingRate{});
+    saw_square_ = helper::GetAlterParamValue(params.args, param::DualSaw_SawSquare{});
+    second_amp_ = helper::GetAlterParamValue(params.args, param::DualSaw_SecondAmp{});
 
     auto inc = beating_rate_ * inv_update_rate_;
     beating_phase_ += inc;

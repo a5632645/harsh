@@ -94,7 +94,7 @@ void Knob::display() {
     // draw number
     auto num_val = m_value;
     if (m_parameter != nullptr) {
-        num_val = m_parameter->GetRange().ConvertFrom01(num_val);
+        num_val = m_parameter->ConvertFrom01(num_val);
     }
     auto const numberText = value_to_text_function(num_val);
     auto const numberTextWidth = MeasureText(numberText.c_str(), m_number_font_size);
@@ -207,11 +207,9 @@ Knob& Knob::set_parameter(FloatParameter* parameter) {
     assert(parameter != nullptr);
 
     m_parameter = parameter;
-    const auto& rng = parameter->GetRange();
-    this->set_range(0.0f, 1.0f, 1.0f / 200.0f, rng.ConvertTo01(rng.vdefault));
+    this->set_range(0.0f, 1.0f, 1.0f / 200.0f, 0.5f);
     this->set_value(parameter->Get01Value());
     this->set_title(parameter->GetName());
-    this->value_to_text_function = parameter->value_to_text;
     return *this;
 }
 

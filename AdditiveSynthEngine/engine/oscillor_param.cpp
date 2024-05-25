@@ -5,18 +5,14 @@
 namespace mana {
 OscillorParams::OscillorParams(SynthParams& synth_param)
     : parent_synth_param_(synth_param) {
-    ConnectSynthParam(synth_param);
-}
-
-void mana::OscillorParams::ConnectSynthParam(SynthParams& synth_param) {
     auto& bank = synth_param.GetParamBank();
-    auto& synth_param_map = bank.GetParamsMap();
+    auto& synth_param_map = bank.GetParamMap<FloatParameter>();
 
     for (auto&&[k, v] : synth_param_map) {
         if (v->GetModulationType() == ModulationType::kPoly) {
             // add to oscillor params
             auto& p = poly_modu_params_.emplace_back(std::make_unique<PolyModuFloatParameter>(v.get()));
-            oscillor_param_table_[v->GetIdStringView()] = p.get();
+            oscillor_param_table_[v->GetId()] = p.get();
         }
     }
 }

@@ -112,17 +112,17 @@ public:
     }
 
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
-        auto cycle01 = param::FloatParam<param::Phaser_Cycles>::GetNumber(args.args);
+        auto cycle01 = helper::GetAlterParamValue(args.args, param::Phaser_Cycles{});
         phaser_cycles_ = cycle01 * kNumPartials / 4;
         flanger_cycles_ = cycle01 * kNumPartials / 2;
         harmonic_cycles_ = cycle01 * kNumPartials;
 
-        std::tie(first_shape_, second_shape_, shape_fraction_) = param::Phaser_Shape::GetInterpIndex(args.args);
-        std::tie(first_mode_, second_mode_, mode_fraction_) = param::Phaser_Mode::GetInterpIndex(args.args);
+        std::tie(first_shape_, second_shape_, shape_fraction_) = param::Phaser_Shape::GetInterpIndex(args.args[param::Phaser_Shape::kArgIdx]->Get01Value());
+        std::tie(first_mode_, second_mode_, mode_fraction_) = param::Phaser_Mode::GetInterpIndex(args.args[param::Phaser_Mode::kArgIdx]->Get01Value());
 
-        mix_ = param::FloatParam<param::Phaser_Mix>::GetNumber(args.args);
-        pinch_ = param::FloatParam<param::Phaser_Pinch>::GetNumber(args.args);
-        barber_rate_ = param::FloatParam<param::Phaser_BarberRate>::GetNumber(args.args);
+        mix_ = helper::GetAlterParamValue(args.args, param::Phaser_Mix{});
+        pinch_ = helper::GetAlterParamValue(args.args, param::Phaser_Pinch{});
+        barber_rate_ = helper::GetAlterParamValue(args.args, param::Phaser_BarberRate{});
 
         float val{};
         float phase_inc = barber_rate_ * inv_update_rate_;

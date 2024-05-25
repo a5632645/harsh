@@ -21,18 +21,15 @@ public:
     OscillorParams(const OscillorParams&) = delete;
     OscillorParams& operator=(const OscillorParams&) = delete;
 
-    void ConnectSynthParam(SynthParams& synth_param);
     void UpdateParams();
     void CreateModulation(std::string_view param_id, Modulator* pmodulator, ModulationConfig* pconfig);
     void RemoveModulation(ModulationConfig& config);
     std::vector<std::string_view> GetParamIds() const;
 
-    template<IsParamter P>
-    P* GetParam(std::string_view id) { return parent_synth_param_.GetParamBank().GetParamPtr<P>(id); }
-    template<IsParamter P, class...T> requires (sizeof...(T) >= 1)
+    template<IsParamter P, class...T>
         P* GetParam(std::format_string<T...> format_text, T&&... args) { return parent_synth_param_.GetParamBank().GetParamPtr<P>(format_text, std::forward<T>(args)...); }
-    PolyModuFloatParameter* GetPolyFloatParam(std::string_view id) { return oscillor_param_table_.at(id); }
-    template<class...T> requires (sizeof...(T) >= 1)
+
+    template<class...T>
         PolyModuFloatParameter* GetPolyFloatParam(std::format_string<T...> format_text, T&&... args) { return oscillor_param_table_.at(std::format(format_text, std::forward<T>(args)...)); }
     SynthParams& GetParentSynthParams() { return parent_synth_param_; }
 

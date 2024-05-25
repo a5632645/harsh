@@ -17,17 +17,19 @@ struct SimplePixel {
 
 class Synth {
 public:
-    Synth();
+    Synth(std::shared_ptr<ParamCreator> creator);
 
     void NoteOn(int note, float velocity);
 
     void NoteOff(int note, float velocity);
 
     void Render(size_t numFrame);
+    void Render(float* buffer, int num_frame);
 
     void Init(size_t bufferSize, float sampleRate, float update_rate);
 
     void update_state(int step);
+    int GetUpdateSkip() const { return update_skip_; }
 
     decltype(auto) getBuffer() const {
         return (audio_buffer_);

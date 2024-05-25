@@ -17,21 +17,7 @@ enum class ModulationType {
 
 class FloatParameter {
 public:
-    enum class ParamType {
-        kFloat,
-        kInt,
-        kBool,
-        kChoice
-    };
-
-    static constexpr auto kTypeEnum = ParamType::kFloat;
-
-    template<class...T>
-    FloatParameter(ModulationType modulation_type, ParamRange range, std::string_view name, std::format_string<T...> format_text, T&&... args)
-        : id_(std::format(format_text, std::forward<T>(args)...))
-        , modulation_type_(modulation_type)
-        , range_(std::move(range))
-        , name_(name) {}
+    FloatParameter(ModulationType t) : modulation_type_(t) {}
 
     virtual ~FloatParameter() = default;
     FloatParameter(FloatParameter const&) = delete;
@@ -39,68 +25,95 @@ public:
     FloatParameter(FloatParameter&&) noexcept = default;
     FloatParameter& operator=(FloatParameter&&) noexcept = default;
 
-    void SetValue(float new_val) { value_.store(range_.ConvertTo01(new_val)); }
-    float GetValue() const { return range_.ConvertFrom01(value_.load()); }
+    virtual void SetValue(float new_val) = 0;
+    virtual float GetValue() const = 0;
 
-    float Get01Value() const { return value_; }
-    void Set01Value(float new_val) { value_.store(new_val); }
+    virtual void Set01Value(float new_val) = 0;
+    virtual float Get01Value() const = 0;
+
+    virtual float ConvertFrom01(float x) = 0;
+    virtual float ConvertTo01(float x) = 0;
+
+    virtual std::string_view GetId() const = 0;
+    virtual std::string_view GetName() const = 0;
+
+    virtual float PraseValue(std::string_view text) = 0;
+    virtual std::string FormantValue(float v) = 0;
 
     ModulationType GetModulationType() const { return modulation_type_; }
-    std::string_view GetIdStringView() const { return id_; }
-    const std::string& GetIdStringRef() const { return id_; }
-    const ParamRange& GetRange() const { return range_; }
-    virtual ParamType GetParamType() const { return ParamType::kFloat; }
-
-    std::string_view GetName() const { return name_; }
-
-    std::function<std::string(float v)> value_to_text = [](float v) {return std::to_string(v); };
-    std::string GetValueText() const { return value_to_text(GetValue()); }
 protected:
-    std::string id_;
-    std::string name_;
     ModulationType modulation_type_;
-    ParamRange range_;
-    std::atomic<float> value_{};
 };
 
-class IntParameter : public FloatParameter {
+class IntParameter {
 public:
-    static constexpr auto kTypeEnum = ParamType::kInt;
+    IntParameter() = default;
+    virtual ~IntParameter() = default;
+    IntParameter(IntParameter const&) = delete;
+    IntParameter& operator=(IntParameter const&) = delete;
+    IntParameter(IntParameter&&) noexcept = default;
+    IntParameter& operator=(IntParameter&&) noexcept = default;
 
-    using FloatParameter::FloatParameter;
+    virtual void SetValue(int new_val) = 0;
+    virtual int GetInt() const = 0;
 
-    void SetInt(int v) { SetValue(static_cast<float>(v)); }
-    int GetInt() const { return static_cast<int>(std::round(GetValue())); }
-    operator int() const { return GetInt(); }
-    ParamType GetParamType() const override { return ParamType::kInt; }
+    virtual void Set01Value(float new_val) = 0;
+    virtual float Get01Value() const = 0;
+
+    virtual int ConvertFrom01(float x) = 0;
+    virtual float ConvertTo01(int x) = 0;
+
+    virtual std::string_view GetId() const = 0;
+    virtual std::string_view GetName() const = 0;
+
+    virtual int PraseValue(std::string_view text) = 0;
+    virtual std::string FormantValue(int v) = 0;
 };
 
-class IntChoiceParameter : public FloatParameter {
+class IntChoiceParameter {
 public:
-    static constexpr auto kTypeEnum = ParamType::kChoice;
+    IntChoiceParameter() = default;
+    virtual ~IntChoiceParameter() = default;
+    IntChoiceParameter(IntChoiceParameter const&) = delete;
+    IntChoiceParameter& operator=(IntChoiceParameter const&) = delete;
+    IntChoiceParameter(IntChoiceParameter&&) noexcept = default;
+    IntChoiceParameter& operator=(IntChoiceParameter&&) noexcept = default;
 
-    using FloatParameter::FloatParameter;
+    virtual void SetValue(int new_val) = 0;
+    virtual int GetInt() const = 0;
 
-    void SetInt(int v) { SetValue(static_cast<float>(v)); }
-    int GetInt() const { return static_cast<int>(std::round(GetValue())); }
-    operator int() const { return GetInt(); }
-    decltype(auto) GetChoices() const { return (choices_); }
-    ParamType GetParamType() const override { return ParamType::kChoice; }
+    virtual void Set01Value(float new_val) = 0;
+    virtual float Get01Value() const = 0;
 
-    std::vector<std::string_view> choices_;
+    virtual int ConvertFrom01(float x) = 0;
+    virtual float ConvertTo01(int x) = 0;
+
+    virtual std::string_view GetId() const = 0;
+    virtual std::string_view GetName() const = 0;
+
+    virtual int PraseValue(std::string_view text) = 0;
+    virtual std::string FormantValue(int v) = 0;
+protected:
+    std::vector<std::string> choices_;
 };
 
-class BoolParameter : public FloatParameter {
+class BoolParameter {
 public:
-    static constexpr auto kTypeEnum = ParamType::kBool;
+    BoolParameter() = default;
+    virtual ~BoolParameter() = default;
+    BoolParameter(BoolParameter const&) = delete;
+    BoolParameter& operator=(BoolParameter const&) = delete;
+    BoolParameter(BoolParameter&&) noexcept = default;
+    BoolParameter& operator=(BoolParameter&&) noexcept = default;
 
-    using FloatParameter::FloatParameter;
+    virtual void SetValue(bool new_val) = 0;
+    virtual bool GetBool() const = 0;
 
-    void SetBool(bool v) { Set01Value(value_ = v ? 1.0f : 0.0f); }
-    bool GetBool() const { return Get01Value() > 0.5f; }
-    operator bool() const { return GetBool(); }
+    virtual std::string_view GetId() const = 0;
+    virtual std::string_view GetName() const = 0;
 
-    ParamType GetParamType() const override { return ParamType::kBool; }
+    virtual bool PraseValue(std::string_view text) = 0;
+    virtual std::string FormantValue(bool v) = 0;
 };
 
 template<class Type>

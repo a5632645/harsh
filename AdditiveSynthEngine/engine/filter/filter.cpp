@@ -5,6 +5,7 @@
 #include "utli/convert.h"
 #include "param/filter_param.h"
 #include "engine/oscillor_param.h"
+#include "param/param_helper.h"
 
 namespace mana {
 Filter::Filter(int idx)
@@ -107,26 +108,27 @@ void Filter::PrepareParams(OscillorParams & params) {
 
 void Filter::OnUpdateTick() {
     // filter
-    cutoff_semitone_ = param::Filter_Cutoff::GetNumber(filter_args_);
+    cutoff_semitone_ = helper::GetAlterParamValue(filter_args_, param::Filter_Cutoff{});
     normalized_cutoff_ = std::exp2(cutoff_semitone_ / 12.0f) * 8.1758f * 2.0f / sample_rate_;
-    slope_ = param::Filter_Slope::GetNumber(filter_args_) / 12.0f; // make it db/oct
-    key_track_ = param::Filter_KeyTracking::GetNumber(filter_args_);
-    cutoff_knee_ = param::Filter_Knee::GetNumber(filter_args_);
-    filter_width_ = param::Filter_BandWidth::GetNumber(filter_args_);
+    slope_ = helper::GetAlterParamValue(filter_args_, param::Filter_Slope{}) / 12.0f; // make it db/oct
+    key_track_ = helper::GetAlterParamValue(filter_args_, param::Filter_KeyTracking{});
+    cutoff_knee_ = helper::GetAlterParamValue(filter_args_, param::Filter_Knee{});
+    filter_width_ = helper::GetAlterParamValue(filter_args_, param::Filter_BandWidth{});
 
     // comb
-    comb_shape_ = param::Filter_CombShape::GetNumber(filter_args_);
-    comb_phase_ = param::Filter_CombPhase::GetNumber(filter_args_) * std::numbers::pi_v<float> *2.0f;
-    comb_depth_ = param::Filter_CombDepth::GetNumber(filter_args_);
-    comb_phaser_ = param::Filter_CombPhaser::GetNumber(filter_args_);
+    comb_shape_ = helper::GetAlterParamValue(filter_args_, param::Filter_CombShape{});
+    comb_phase_ = helper::GetAlterParamValue(filter_args_, param::Filter_CombPhase{}) * std::numbers::pi_v<float> *2.0f;
+    comb_depth_ = helper::GetAlterParamValue(filter_args_, param::Filter_CombDepth{});
+    comb_phaser_ = helper::GetAlterParamValue(filter_args_, param::Filter_CombPhaser{});
+
 
     // phaser
-    phaser_width_ = param::Filter_PhaserWidth::GetNumber(filter_args_);
+    phaser_width_ = helper::GetAlterParamValue(filter_args_, param::Filter_PhaserWidth{});
     phaser_cycles_ = std::numbers::pi_v<float> *2.0f / phaser_width_ * phaser_notches_;
-    phaser_depth_ = param::Filter_PhaserDepth::GetNumber(filter_args_);
-    phaser_notches_ = param::Filter_PhaserNotches::GetNumber(filter_args_);
-    phaser_phase_ = param::Filter_PhaserPhase::GetNumber(filter_args_) * std::numbers::pi_v<float>*2.0f;
-    phaser_shape_ = param::Filter_PhaserShape::GetNumber(filter_args_);
+    phaser_depth_ = helper::GetAlterParamValue(filter_args_, param::Filter_PhaserDepth{});
+    phaser_notches_ = helper::GetAlterParamValue(filter_args_, param::Filter_PhaserNotches{});
+    phaser_phase_ = helper::GetAlterParamValue(filter_args_, param::Filter_PhaserPhase{}) * std::numbers::pi_v<float> *2.0f;
+    phaser_shape_ = helper::GetAlterParamValue(filter_args_, param::Filter_PhaserShape{});
     phaser_begin_pitch_ = cutoff_semitone_ - phaser_width_ * 0.5f;
     phaser_end_pitch_ = cutoff_semitone_ + phaser_width_ * 0.5f;
 
@@ -419,8 +421,8 @@ inline static constexpr float SimpleRampReso(float c, float b, float r, float p)
 }
 
 void Filter::RampReso(Partials& partials) {
-    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
-    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+    float resonance_width = helper::GetAlterParamValue(filter_args_, param::Filter_ResonanceWidth{});
+    float resonance = helper::GetAlterParamValue(filter_args_, param::Filter_Resonance{});
 
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
@@ -432,8 +434,8 @@ void Filter::RampReso(Partials& partials) {
 }
 
 void Filter::DoubleRampReso(Partials& partials) {
-    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
-    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+    float resonance_width = helper::GetAlterParamValue(filter_args_, param::Filter_ResonanceWidth{});
+    float resonance = helper::GetAlterParamValue(filter_args_, param::Filter_Resonance{});
 
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
@@ -459,8 +461,8 @@ inline static constexpr float SimpleCosReso(float c, float b, float r, float p) 
 }
 
 void Filter::CosReso(Partials& partials) {
-    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
-    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+    float resonance_width = helper::GetAlterParamValue(filter_args_, param::Filter_ResonanceWidth{});
+    float resonance = helper::GetAlterParamValue(filter_args_, param::Filter_Resonance{});
 
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
@@ -472,8 +474,8 @@ void Filter::CosReso(Partials& partials) {
 }
 
 void Filter::DoubleCosReso(Partials& partials) {
-    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
-    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+    float resonance_width = helper::GetAlterParamValue(filter_args_, param::Filter_ResonanceWidth{});
+    float resonance = helper::GetAlterParamValue(filter_args_, param::Filter_Resonance{});
 
     for (int i = 0; i < kNumPartials; ++i) {
         auto partial_p = partials.pitches[i];
@@ -520,8 +522,8 @@ inline static constexpr float SimpleParabolaReso(const ParabolaResoCoeff& c, flo
 }
 
 void Filter::ParabolaReso(Partials& partials) {
-    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
-    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+    float resonance_width = helper::GetAlterParamValue(filter_args_, param::Filter_ResonanceWidth{});
+    float resonance = helper::GetAlterParamValue(filter_args_, param::Filter_Resonance{});
 
     ParabolaResoCoeff c{ cutoff_semitone_, resonance_width, resonance };
     for (int i = 0; i < kNumPartials; ++i) {
@@ -534,8 +536,8 @@ void Filter::ParabolaReso(Partials& partials) {
 }
 
 void Filter::DoubleParabolaReso(Partials& partials) {
-    float resonance_width = param::Filter_ResonanceWidth::GetNumber(filter_args_);
-    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
+    float resonance_width = helper::GetAlterParamValue(filter_args_, param::Filter_ResonanceWidth{});
+    float resonance = helper::GetAlterParamValue(filter_args_, param::Filter_Resonance{});
 
     ParabolaResoCoeff left{ cutoff_semitone_ - filter_width_, resonance_width, resonance };
     ParabolaResoCoeff right{ cutoff_semitone_ + filter_width_, resonance_width, resonance };
@@ -550,9 +552,9 @@ void Filter::DoubleParabolaReso(Partials& partials) {
 }
 
 void Filter::PhaserReso(Partials& partials) {
-    float resonance_width = param::Reso_PhaserResoWidth::GetNumber(filter_args_);
-    float resonance = param::Filter_Resonance::GetNumber(filter_args_);
-    float reso_phaser_cycles = param::Filter_PhaserResoCycles::GetNumber(filter_args_);
+    float resonance_width = helper::GetAlterParamValue(filter_args_, param::Reso_PhaserResoWidth{});
+    float resonance = helper::GetAlterParamValue(filter_args_, param::Filter_Resonance{});
+    float reso_phaser_cycles = helper::GetAlterParamValue(filter_args_, param::Filter_PhaserResoCycles{});
 
     float f = reso_phaser_cycles * std::numbers::pi_v<float> / 150.0f;
     float reso_begin = cutoff_semitone_ - resonance_width;

@@ -4,11 +4,12 @@
 #include "engine/modulation/Parameter.h"
 #include "engine/modulation/curve.h"
 #include "engine/resynthsis/resynthsis_data.h"
+#include "engine/modulation/param_creator.h"
 
 namespace mana {
 class SynthParams {
 public:
-    SynthParams();
+    SynthParams(std::shared_ptr<ParamCreator> creator);
 
     ParamBank& GetParamBank() { return param_bank_; }
 

@@ -20,7 +20,7 @@ public:
     }
 
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
-        gate_level_ = utli::DbToGain(param::SpectralGate_Level::GetNumber(args.args));
+        gate_level_ = helper::GetAlterParamValue(args.args, param::SpectralGate_Level{});
     }
 
     void OnNoteOn(int note) override {}

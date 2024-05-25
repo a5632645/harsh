@@ -237,28 +237,28 @@ void Dissonance::OnUpdateTick() {
     is_enable_ = is_enable_param_->GetBool();
 
     {
-        auto raw_string = param::StringDissStretch::GetNumber(args_);
-        auto ratio_idx = param::StringMultiRatio::GetChoiceIndex(args_);
+        auto raw_string = param::StringDissStretch::GetNumber(args_[param::StringDissStretch::kArgIdx]->Get01Value());
+        auto ratio_idx = param::StringMultiRatio::GetChoiceIndex(args_[param::StringMultiRatio::kArgIdx]->Get01Value());
         string_stretch_factor_ = raw_string * kStringRatios[ratio_idx];
     }
 
-    harmonic_stretch_ratio_ = param::HarmonicStrech::GetNumber(args_);
+    harmonic_stretch_ratio_ = param::HarmonicStrech::GetNumber(args_[param::HarmonicStrech::kArgIdx]->Get01Value());
 
-    st_space_semitone_ = param::SemitoneSpace::GetNumber(args_);
+    st_space_semitone_ = param::SemitoneSpace::GetNumber(args_[param::SemitoneSpace::kArgIdx]->Get01Value());
 
     {
-        error_ramp_ = param::ErrorRamp::GetNumber(args_);
-        error_range_ = param::ErrorRange::GetNumber(args_);
+        error_ramp_ = param::ErrorRamp::GetNumber(args_[param::ErrorRamp::kArgIdx]->Get01Value());
+        error_range_ = param::ErrorRange::GetNumber(args_[param::ErrorRange::kArgIdx]->Get01Value());
     }
 
     {
-        ratio2x_ratio_ = std::exp2(param::FakeUnisonRatio0::GetNumber(args_) / 12.0f);
-        ratio3x_ratio_ = std::exp2(param::FakeUnisonRatio1::GetNumber(args_) / 12.0f);
+        ratio2x_ratio_ = std::exp2(param::FakeUnisonRatio0::GetNumber(args_[param::FakeUnisonRatio0::kArgIdx]->Get01Value()) / 12.0f);
+        ratio3x_ratio_ = std::exp2(param::FakeUnisonRatio1::GetNumber(args_[param::FakeUnisonRatio1::kArgIdx]->Get01Value()) / 12.0f);
     }
 
     {
-        dispersion_amount_ = param::Dispersion_Amount::GetNumber(args_);
-        dispersion_warp_ = param::Dispersion_Warp::GetNumber(args_);
+        dispersion_amount_ = param::Dispersion_Amount::GetNumber(args_[param::Dispersion_Amount::kArgIdx]->Get01Value());
+        dispersion_warp_ = param::Dispersion_Warp::GetNumber(args_[param::Dispersion_Warp::kArgIdx]->Get01Value());
     }
 }
 
@@ -273,7 +273,7 @@ void Dissonance::OnNoteOff() {
 }
 
 void Dissonance::DoPitchQuantize(Partials& partials) {
-    float amount = param::PitchQuantize_Amount::GetNumber(args_);
+    float amount = param::PitchQuantize_Amount::GetNumber(args_[param::PitchQuantize_Amount::kArgIdx]->Get01Value());
 
     for (int i = 0; i < kNumPartials; ++i) {
         float ratio = i + 1.0f + partials.ratios[i];

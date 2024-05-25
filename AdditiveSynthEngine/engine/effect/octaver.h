@@ -5,6 +5,7 @@
 #include "effect_base.h"
 #include "param/effect_param.h"
 #include "param/param.h"
+#include "param/param_helper.h"
 
 namespace mana {
 class Octaver : public EffectBase {
@@ -31,9 +32,9 @@ public:
     }
 
     void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
-        amount_ = param::Octaver_Amount::GetNumber(args.args);
-        width_ = param::Octaver_Width::GetNumber(args.args);
-        decay_ = param::Octaver_Decay::GetNumber(args.args);
+        amount_ = helper::GetAlterParamValue(args.args, param::Octaver_Amount{});
+        width_ = helper::GetAlterParamValue(args.args, param::Octaver_Width{});
+        decay_ = helper::GetAlterParamValue(args.args, param::Octaver_Decay{});
         gain_ = std::lerp(1.0f, 1.0f / (CalcAndCountTotalGain() + 1.0f), amount_);
     }
     void OnNoteOn(int note) override {}
