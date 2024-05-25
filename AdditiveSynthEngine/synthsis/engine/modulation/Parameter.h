@@ -41,6 +41,10 @@ public:
     virtual std::string FormantValue(float v) = 0;
 
     ModulationType GetModulationType() const { return modulation_type_; }
+
+    template<typename T>
+    requires std::derived_from<T, FloatParameter>
+    T& As() { return static_cast<T&>(*this); }
 protected:
     ModulationType modulation_type_;
 };
@@ -68,6 +72,10 @@ public:
 
     virtual int PraseValue(std::string_view text) = 0;
     virtual std::string FormantValue(int v) = 0;
+
+    template<typename T>
+    requires std::derived_from<T, IntParameter>
+    T& As() { return static_cast<T&>(*this); }
 };
 
 class IntChoiceParameter {
@@ -93,8 +101,10 @@ public:
 
     virtual int PraseValue(std::string_view text) = 0;
     virtual std::string FormantValue(int v) = 0;
-protected:
-    std::vector<std::string> choices_;
+
+    template<typename T>
+    requires std::derived_from<T, IntChoiceParameter>
+    T& As() { return static_cast<T&>(*this); }
 };
 
 class BoolParameter {
@@ -114,6 +124,10 @@ public:
 
     virtual bool PraseValue(std::string_view text) = 0;
     virtual std::string FormantValue(bool v) = 0;
+
+    template<typename T>
+    requires std::derived_from<T, BoolParameter>
+    T& As() { return static_cast<T&>(*this); }
 };
 
 template<class Type>

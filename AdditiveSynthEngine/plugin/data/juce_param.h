@@ -13,6 +13,9 @@ public:
         jassert(ptr != nullptr);
     }
 
+    juce::AudioParameterFloat& GetRef() { return *ref_; }
+    const juce::AudioParameterFloat& GetRef() const { return *ref_; }
+
     // 通过 FloatParameter 继承
     void SetValue(float new_val) override;
     float GetValue() const override;
@@ -34,6 +37,9 @@ public:
         : ref_(ptr) {
         jassert(ptr != nullptr);
     }
+
+    juce::AudioParameterInt& GetRef() { return *ref_; }
+    const juce::AudioParameterInt& GetRef() const { return *ref_; }
 
     // 通过 IntParameter 继承
     void SetValue(int new_val) override;
@@ -57,6 +63,9 @@ public:
         jassert(ptr != nullptr);
     }
 
+    juce::AudioParameterBool& GetRef() { return *ref_; }
+    const juce::AudioParameterBool& GetRef() const { return *ref_; }
+
     // 通过 BoolParameter 继承
     void SetValue(bool new_val) override;
     bool GetBool() const override;
@@ -74,6 +83,9 @@ public:
         : ref_(ptr) {
         jassert(ptr != nullptr);
     }
+
+    juce::AudioParameterChoice& GetRef() { return *ref_; }
+    const juce::AudioParameterChoice& GetRef() const { return *ref_; }
 
     // 通过 IntChoiceParameter 继承
     void SetValue(int new_val) override;

@@ -69,6 +69,69 @@ juce_add_plugin(Harsh
 # Finally, we supply a list of source files that will be built into the target. This is a standard
 # CMake command.
 
+set(UI_SRC
+"ui/wrap_drop_box.cpp"
+"ui/wrap_slider.cpp"
+"layout/synth/dissonance_layout.cpp"
+"layout/synth/timber_layout.cpp"
+#"ui/oscilloscope.cpp"
+ "layout/synth/filter_layout.cpp"
+ "layout/effect/sp_effect_layout.cpp"
+ "layout/resynthsis/resynthsis_layout.cpp"
+ "layout/standard_layout.cpp"
+  "layout/synth/osc_layout.cpp"
+  #"ui/curve_editor.cpp"
+  "layout/curve_layout.cpp"
+  "layout/main_window.cpp"
+  
+ "ui/wrap_check_box.cpp"
+ "layout/modulators/lfo_layout.cpp"
+ "layout/matrix/modulation_matrix_layout.cpp"
+ "layout/synth/unison_layout.cpp"
+ 
+ "layout/modulators/envelop_layout.cpp"
+ "layout/synth/synth_layout.cpp"
+ "layout/synth/phase_layout.cpp"
+ "layout/synth/filter_route_layout.cpp"
+ "layout/synth/final_filter_layout.cpp"
+ "layout/modulators/modulators_layout.cpp"
+ "layout/effect/final_fx_layout.cpp"
+ "layout/about/about_layout.cpp"
+ "layout/master_layout.cpp"
+ "ui/spectrum.cpp"
+)
+set(UI_HEADER
+"layout/modulators/envelop_layout.h"
+ "layout/synth/synth_layout.h"
+ "layout/synth/phase_layout.h"
+ "layout/synth/filter_route_layout.h"
+ "layout/synth/final_filter_layout.h"
+ "layout/modulators/modulators_layout.h"
+ "layout/modulators/layout_base.h"
+ "layout/effect/final_fx_layout.h"
+ "layout/about/about_layout.h"
+ "layout/master_layout.h"
+ "ui/spectrum.h"
+ "layout/synth/dissonance_layout.h"
+"ui/wrap_drop_box.h"
+"layout/synth/timber_layout.h"
+#"ui/oscilloscope.h"
+ "layout/synth/filter_layout.h"
+ "layout/effect/sp_effect_layout.h"
+ "layout/gui_param_pack.h"
+ "layout/resynthsis/resynthsis_layout.h"
+ "layout/standard_layout.h"
+  "layout/synth/osc_layout.h"
+#"ui/curve_editor.h"
+  "layout/curve_layout.h"
+  "layout/main_window.h"
+  "ui/wrap_slider.h"
+ "ui/wrap_check_box.h"
+ "layout/modulators/lfo_layout.h"
+ "layout/matrix/modulation_matrix_layout.h"
+ "layout/synth/unison_layout.h"
+ "layout/modu_container.h")
+
 target_sources(Harsh
     PRIVATE
         PluginEditor.cpp
@@ -76,8 +139,11 @@ target_sources(Harsh
         "data/juce_param.h"
         "data/juce_param.cpp"
         "data/juce_param_creator.h"
-        "data/juce_param_creator.cpp")
+        "data/juce_param_creator.cpp"
+        ${UI_SRC}
+        ${UI_HEADER})
 set_property(TARGET Harsh PROPERTY CXX_STANDARD 20)
+target_include_directories(Harsh PRIVATE ".")
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
@@ -112,6 +178,7 @@ target_link_libraries(Harsh
     PRIVATE
         # AudioPluginData           # If we'd created a binary data target, we'd link to it here
         juce::juce_audio_utils
+        juce::juce_gui_basics
         AdSynthLib
     PUBLIC
         juce::juce_recommended_config_flags
