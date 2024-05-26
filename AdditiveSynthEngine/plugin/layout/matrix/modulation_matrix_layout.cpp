@@ -1,59 +1,129 @@
 #include "modulation_matrix_layout.h"
 
-#include "ui/wrap_check_box.h"
-#include "ui/Knob.h"
 #include "engine/modulation/Modulation.h"
 #include "engine/synth.h"
 
 namespace mana {
-class ModulationMatrixLayout::SingleModulationLayout {
+class ModuWrapToggleBox : public juce::ToggleButton {
 public:
-    SingleModulationLayout(ModulationConfig& cfg) : config_ref_(cfg) {
-        amount_.set_range(-1.0f, 1.0f, 0.0025f, 0.5f);
-        amount_.set_title("amount");
-        enable_.SetText("enable");
-        bipolar_.SetText("bipolar");
-        remove_.SetText("remove");
+    ModuWrapToggleBox(ModulationConfig* cfg) {
+        this->onClick = [this]() {
+            if (config_ == nullptr) return;
+            config_->enable = this->getToggleState();
+        };
+
+        SetModulationConfig(cfg);
     }
 
-    void Paint() {
-        if (remove_.Show()) {
-            on_remove_click(this);
-        }
-        enable_.Paint();
-        bipolar_.Paint();
-        amount_.display();
-
-        config_ref_.enable = enable_.IsChecked();
-        config_ref_.bipolar = bipolar_.IsChecked();
-        config_ref_.amount = amount_.get_value();
-
-        DrawText(config_ref_.modulator_id.data(), bound_.x + 300, bound_.y, 20, WHITE);
-        DrawText(config_ref_.param_id.data(), bound_.x + 400, bound_.y, 20, WHITE);
+    void SetModulationConfig(ModulationConfig* cfg) {
+        setToggleState(cfg->enable, juce::dontSendNotification);
+        config_ = cfg; 
     }
-
-    void SetBounds(Rectangle bound) {
-        bound_ = bound;
-        enable_.SetBounds(rgc::Bounds(bound.x, bound.y, 16, 16));
-        bipolar_.SetBounds(rgc::Bounds(bound.x + 100, bound.y, 16, 16));
-        amount_.set_bound({ bound.x + 150,bound.y,50,50 });
-        remove_.SetBounds(rgc::Bounds(bound.x + 200, bound.y, 50, 16));
-    }
-
-    ModulationConfig& GetModulationConfigRef() { return config_ref_; }
-
-    std::function<void(SingleModulationLayout*)> on_remove_click = [](auto) {};
 private:
-    Rectangle bound_{};
-    ModulationConfig& config_ref_;
-    WrapCheckBox enable_;
-    WrapCheckBox bipolar_;
-    WrapSlider amount_;
-    rgc::Button remove_;
+    ModulationConfig* config_;
 };
+
+class ModuWrapAmountSlider : public juce::Slider {
+public:
+    ModuWrapAmountSlider(ModulationConfig* cfg) {
+        this->onValueChange = [this]() {
+            if (config_ == nullptr) return;
+            config_->amount = this->getValue();
+        };
+
+        SetModulationConfig(cfg);
+    }
+
+    void SetModulationConfig(ModulationConfig* cfg) {
+        setRange(-1.0f, 1.0f);
+        setValue(cfg->amount);
+        config_ = cfg;
+    }
+
+private:
+    ModulationConfig* config_;
+};
+
+class ModuWrapBipolarToggleBox : public juce::ToggleButton {
+public:
+    ModuWrapBipolarToggleBox(ModulationConfig* cfg) {
+        this->onClick = [this]() {
+            if (config_ == nullptr) return;
+            config_->bipolar = this->getToggleState();
+        };
+
+        SetModulationConfig(cfg);
+    }
+
+    void SetModulationConfig(ModulationConfig* cfg) {
+        setToggleState(cfg->bipolar, juce::dontSendNotification);
+        config_ = cfg;
+    }
+
+private:
+    ModulationConfig* config_;
+};
+
+class ModuWrapRemoveButton : public juce::TextButton {
+public:
+    ModuWrapRemoveButton(ModulationConfig* cfg) : config_(cfg), TextButton("remove") {}
+
+    ModulationConfig* GetModulationConfig() { return config_; }
+    void SetModulationConfig(ModulationConfig* cfg) { config_ = cfg; }
+private:
+    ModulationConfig* config_;
+};
+
+//class ModulationMatrixLayout::SingleModulationLayout : public juce::Component {
+//public:
+//    SingleModulationLayout(ModulationConfig& cfg) : config_ref_(cfg) {
+//        amount_.set_range(-1.0f, 1.0f, 0.0025f, 0.5f);
+//        amount_.set_title("amount");
+//        enable_.SetText("enable");
+//        bipolar_.SetText("bipolar");
+//        remove_.SetText("remove");
+//    }
+//
+//    void resized() override {
+//        enable_.SetBounds(rgc::Bounds(bound.x, bound.y, 16, 16));
+//        bipolar_.SetBounds(rgc::Bounds(bound.x + 100, bound.y, 16, 16));
+//        amount_.set_bound({ bound.x + 150,bound.y,50,50 });
+//        remove_.SetBounds(rgc::Bounds(bound.x + 200, bound.y, 50, 16));
+//    }
+//
+//    ModulationConfig& GetModulationConfigRef() { return config_ref_; }
+//
+//    std::function<void(SingleModulationLayout*)> on_remove_click = [](auto) {};
+//private:
+//    ModulationConfig& config_ref_;
+//    std::unique_ptr<juce::ToggleButton> enable_;
+//    std::unique_ptr<juce::ToggleButton> bipolar_;
+//    std::unique_ptr<juce::Slider> amount_;
+//    std::unique_ptr<juce::TextButton> remove_;
+//};
 
 ModulationMatrixLayout::ModulationMatrixLayout(Synth& synth)
     : synth_(synth) {
+    param_selector_ = std::make_unique<juce::ComboBox>("param_selector");
+    section_selector_ = std::make_unique<juce::ComboBox>("section_selector");
+    modulator_selector_ = std::make_unique<juce::ComboBox>("modulator_selector");
+    add_button_ = std::make_unique<juce::TextButton>("add");
+    table_ = std::make_unique<juce::TableListBox>("table", this);
+
+    table_->getHeader().addColumn("modulator", 1, 100);
+    table_->getHeader().addColumn("param", 2, 100);
+    table_->getHeader().addColumn("enable", 3, 100);
+    table_->getHeader().addColumn("bipolar", 4, 100);
+    table_->getHeader().addColumn("amount", 5, 100);
+    table_->getHeader().addColumn("remove", 6, 100);
+
+    addAndMakeVisible(*param_selector_);
+    addAndMakeVisible(*section_selector_);
+    addAndMakeVisible(*modulator_selector_);
+    addAndMakeVisible(*add_button_);
+    addAndMakeVisible(*table_);
+
+    // process param ids
     modulator_ids_ = synth.GetModulatorIds();
     auto param_ids = synth.GetModulableParamIds();
 
@@ -66,55 +136,42 @@ ModulationMatrixLayout::ModulationMatrixLayout(Synth& synth)
     }
     auto section_view = split_param_ids | std::ranges::views::keys;
     sections_.assign(section_view.begin(), section_view.end());
-    section_selector_.SetChoices(section_view);
-    section_selector_.on_choice_changed = [this](int c) {
-        param_selector_.ResetItemSelect();
-        param_selector_.SetChoices(split_param_ids[sections_[c]] | std::views::transform([](SplitParamId& id) {
-            return id.detail;
-        }));
-    };
-    section_selector_.on_choice_changed(0);
 
-    modulator_selector_.SetChoices(modulator_ids_);
-    add_button_.SetText("add");
+    {
+        juce::StringArray sa;
+        for (auto sv : section_view) {
+            sa.add(juce::String{ sv.data(), sv.length() });
+        }
+        section_selector_->addItemList(sa, 1);
+        section_selector_->addListener(this);
+    }
+    section_selector_->setSelectedItemIndex(0, juce::sendNotification);
+
+    {
+        juce::StringArray sa;
+        for (auto id : modulator_ids_) {
+            sa.add(juce::String{ id.data(), id.length() });
+        }
+        modulator_selector_->addItemList(sa, 1);
+        modulator_selector_->addListener(this);
+    }
 }
 
 ModulationMatrixLayout::~ModulationMatrixLayout() = default;
 
-void ModulationMatrixLayout::Paint() {
-    if (add_button_.Show()) {
-        OnAddClick();
-    }
-
-    for (auto& p : layouts_) {
-        p->Paint();
-    }
-
-    param_selector_.Paint();
-    modulator_selector_.Paint();
-    section_selector_.Paint();
-
-    CheckAndRemoveLayout();
-}
-
-void ModulationMatrixLayout::SetBounds(Rectangle bound) {
-    bound_ = bound;
-    section_selector_.SetBounds(rgc::Bounds(bound.x, bound.y, 100, 16));
-    param_selector_.SetBounds(rgc::Bounds(bound.x + 100, bound.y, 100, 16));
-    modulator_selector_.SetBounds(rgc::Bounds(bound.x + 200, bound.y, 50, 16));
-    add_button_.SetBounds(rgc::Bounds(bound.x + 250, bound.y, 50, 16));
-
-    for (int i = 0; auto & p : layouts_) {
-        p->SetBounds({ bound.x, bound.y + 16 + 50 * i, 200,50 });
-        ++i;
-    }
+void ModulationMatrixLayout::resized() {
+    section_selector_->setBounds(0, 0, 100, 16);
+    param_selector_->setBounds(0 + 100, 0, 100, 16);
+    modulator_selector_->setBounds(0 + 200, 0, 50, 16);
+    add_button_->setBounds(0 + 250, 0, 50, 16);
+    table_->setBounds(0, 16, getWidth(), getHeight() - 16);
 }
 
 void ModulationMatrixLayout::OnAddClick() {
-    auto modulator_idx = modulator_selector_.get_item_selected();
-    auto param_idx = param_selector_.get_item_selected();
+    auto modulator_idx = modulator_selector_->getSelectedItemIndex();
+    auto param_idx = param_selector_->getSelectedItemIndex();
     auto modulator_id = modulator_ids_[modulator_idx];
-    auto section = sections_[section_selector_.get_item_selected()];
+    auto section = sections_[section_selector_->getSelectedItemIndex()];
     auto param_id = split_param_ids[section][param_idx].id;
 
     auto&&[added, pconfig] = synth_.CreateModulation(modulator_id, param_id);
@@ -122,23 +179,121 @@ void ModulationMatrixLayout::OnAddClick() {
         return;
     }
 
-    auto& l = layouts_.emplace_back(std::make_unique<SingleModulationLayout>(*pconfig));
-    l->on_remove_click = [this](SingleModulationLayout* v) {remove_layout_ = v; };
-    SetBounds(bound_);
+    table_->updateContent();
 }
 
-void ModulationMatrixLayout::CheckAndRemoveLayout() {
-    if (remove_layout_ == nullptr) {
+int ModulationMatrixLayout::getNumRows() {
+    return synth_.GetModulatorCount();
+}
+
+void ModulationMatrixLayout::paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected) {
+    auto alternateColour = getLookAndFeel().findColour(juce::ListBox::backgroundColourId)
+        .interpolatedWith(getLookAndFeel().findColour(juce::ListBox::textColourId), 0.03f);
+    if (rowIsSelected)
+        g.fillAll(juce::Colours::lightblue);
+    else if (rowNumber % 2)
+        g.fillAll(alternateColour);
+}
+
+void ModulationMatrixLayout::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) {
+    if (columnId != 1 || columnId != 2) {
         return;
     }
 
-    auto it = std::ranges::find_if(layouts_, [this](std::unique_ptr<SingleModulationLayout>& p) {
-        return p.get() == remove_layout_;
-    });
+    if(rowNumber >= synth_.GetModulatorCount()) {
+        return;
+    }
 
-    synth_.RemoveModulation(remove_layout_->GetModulationConfigRef());
+    auto config = synth_.GetModulationConfig(rowNumber);
+    g.setColour(getLookAndFeel().findColour(juce::ListBox::textColourId));
+    if (columnId == 1) {
+        auto modulator_id = config->modulator_id;
+        g.drawText(juce::String{ modulator_id.data(), modulator_id.length() }, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+    }
+    else if (columnId == 2) {
+        auto param_id = config->param_id;
+        g.drawText(juce::String{ param_id.data(), param_id.length() }, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+    }
 
-    layouts_.erase(it);
-    remove_layout_ = nullptr;
+
+    g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
+    g.fillRect(width - 1, 0, 1, height);
+}
+
+juce::Component* ModulationMatrixLayout::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, juce::Component* existingComponentToUpdate) {
+    if(rowNumber >= synth_.GetModulatorCount()) {
+        return nullptr;
+    }
+
+    auto config = synth_.GetModulationConfig(rowNumber).get();
+    if (columnId == 3) { // enable
+        if (existingComponentToUpdate == nullptr) {
+            return new ModuWrapToggleBox(config);
+        }
+        else {
+            static_cast<ModuWrapToggleBox*>(existingComponentToUpdate)->SetModulationConfig(config);
+            return existingComponentToUpdate;
+        }
+    }
+    else if (columnId == 4) { // bipolar
+        if (existingComponentToUpdate == nullptr) {
+            return new ModuWrapBipolarToggleBox(config);
+        }
+        else {
+            static_cast<ModuWrapBipolarToggleBox*>(existingComponentToUpdate)->SetModulationConfig(config);
+            return existingComponentToUpdate;
+        }
+    }
+    else if(columnId == 5) { // amount
+        if (existingComponentToUpdate == nullptr) {
+            return new ModuWrapAmountSlider(config);
+        }
+        else {
+            static_cast<ModuWrapAmountSlider*>(existingComponentToUpdate)->SetModulationConfig(config);
+            return existingComponentToUpdate;
+        }
+    }
+    else if(columnId == 6) { // remove
+        if (existingComponentToUpdate == nullptr) {
+            auto p = new ModuWrapRemoveButton(config);
+            p->addListener(this);
+            return p;
+        }
+        else {
+            static_cast<ModuWrapRemoveButton*>(existingComponentToUpdate)->SetModulationConfig(config);
+            return existingComponentToUpdate;
+        }
+    }
+
+    return nullptr;
+}
+
+void ModulationMatrixLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
+    if(comboBoxThatHasChanged == section_selector_.get()) {
+        int current_section_idx = comboBoxThatHasChanged->getSelectedItemIndex();
+        auto param_ids = split_param_ids[sections_[current_section_idx]] | std::views::transform([](SplitParamId& id) {
+            return id.detail;
+        });
+
+        juce::StringArray sa;
+        for (auto id : param_ids) {
+            sa.add(juce::String{ id.data(), id.length() });
+        }
+        param_selector_->clear(juce::dontSendNotification);
+        param_selector_->addItemList(sa, 1);
+        param_selector_->setSelectedItemIndex(0, juce::dontSendNotification);
+    }
+}
+
+void ModulationMatrixLayout::buttonClicked(juce::Button* ptr_button) {
+    if (ptr_button == add_button_.get()) {
+        OnAddClick();
+        return;
+    }
+
+    auto* remove_button = static_cast<ModuWrapRemoveButton*>(ptr_button);
+    auto config = remove_button->GetModulationConfig();
+    synth_.RemoveModulation(*config);
+    table_->updateContent();
 }
 }

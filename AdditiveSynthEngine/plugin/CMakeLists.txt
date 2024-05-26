@@ -78,10 +78,10 @@ set(UI_SRC
  "layout/synth/filter_layout.cpp"
  "layout/effect/sp_effect_layout.cpp"
  "layout/resynthsis/resynthsis_layout.cpp"
- "layout/standard_layout.cpp"
+ 
   "layout/synth/osc_layout.cpp"
   #"ui/curve_editor.cpp"
-  "layout/curve_layout.cpp"
+  #"layout/curve_layout.cpp"
   "layout/main_window.cpp"
   
  "ui/wrap_check_box.cpp"
@@ -107,7 +107,7 @@ set(UI_HEADER
  "layout/synth/filter_route_layout.h"
  "layout/synth/final_filter_layout.h"
  "layout/modulators/modulators_layout.h"
- "layout/modulators/layout_base.h"
+ 
  "layout/effect/final_fx_layout.h"
  "layout/about/about_layout.h"
  "layout/master_layout.h"
@@ -120,10 +120,10 @@ set(UI_HEADER
  "layout/effect/sp_effect_layout.h"
  "layout/gui_param_pack.h"
  "layout/resynthsis/resynthsis_layout.h"
- "layout/standard_layout.h"
+ 
   "layout/synth/osc_layout.h"
 #"ui/curve_editor.h"
-  "layout/curve_layout.h"
+  #"layout/curve_layout.h"
   "layout/main_window.h"
   "ui/wrap_slider.h"
  "ui/wrap_check_box.h"
@@ -180,6 +180,7 @@ target_link_libraries(Harsh
         juce::juce_audio_utils
         juce::juce_gui_basics
         AdSynthLib
+        AudioFile
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags

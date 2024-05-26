@@ -7,34 +7,26 @@
 
 namespace mana {
 OscLayout::OscLayout(Synth& synth, int idx)
-    : timber_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>(std::format("timber.osc{}.type", idx)))
-    , idx_(idx) {
-    //timber_type_.SetChoices(param::TimberType::kNames);
-    timber_type_.on_choice_changed = [this](int c) {OnTimberTypeChanged(c); };
+    : idx_(idx) {
+    timber_type_ = std::make_unique<WrapDropBox>(synth.GetParamBank().GetParamPtr<IntChoiceParameter>(std::format("timber.osc{}.type", idx)));
+    timber_type_->addListener(this);
 
     for (int i = 0; auto & k : arg_knobs_) {
-        k.set_parameter(synth.GetParamBank().GetParamPtr(std::format("timber.osc{}.arg{}", idx, i++)));
+        k = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("timber.osc{}.arg{}", idx, i++)));
     }
     OnTimberTypeChanged(0);
-}
 
-void OscLayout::Paint() {
-    for (auto& knob : arg_knobs_) {
-        knob.display();
+    addAndMakeVisible(timber_type_.get());
+    for (const auto& k : arg_knobs_) {
+        addAndMakeVisible(*k);
     }
-    timber_type_.Paint();
 }
 
-void OscLayout::SetBounds(int x, int y, int w, int h) {
-    auto x_f = static_cast<float>(x);
-    auto y_f = static_cast<float>(y);
-    auto w_f = static_cast<float>(w);
-
-    timber_type_.SetBounds(rgc::Bounds(x_f, y_f, w_f, 12));
-    arg_knobs_[0].set_bound(x, y + 12, 50, 50);
-    arg_knobs_[1].set_bound(x + 50, y + 12, 50, 50);
-    arg_knobs_[2].set_bound(x + 100, y + 12, 50, 50);
-    arg_knobs_[3].set_bound(x + 150, y + 12, 50, 50);
+void OscLayout::resized() {
+    timber_type_->setBounds(0, 0, getWidth(), 12);
+    for (int i = 0; i < 4; ++i) {
+        arg_knobs_[i]->setBounds(50 * i, 12, 50, 50);
+    }
 }
 
 void OscLayout::OnTimberTypeChanged(int c) {
@@ -73,5 +65,9 @@ void OscLayout::OnTimberTypeChanged(int c) {
         assert(false);
         break;
     }
+}
+
+void OscLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
+    OnTimberTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
 }
 }

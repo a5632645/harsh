@@ -7,18 +7,13 @@ namespace mana {
 FinalFxLayout::FinalFxLayout(Synth& synth) {
     for (int i = 0; i < 5; ++i) {
         sp_effects_.emplace_back(std::make_unique<EffectLayout>(synth, i));
+        addAndMakeVisible(sp_effects_.back().get());
     }
 }
 
-void FinalFxLayout::Paint() {
-    for (auto& p : sp_effects_) {
-        p->Paint();
-    }
-}
-
-void FinalFxLayout::SetBounds(int x, int y, int w, int h) {
+void FinalFxLayout::resized() {
     for (int i = 0; auto & e : sp_effects_) {
-        e->SetBounds(x + i * 150, y, 150, h);
+        e->setBounds(i * 150, 0, 150, getHeight());
         ++i;
     }
 }

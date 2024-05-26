@@ -1,20 +1,19 @@
 #pragma once
 
-#include <raylib.h>
 #include "engine/forward_decalre.h"
-#include "ui/Knob.h"
-#include "layout_base.h"
+#include "layout/modu_container.h"
+#include "ui/wrap_slider.h"
 
 namespace mana {
-class EnvelopLayout : public LayoutBase {
+class EnvelopLayout : public juce::Component, public ModuContainer {
 public:
-    EnvelopLayout(Synth& synth, int idx, std::string_view id);
-    void Paint() override;
-    void SetBounds(Rectangle bound) override;
+    EnvelopLayout(Synth& synth, int idx);
+    
+    void resized() override;
 private:
-    WrapSlider attack_;
-    WrapSlider decay_;
-    WrapSlider sustain_;
-    WrapSlider release_;
+    std::unique_ptr<WrapSlider> attack_;
+    std::unique_ptr<WrapSlider> decay_;
+    std::unique_ptr<WrapSlider> sustain_;
+    std::unique_ptr<WrapSlider> release_;
 };
 }

@@ -6,37 +6,27 @@
 #include "engine/synth.h"
 
 namespace mana {
-LfoLayout::LfoLayout(Synth& synth, int idx, std::string_view id) {
-    id_ = id;
-
+LfoLayout::LfoLayout(Synth& synth, int idx) {
     const auto& bank = synth.GetParamBank();
 
-    rate_.set_parameter(bank.GetParamPtr(std::format("lfo{}.rate", idx)));
-    //SetSingeKnobInfo(rate_, param::LFO_Rate{});
-    start_phase_.set_parameter(bank.GetParamPtr(std::format("lfo{}.start_phase", idx)));
-    //SetSingeKnobInfo(start_phase_, param::LFO_Phase{});
-    level_.set_parameter(bank.GetParamPtr(std::format("lfo{}.level", idx)));
-    //SetSingeKnobInfo(level_, param::LFO_Level{});
+    rate_ = std::make_unique<WrapSlider>(bank.GetParamPtr(std::format("lfo{}.rate", idx)));
+    start_phase_ = std::make_unique<WrapSlider>(bank.GetParamPtr(std::format("lfo{}.start_phase", idx)));
+    level_ = std::make_unique<WrapSlider>(bank.GetParamPtr(std::format("lfo{}.level", idx)));
+    restart_ = std::make_unique<WrapCheckBox>(bank.GetParamPtr<BoolParameter>(std::format("lfo{}.restart", idx)));
+    wave_type_ = std::make_unique<WrapDropBox>(bank.GetParamPtr<IntChoiceParameter>(std::format("lfo{}.wave_type", idx)));
 
-    restart_.SetParameter(bank.GetParamPtr<BoolParameter>(std::format("lfo{}.restart", idx)));
-    restart_.SetText("restart");
-    wave_type_.SetParameter(bank.GetParamPtr<IntChoiceParameter>(std::format("lfo{}.wave_type", idx)));
-    //wave_type_.SetChoices(param::LFO_WaveType::kNames);
+    addAndMakeVisible(rate_.get());
+    addAndMakeVisible(start_phase_.get());
+    addAndMakeVisible(level_.get());
+    addAndMakeVisible(restart_.get());
+    addAndMakeVisible(wave_type_.get());
 }
 
-void LfoLayout::Paint() {
-    rate_.display();
-    start_phase_.display();
-    level_.display();
-    restart_.Paint();
-    wave_type_.Paint();
-}
-
-void LfoLayout::SetBounds(Rectangle bound) {
-    rate_.set_bound(bound.x, bound.y, 50, 50);
-    start_phase_.set_bound({ bound.x + 50,bound.y,50,50 });
-    level_.set_bound({ bound.x + 100,bound.y,50,50 });
-    restart_.SetBounds({ bound.x + 150,bound.y, 16,16 });
-    wave_type_.SetBounds({ bound.x + 216,bound.y,100,16 });
+void LfoLayout::resized() {
+    rate_->setBounds(0, 0, 50, 50);
+    start_phase_->setBounds(0 + 50, 0, 50, 50);
+    level_->setBounds(0 + 100, 0, 50, 50);
+    restart_->setBounds(0 + 150, 0, 16, 16);
+    wave_type_->setBounds(0 + 216, 0, 100, 16);
 }
 }

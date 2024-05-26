@@ -27,6 +27,9 @@ void Spectrum::paint(juce::Graphics& g) {
         int y = static_cast<int>(bound.getY() + bound.getHeight() * (1.0f - y_nor));
         g.drawLine(x, y, x, bound.getBottom(), 1.0f);
     }
+
+    g.setColour(juce::Colours::black);
+    g.drawRect(getLocalBounds());
 }
 
 void Spectrum::timerCallback() {

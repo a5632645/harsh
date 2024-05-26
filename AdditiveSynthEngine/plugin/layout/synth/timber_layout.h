@@ -2,21 +2,22 @@
 
 #include "engine/forward_decalre.h"
 #include "osc_layout.h"
-#include "ui/Knob.h"
+#include "ui/wrap_slider.h"
+#include "layout/modu_container.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class TimberLayout {
+class TimberLayout : public ModuContainer, public juce::Component {
 public:
     TimberLayout(Synth& synth);
 
-    void Paint();
-    void SetBounds(int x, int y, int w, int h);
+    void resized() override;
 private:
     OscLayout osc1_layout_;
     OscLayout osc2_layout_;
-    WrapSlider osc2_shift_;
-    WrapSlider osc2_beating_;
-    WrapSlider osc1_gain_;
-    WrapSlider osc2_gain_;
+    std::unique_ptr<WrapSlider> osc2_shift_;
+    std::unique_ptr<WrapSlider> osc2_beating_;
+    std::unique_ptr<WrapSlider> osc1_gain_;
+    std::unique_ptr<WrapSlider> osc2_gain_;
 };
 }

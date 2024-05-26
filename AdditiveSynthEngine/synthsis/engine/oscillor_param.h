@@ -26,11 +26,13 @@ public:
     void RemoveModulation(ModulationConfig& config);
     std::vector<std::string_view> GetParamIds() const;
 
-    template<IsParamter P, class...T>
+    template<IsParamter P, class...T> requires (sizeof...(T) >= 1)
         P* GetParam(std::format_string<T...> format_text, T&&... args) { return parent_synth_param_.GetParamBank().GetParamPtr<P>(format_text, std::forward<T>(args)...); }
+    template<IsParamter P>
+    P* GetParam(std::string_view id) { return parent_synth_param_.GetParamBank().GetParamPtr<P>(id); }
 
     template<class...T>
-        PolyModuFloatParameter* GetPolyFloatParam(std::format_string<T...> format_text, T&&... args) { return oscillor_param_table_.at(std::format(format_text, std::forward<T>(args)...)); }
+    PolyModuFloatParameter* GetPolyFloatParam(std::format_string<T...> format_text, T&&... args) { return oscillor_param_table_.at(std::format(format_text, std::forward<T>(args)...)); }
     SynthParams& GetParentSynthParams() { return parent_synth_param_; }
 
 private:

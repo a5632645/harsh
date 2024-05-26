@@ -3,51 +3,41 @@
 #include "param/param.h"
 #include "param/effect_param.h"
 #include "engine/synth.h"
+#include "layout/gui_param_pack.h"
 
 namespace mana {
-EffectLayout::EffectLayout(Synth& synth, int effect_idx) : effect_idx_(effect_idx) {
-    is_enable_ = std::make_unique<juce::ToggleButton>();
+EffectLayout::EffectLayout(Synth& synth, int effect_idx)
+    : effect_idx_(effect_idx) {
+    is_enable_ = std::make_unique<WrapCheckBox>(synth.GetParamBank().GetParamPtr<BoolParameter>(std::format("effect{}.enable", effect_idx)));
+    effect_type_ = std::make_unique<WrapDropBox>(synth.GetParamBank().GetParamPtr<IntChoiceParameter>(std::format("effect{}.type", effect_idx)));
+    effect_type_->addListener(this);
 
-    is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>(std::format("effect{}.enable", effect_idx)));
-    effect_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>(std::format("effect{}.type", effect_idx)));
-    effect_idx(effect_idx);
-    effect_type_.on_choice_changed = [this](int c) {OnEffectTypeChanged(c); };
-
-    for (int i = 0; auto & arg_knob : arg_knobs_) {
-        arg_knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("effect{}.arg{}", effect_idx, i++)));
+    for (int i = 0; i < 6; ++i) {
+        arg_knobs_.emplace_back(std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("effect{}.arg{}", effect_idx, i))));
     }
 
-    is_enable_.SetText("effect");
+    // init
     OnEffectTypeChanged(0);
+
+    // add
+    for (const auto& k : arg_knobs_) {
+        addAndMakeVisible(k.get());
+    }
+    addAndMakeVisible(is_enable_.get());
+    addAndMakeVisible(effect_type_.get());
 }
 
-void EffectLayout::Paint() {
-    is_enable_.Paint();
-    if (!is_enable_.IsChecked()) {
-        return;
-    }
-
-    for (auto& knob : arg_knobs_) {
-        knob.display();
-    }
-    effect_type_.Paint();
-}
-
-void EffectLayout::SetBounds(int x, int y, int w, int h) {
-    auto x_f = static_cast<float>(x);
-    auto y_f = static_cast<float>(y);
-    auto w_f = static_cast<float>(w);
-
-    is_enable_.SetBounds(rgc::Bounds(x_f, y_f, 12, 12));
-    effect_type_.SetBounds(rgc::Bounds(x_f, y_f + 12, w_f, 16));
-    auto first_y = y + 12 + 16;
-    arg_knobs_[0].set_bound(x, first_y, 50, 50);
-    arg_knobs_[1].set_bound(x + 50, first_y, 50, 50);
-    arg_knobs_[2].set_bound(x + 100, first_y, 50, 50);
+void EffectLayout::resized() {
+    is_enable_->setBounds(0, 0, getWidth(), 16);
+    effect_type_->setBounds(0, 0 + 12, getWidth(), 16);
+    auto first_y = 12 + 16;
+    arg_knobs_[0]->setBounds(0, first_y, 50, 50);
+    arg_knobs_[1]->setBounds(50, first_y, 50, 50);
+    arg_knobs_[2]->setBounds(100, first_y, 50, 50);
     auto second_y = first_y + 70;
-    arg_knobs_[3].set_bound(x, second_y, 50, 50);
-    arg_knobs_[4].set_bound(x + 50, second_y, 50, 50);
-    arg_knobs_[5].set_bound(x + 100, second_y, 50, 50);
+    arg_knobs_[3]->setBounds(0, second_y, 50, 50);
+    arg_knobs_[4]->setBounds(50, second_y, 50, 50);
+    arg_knobs_[5]->setBounds(100, second_y, 50, 50);
 }
 
 void EffectLayout::OnEffectTypeChanged(int c) {
@@ -109,5 +99,9 @@ void EffectLayout::OnEffectTypeChanged(int c) {
         SetGuiKnobs(arg_knobs_);
         break;
     }
+}
+
+void EffectLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
+    OnEffectTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
 }
 }

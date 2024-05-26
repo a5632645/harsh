@@ -9,21 +9,18 @@ SynthLayout::SynthLayout(Synth& synth)
     , diss_(synth)
     , phase_(synth)
     , filter_(synth) {
+    addAndMakeVisible(timber_);
+    addAndMakeVisible(unison_);
+    addAndMakeVisible(diss_);
+    addAndMakeVisible(phase_);
+    addAndMakeVisible(filter_);
 }
 
-void SynthLayout::Paint() {
-    timber_.Paint();
-    unison_.Paint();
-    diss_.Paint();
-    phase_.Paint();
-    filter_.Paint();
-}
-
-void SynthLayout::SetBounds(Rectangle bound) {
-    timber_.SetBounds(bound.x, bound.y, 250, 200);
-    unison_.SetBounds({ bound.x + 250, bound.y, 100, 200 });
-    diss_.SetBounds(bound.x + 350, bound.y, 100, 200);
-    phase_.SetBounds({ bound.x + 450, bound.y, 50, 200 });
-    filter_.SetBounds({ bound.x, bound.y + 200, bound.width, bound.height - 200 });
+void SynthLayout::resized() {
+    timber_.setBounds(0, 0, 250, 200);
+    unison_.setBounds(0 + 250, 0, 100, 200);
+    diss_.setBounds(0 + 350, 0, 100, 200);
+    phase_.setBounds(0 + 450, 0, 50, 200);
+    filter_.setBounds(0, 0 + 200, getWidth(), getHeight() - 200);
 }
 }

@@ -2,34 +2,27 @@
 
 #include <vector>
 #include <memory>
-#include "ui/WrapDropBox.h"
-#include "engine/forward_decalre.h"
 #include <unordered_map>
-#include <raygui-cpp/Button.h>
+#include <juce_gui_basics/juce_gui_basics.h>
+#include "engine/forward_decalre.h"
 
 namespace mana {
-class ModulationMatrixLayout {
+class ModulationMatrixLayout : public juce::Component
+    , public juce::TableListBoxModel
+    , private juce::ComboBox::Listener
+    , public juce::Button::Listener {
 public:
     ModulationMatrixLayout(Synth& synth);
     ~ModulationMatrixLayout();
 
-    ModulationMatrixLayout(const ModulationMatrixLayout&) = delete;
-    ModulationMatrixLayout& operator=(const ModulationMatrixLayout&) = delete;
-    ModulationMatrixLayout(ModulationMatrixLayout&&) = delete;
-    ModulationMatrixLayout& operator=(ModulationMatrixLayout&&) = delete;
-
-    void Paint();
-    void SetBounds(Rectangle bound);
+    void resized() override;
 private:
     Synth& synth_;
-    Rectangle bound_{};
-    WrapDropBox param_selector_;
-    WrapDropBox section_selector_;
-    WrapDropBox modulator_selector_;
-    rgc::Button add_button_;
-
-    class SingleModulationLayout;
-    SingleModulationLayout* remove_layout_{};
+    std::unique_ptr<juce::ComboBox> param_selector_;
+    std::unique_ptr<juce::ComboBox> section_selector_;
+    std::unique_ptr<juce::ComboBox> modulator_selector_;
+    std::unique_ptr<juce::TextButton> add_button_;
+    std::unique_ptr<juce::TableListBox> table_;
 
     void OnAddClick();
     void CheckAndRemoveLayout();
@@ -42,7 +35,16 @@ private:
     };
     std::unordered_map<std::string_view, std::vector<SplitParamId>> split_param_ids;
 
-    size_t layout_count_{};
-    std::vector<std::unique_ptr<SingleModulationLayout>> layouts_;
+    // 通过 TableListBoxModel 继承
+    int getNumRows() override;
+    void paintRowBackground(juce::Graphics&, int rowNumber, int width, int height, bool rowIsSelected) override;
+    void paintCell(juce::Graphics&, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
+    juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, juce::Component* existingComponentToUpdate) override;
+
+    // 通过 Listener 继承
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
+
+    // 通过 Listener 继承
+    void buttonClicked(juce::Button*) override;
 };
 }

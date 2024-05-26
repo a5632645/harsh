@@ -5,24 +5,24 @@
 
 namespace mana {
 PhaseLayout::PhaseLayout(Synth& synth) {
-    phase_type_.SetParameter(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("phase.type"));
-    phase_type_.on_choice_changed = [this](int c) {OnPhaseTypeChanged(c); };
+    phase_type_ = std::make_unique<WrapDropBox>(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("phase.type"));
+    phase_type_->addListener(this);
 
     for (int i = 0; auto & arg_knob : phase_arg_knobs_) {
-        arg_knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("phase.arg{}", i++)));
+        arg_knob = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("phase.arg{}", i++)));
     }
     OnPhaseTypeChanged(0);
+
+    addAndMakeVisible(phase_type_.get());
+    for (const auto& k : phase_arg_knobs_) {
+        addAndMakeVisible(*k);
+    }
 }
 
-void PhaseLayout::Paint() {
-    std::ranges::for_each(phase_arg_knobs_, &WrapSlider::display);
-    phase_type_.Paint();
-}
-
-void PhaseLayout::SetBounds(Rectangle bound) {
-    phase_type_.SetBounds({ bound.x, bound.y, bound.width, 16 });
+void PhaseLayout::resized() {
+    phase_type_->setBounds(0, 0, getWidth(), 16);
     for (int i = 0; auto & k : phase_arg_knobs_) {
-        k.set_bound(bound.x, bound.y + 16 + 50 * i, 50, 50);
+        k->setBounds(0, 16 + 50 * i, 50, 50);
         ++i;
     }
 }
@@ -48,5 +48,9 @@ void PhaseLayout::OnPhaseTypeChanged(int c) {
         SetGuiKnobs(phase_arg_knobs_);
         break;
     }
+}
+
+void PhaseLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
+    OnPhaseTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
 }
 }

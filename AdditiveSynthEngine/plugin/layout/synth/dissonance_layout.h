@@ -2,21 +2,25 @@
 
 #include <array>
 #include "engine/forward_decalre.h"
-#include "ui/Knob.h"
-#include "ui/WrapDropBox.h"
+#include "ui/wrap_slider.h"
+#include "ui/wrap_drop_box.h"
 #include "ui/wrap_check_box.h"
+#include "layout/modu_container.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class DissonanceLayout {
+class DissonanceLayout : public ModuContainer, public juce::Component, private juce::ComboBox::Listener {
 public:
     DissonanceLayout(Synth& synth);
 
-    void Paint();
-    void SetBounds(int x, int y, int w, int h);
+    void resized() override;
 private:
     void OnDissonanceTypeChanged(int c);
-    WrapCheckBox is_enable_;
-    WrapDropBox type_;
-    std::array<WrapSlider, 2> arg_knobs_;
+    std::unique_ptr<WrapCheckBox> is_enable_;
+    std::unique_ptr<WrapDropBox> type_;
+    std::array<std::unique_ptr<WrapSlider>, 2> arg_knobs_;
+
+    // 通过 Listener 继承
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 };
 }

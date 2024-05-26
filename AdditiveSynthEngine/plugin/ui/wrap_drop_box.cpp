@@ -5,6 +5,7 @@
 namespace mana {
 WrapDropBox::WrapDropBox(IntChoiceParameter* p)
     : parameter_(*p) {
+    addItemList(parameter_.As<JuceEnumParam>().GetRef().choices, 1);
     attachment_ = std::make_unique<juce::ComboBoxParameterAttachment>(parameter_.As<JuceEnumParam>().GetRef(), *this);
 }
 

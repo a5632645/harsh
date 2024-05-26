@@ -162,7 +162,7 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     auto process_midi = [&midiMessages, this](int begin, int end) {
         auto it_begin = midiMessages.findNextSamplePosition(begin);
         auto it_end = midiMessages.findNextSamplePosition(end);
-        
+
         for (auto it = it_begin; it != it_end; ++it) {
             auto msg = (*it).getMessage();
             if (msg.isNoteOn()) {
@@ -194,7 +194,7 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
             break;
         }
     }
-    
+
     std::copy(ptr_buffer, ptr_buffer + num_frame, buffer.getWritePointer(1));
 }
 
@@ -206,8 +206,8 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    //return new AudioPluginAudioProcessorEditor(*this);
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new AudioPluginAudioProcessorEditor(*this);
+    //return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================

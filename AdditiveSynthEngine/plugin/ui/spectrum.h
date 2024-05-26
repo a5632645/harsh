@@ -10,7 +10,7 @@ class Spectrum
     : public juce::Component
     , private juce::Timer {
 public:
-    Spectrum(Synth& synth) : synth_(synth) { startTimerHz(10); }
+    Spectrum(Synth& synth) : synth_(synth) { startTimerHz(25); }
     ~Spectrum() override { stopTimer(); }
 
     void paint(juce::Graphics& g) override;

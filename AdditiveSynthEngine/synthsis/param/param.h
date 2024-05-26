@@ -27,6 +27,17 @@ struct FloatParam {
         static_assert(requires {P::kMin; P::kMax; });
         return std::lerp(P::kMin, P::kMax, nor);
     }
+
+    static std::string GetText(float v) {
+        constexpr bool kHasStuff = requires {DetailParam::kStuff; DetailParam::kTextPrecision; };
+        v = GetNumber(v);
+        if constexpr (kHasStuff) {
+            return std::format("{0:.{1}f}{2}", v, DetailParam::kTextPrecision, DetailParam::kStuff);
+        }
+        else {
+            return std::format("{0:.{1}f}", v, DetailParam::kTextPrecision);
+        }
+    }
 };
 
 template<typename DetailParam>
@@ -66,6 +77,15 @@ struct FloatChoiceParam {
         using EnumType = typename DetailParam::ParamEnum;
 
         return static_cast<EnumType>(nor);
+    }
+
+    static constexpr std::string GetText(float nor) {
+        using EnumType = typename DetailParam::ParamEnum;
+
+        static_assert(requires{DetailParam::kNames; });
+        static_assert(static_cast<size_t>(EnumType::kNumEnums) == std::size(DetailParam::kNames));
+
+        return std::string{ DetailParam::kNames[GetChoiceIndex(nor)] };
     }
 };
 

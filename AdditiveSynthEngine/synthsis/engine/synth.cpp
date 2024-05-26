@@ -268,7 +268,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     return audio_frames;
 }
 
-ResynthsisFrames Synth::CreateResynthsisFramesFromImage(const std::vector<std::vector<SimplePixel>>& image_in) {
+ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBase> image_in) {
     ResynthsisFrames image_frame;
 
     /*
@@ -277,8 +277,8 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(const std::vector<std::v
     * B ratio_diff [0,255] map to [-1, 1]
     * simulate harmor's audio convert to image resynthsis mode
     */
-    auto w = image_in.size();
-    auto h = static_cast<int>(image_in.front().size());
+    auto w = image_in->GetWidth();
+    auto h = image_in->GetHeight();
     image_frame.frames.resize(w);
     auto max_gain = 0.0f;
     image_frame.frame_interval_sample = kFFtHop;
@@ -287,11 +287,10 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(const std::vector<std::v
 
     for (int x = 0; x < w; ++x) {
         auto& frame = image_frame.frames[x];
-        auto& img_line = image_in[x];
         for (int y = 0; y < kNumPartials; ++y) {
             auto y_nor = static_cast<float>(y) / static_cast<float>(kNumPartials);
             auto image_y_idx = std::clamp(static_cast<int>(h - y_nor * h), 0, h - 1);
-            auto pixel = img_line[image_y_idx];
+            auto pixel = image_in->GetPixel(x, image_y_idx);
 
             // map g to gain
             auto gain = 0.0f;

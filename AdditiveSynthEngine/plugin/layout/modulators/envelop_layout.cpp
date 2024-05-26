@@ -5,32 +5,24 @@
 #include "layout/gui_param_pack.h"
 
 namespace mana {
-EnvelopLayout::EnvelopLayout(Synth& synth, int idx, std::string_view id) {
-    id_ = id;
-
+EnvelopLayout::EnvelopLayout(Synth& synth, int idx) {
     const auto& param_bank = synth.GetParamBank();
 
-    attack_.set_parameter(param_bank.GetParamPtr("envelop{}.attack", idx));
-    //SetSingeKnobInfo(attack_, param::Env_Attack{});
-    decay_.set_parameter(param_bank.GetParamPtr("envelop{}.decay", idx));
-    //SetSingeKnobInfo(decay_, param::Env_Decay{});
-    sustain_.set_parameter(param_bank.GetParamPtr("envelop{}.sustain", idx));
-    //SetSingeKnobInfo(sustain_, param::Env_Sustain{});
-    release_.set_parameter(param_bank.GetParamPtr("envelop{}.release", idx));
-    //SetSingeKnobInfo(release_, param::Env_Release{});
+    attack_ = std::make_unique<WrapSlider>(param_bank.GetParamPtr("envelop{}.attack", idx));
+    decay_ = std::make_unique<WrapSlider>(param_bank.GetParamPtr("envelop{}.decay", idx));
+    sustain_ = std::make_unique<WrapSlider>(param_bank.GetParamPtr("envelop{}.sustain", idx));
+    release_ = std::make_unique<WrapSlider>(param_bank.GetParamPtr("envelop{}.release", idx));
+
+    addAndMakeVisible(attack_.get());
+    addAndMakeVisible(decay_.get());
+    addAndMakeVisible(sustain_.get());
+    addAndMakeVisible(release_.get());
 }
 
-void EnvelopLayout::Paint() {
-    attack_.display();
-    decay_.display();
-    sustain_.display();
-    release_.display();
-}
-
-void EnvelopLayout::SetBounds(Rectangle bound) {
-    attack_.set_bound({ bound.x, bound.y, 50, 50 });
-    decay_.set_bound({ bound.x + 50, bound.y, 50, 50 });
-    sustain_.set_bound({ bound.x + 100, bound.y, 50, 50 });
-    release_.set_bound({ bound.x + 150, bound.y, 50, 50 });
+void EnvelopLayout::resized() {
+    attack_->setBounds(0, 0, 50, 50);
+    decay_->setBounds(0 + 50, 0, 50, 50);
+    sustain_->setBounds(0 + 100, 0, 50, 50);
+    release_->setBounds(0 + 150, 0, 50, 50);
 }
 }

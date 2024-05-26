@@ -7,40 +7,27 @@
 #include "engine/synth.h"
 
 namespace mana {
-DissonanceLayout::DissonanceLayout(Synth& synth)
-    : is_enable_(synth.GetParamBank().GetParamPtr<BoolParameter>("dissonance.enable")) {
-    //type_.SetChoices(param::DissonanceType::kNames);
-    type_.on_choice_changed = [this](int c) {OnDissonanceTypeChanged(c); };
-    type_.SetParameter(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("dissonance.type"));
+DissonanceLayout::DissonanceLayout(Synth& synth) {
+    is_enable_ = std::make_unique<WrapCheckBox>(synth.GetParamBank().GetParamPtr<BoolParameter>("dissonance.enable"));
+    type_ = std::make_unique<WrapDropBox>(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("dissonance.type"));
+    type_->addListener(this);
 
-    arg_knobs_[0].set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg0"));
-    arg_knobs_[1].set_parameter(synth.GetParamBank().GetParamPtr("dissonance.arg1"));
+    arg_knobs_[0] = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr("dissonance.arg0"));
+    arg_knobs_[1] = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr("dissonance.arg1"));
 
-    is_enable_.SetText("dissonance");
     OnDissonanceTypeChanged(0);
+
+    addAndMakeVisible(is_enable_.get());
+    addAndMakeVisible(type_.get());
+    addAndMakeVisible(arg_knobs_[0].get());
+    addAndMakeVisible(arg_knobs_[1].get());
 }
 
-void DissonanceLayout::Paint() {
-    is_enable_.Paint();
-    if (!is_enable_.IsChecked()) {
-        return;
-    }
-
-    for (auto& k : arg_knobs_) {
-        k.display();
-    }
-    type_.Paint();
-}
-
-void DissonanceLayout::SetBounds(int x, int y, int w, int h) {
-    auto x_f = static_cast<float>(x);
-    auto y_f = static_cast<float>(y);
-    auto w_f = static_cast<float>(w);
-
-    is_enable_.SetBounds(rgc::Bounds(x_f, y_f, 12.0f, 12.0f));
-    type_.SetBounds(rgc::Bounds(x_f, y_f + 12.0f, w_f, 12.0f));
-    arg_knobs_[0].set_bound(x, y + 24, 50, 50);
-    arg_knobs_[1].set_bound(x, y + 24 + 50, 50, 50);
+void DissonanceLayout::resized() {
+    is_enable_->setBounds(0, 0, getWidth(), 16);
+    type_->setBounds(0, 12, getWidth(), 12);
+    arg_knobs_[0]->setBounds(0, 24, 50, 50);
+    arg_knobs_[1]->setBounds(0, 24 + 50, 50, 50);
 }
 
 void DissonanceLayout::OnDissonanceTypeChanged(int c) {
@@ -85,5 +72,9 @@ void DissonanceLayout::OnDissonanceTypeChanged(int c) {
         assert(false && "unkown type");
         break;
     }
+}
+
+void DissonanceLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
+    OnDissonanceTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
 }
 }

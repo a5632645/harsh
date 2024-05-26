@@ -8,9 +8,9 @@ namespace mana {
 class WrapSlider : public juce::Slider {
 public:
     WrapSlider(FloatParameter* p);
+    WrapSlider(IntParameter* p);
     ~WrapSlider() override;
 private:
-    FloatParameter& parameter_;
     std::unique_ptr<juce::SliderParameterAttachment> attachment_;
 };
 }

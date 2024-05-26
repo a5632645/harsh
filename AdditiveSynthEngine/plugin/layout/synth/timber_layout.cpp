@@ -10,38 +10,25 @@ namespace mana {
 TimberLayout::TimberLayout(Synth& synth)
     : osc1_layout_(synth, 0)
     , osc2_layout_(synth, 1) {
-    osc2_beating_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_beating"));
-    osc2_shift_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_shift"));
-    osc1_gain_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc1_gain"));
-    osc2_gain_.set_parameter(synth.GetParamBank().GetParamPtr("timber.osc2_gain"));
+    osc2_beating_ = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr("timber.osc2_beating"));
+    osc2_shift_ = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr("timber.osc2_shift"));
+    osc1_gain_ = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr("timber.osc1_gain"));
+    osc2_gain_ = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr("timber.osc2_gain"));
 
-    //SetSingeKnobInfo(osc2_beating_, param::Timber_Osc2Beating{});
-    //SetSingeKnobInfo(osc2_shift_, param::Timber_Osc2Shift{});
-    //SetSingeKnobInfo(osc1_gain_, param::Timber_OscGain{});
-    //SetSingeKnobInfo(osc2_gain_, param::Timber_OscGain{});
-    //osc1_gain_.set_title("osc1_gain");
-    //osc2_gain_.set_title("osc2_gain");
+    addAndMakeVisible(osc2_beating_.get());
+    addAndMakeVisible(osc2_shift_.get());
+    addAndMakeVisible(osc1_gain_.get());
+    addAndMakeVisible(osc2_gain_.get());
+    addAndMakeVisible(&osc1_layout_);
+    addAndMakeVisible(&osc2_layout_);
 }
 
-void TimberLayout::Paint() {
-    osc2_beating_.display();
-    osc2_shift_.display();
-    osc1_gain_.display();
-    osc2_gain_.display();
-    osc1_layout_.Paint();
-    osc2_layout_.Paint();
-}
-
-void TimberLayout::SetBounds(int x, int y, int w, int h) {
-    auto x_f = static_cast<float>(x);
-    auto y_f = static_cast<float>(y);
-    auto w_f = static_cast<float>(w);
-
-    osc2_beating_.set_bound(x + 10, y, 30, 50);
-    osc2_shift_.set_bound(x + 10, y + 50, 30, 40);
-    osc1_gain_.set_bound(x + 10, y + 95, 30, 30);
-    osc2_gain_.set_bound(x + 10, y + 130, 30, 30);
-    osc1_layout_.SetBounds(x + 50, y, 200, 70);
-    osc2_layout_.SetBounds(x + 50, y + 70 + 16, 200, 70);
+void TimberLayout::resized() {
+    osc2_beating_->setBounds(10, 0, 30, 50);
+    osc2_shift_->setBounds(10, 50, 30, 40);
+    osc1_gain_->setBounds(10, 95, 30, 30);
+    osc2_gain_->setBounds(10, 130, 30, 30);
+    osc1_layout_.setBounds(50, 16, 200, 70);
+    osc2_layout_.setBounds(50, 70 + 16, 200, 70);
 }
 }

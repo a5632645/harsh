@@ -2,20 +2,24 @@
 
 #include <array>
 #include "engine/forward_decalre.h"
-#include "ui/WrapDropBox.h"
-#include "ui/Knob.h"
+#include "ui/wrap_drop_box.h"
+#include "ui/wrap_slider.h"
+#include "layout/modu_container.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class OscLayout {
+class OscLayout : public ModuContainer, public juce::Component, private juce::ComboBox::Listener {
 public:
     OscLayout(Synth& synth, int idx);
 
-    void Paint();
-    void SetBounds(int x, int y, int w, int h);
+    void resized() override;
 private:
     void OnTimberTypeChanged(int c);
     const int idx_;
-    WrapDropBox timber_type_;
-    std::array<WrapSlider, 4> arg_knobs_;
+    std::unique_ptr<WrapDropBox> timber_type_;
+    std::array<std::unique_ptr<WrapSlider>, 4> arg_knobs_;
+
+    // 通过 Listener 继承
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 };
 }

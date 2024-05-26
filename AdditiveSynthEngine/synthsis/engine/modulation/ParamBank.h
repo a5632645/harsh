@@ -14,19 +14,6 @@ namespace mana {
 template<IsParamter... PT>
 class TempParamBank {
 public:
-    //template<IsParamter Type = FloatParameter, class... T>
-    //Type& AddOrCreateIfNull(ModulationType type,
-    //                        ParamRange range,
-    //                        std::string_view name,
-    //                        std::format_string<T...> format_text, T&&...args) {
-    //    auto& storer = GetParamMap<Type>();
-
-    //    auto e = std::make_unique<Type>(type, std::move(range), name, format_text, std::forward<T>(args)...);
-    //    auto& v = *e;
-    //    storer[e->GetIdStringRef()] = std::move(e);
-    //    return v;
-    //}
-
     template<IsParamter Type>
     Type& AddParameter(std::unique_ptr<Type> param) {
         auto& storer = GetParamMap<Type>();
@@ -39,11 +26,15 @@ public:
         return v;
     }
 
-    template<IsParamter Type = FloatParameter, class... T>
+    template<IsParamter Type = FloatParameter, class... T> requires (sizeof...(T) >= 1)
     Type* GetParamPtr(std::format_string<T...> format_text, T&&...args) const {
-        auto& storer = GetParamMap<Type>();
+        return GetParamPtr<Type>(std::format(format_text, std::forward<T>(args)...));
+    }
 
-        auto e = storer.at(std::format(format_text, std::forward<T>(args)...)).get();
+    template<IsParamter Type = FloatParameter>
+    Type* GetParamPtr(std::string_view id) const {
+        auto& storer = GetParamMap<Type>();
+        auto e = storer.at(id).get();
         assert(e != nullptr);
         return static_cast<Type*>(e);
     }

@@ -1,33 +1,35 @@
 #pragma once
 
 #include <array>
-#include <future>
 #include "engine/forward_decalre.h"
-#include "ui/Knob.h"
-#include "raygui-cpp.h"
+#include "ui/wrap_slider.h"
 #include "utli/spin_lock.h"
-#include "raylib-cpp.hpp"
 #include "ui/wrap_check_box.h"
-#include "ui/WrapDropBox.h"
+#include "ui/wrap_drop_box.h"
+#include "layout/modu_container.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class ResynthsisLayout {
+class ResynthsisLayout : public ModuContainer, public juce::Component, private juce::FileDragAndDropTarget {
 public:
     ResynthsisLayout(Synth& synth);
 
-    void Paint();
-    void SetBounds(int x, int y, int w, int h);
+    void paint(juce::Graphics& g) override;
+    void resized() override;
 private:
-    void CheckAndDoResynthsis();
-    void DrawSpectrum();
+    void CreateAudioResynthsis(const juce::String& path);
+    void CreateImageResynthsis(const juce::String& path);
 
     Synth& synth_;
-    WrapCheckBox is_enable_;
-    WrapCheckBox is_formant_remap_;
-    std::array<WrapSlider, 7> arg_knobs_;
+    std::unique_ptr<WrapCheckBox> is_enable_;
+    std::unique_ptr<WrapCheckBox> is_formant_remap_;
+    std::array<std::unique_ptr<WrapSlider>, 7> arg_knobs_;
     std::atomic<int> resynthsis_work_counter_;
-    rgc::Bounds bound_;
     utli::SpinLock ui_lock_;
-    std::vector<std::vector<Color>> render_img_;
+    juce::Image render_img_;
+
+    // 通过 FileDragAndDropTarget 继承
+    bool isInterestedInFileDrag(const juce::StringArray& files) override;
+    void filesDropped(const juce::StringArray& files, int x, int y) override;
 };
 }

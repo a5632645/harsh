@@ -85,14 +85,14 @@ set(ENGINE_HEADER
  "engine/filter/filter_wrap.h"
  "engine/modulation/param_creator.h"
  "engine/effect/effect.h"
-  "param/param_helper.h")
+  "param/param_helper.h" "engine/resynthsis/image_base.h")
 
 add_library(AdSynthLib STATIC ${ENGINE_SRC} ${ENGINE_HEADER})
-target_link_libraries(AdSynthLib PRIVATE AudioFFT)
-target_link_libraries(AdSynthLib PRIVATE AudioFile)
-target_link_libraries(AdSynthLib PRIVATE gcem)
+target_link_libraries(AdSynthLib PUBLIC AudioFFT)
+target_link_libraries(AdSynthLib PUBLIC AudioFile)
+target_link_libraries(AdSynthLib PUBLIC gcem)
 target_link_libraries(AdSynthLib PUBLIC xsimd)
-target_link_libraries(AdSynthLib PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(AdSynthLib PUBLIC nlohmann_json::nlohmann_json)
 target_include_directories(AdSynthLib PUBLIC ".")
 
 set_property(TARGET AdSynthLib PROPERTY CXX_STANDARD 20)

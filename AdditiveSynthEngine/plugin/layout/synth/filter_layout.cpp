@@ -6,56 +6,31 @@
 #include "engine/synth.h"
 
 namespace mana {
-mana::FilterLayout::FilterLayout(Synth& synth, int idx)
-    : filter_type_(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("filter{}.type", idx)) {
-    filter_type_.on_choice_changed = [this](int c) {OnFilterTypeChanged(c); };
+mana::FilterLayout::FilterLayout(Synth& synth, int idx) {
+    filter_type_ = std::make_unique<WrapDropBox>(synth.GetParamBank().GetParamPtr<IntChoiceParameter>("filter{}.type", idx));
+    filter_type_->addListener(this);
 
     for (int i = 0; auto & knob : arg_filter_knobs_) {
-        knob.set_parameter(synth.GetParamBank().GetParamPtr(std::format("filter{}.arg{}", idx, i++)));
+        knob = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("filter{}.arg{}", idx, i++)));
     }
 
     OnFilterTypeChanged(0);
     OnResonanceTypeChanged(0);
-}
 
-void FilterLayout::Paint() {
-    std::ranges::for_each(arg_filter_knobs_, &WrapSlider::display);
-    filter_type_.Paint();
-
-    using enum param::Filter_Type::ParamEnum;
-    auto type = param::Filter_Type::GetEnum(filter_type_.get_item_selected());
-    switch (type) {
-    case kLowpass:
-    case kHighpass:
-    case kBandpass:
-    case kBandstop:
-    {
-        auto reso_type = param::Filter_ResonanceType::GetChoiceIndex(arg_filter_knobs_[param::Filter_ResonanceType::kArgIdx].get_value());
-        if (reso_type != last_resonance_type_) {
-            last_resonance_type_ = reso_type;
-            OnResonanceTypeChanged(reso_type);
-        }
-    }
-    break;
-    default:
-        break;
+    addAndMakeVisible(filter_type_.get());
+    for (const auto& k : arg_filter_knobs_) {
+        addAndMakeVisible(*k);
     }
 }
 
-void FilterLayout::SetBounds(int x, int y, int w, int h) {
-    auto x_f = static_cast<float>(x);
-    auto y_f = static_cast<float>(y);
-    auto w_f = static_cast<float>(w);
-
-    filter_type_.SetBounds(rgc::Bounds(x_f, y_f, w_f, 16));
-    arg_filter_knobs_[0].set_bound(x, y + 16, 50, 50);
-    arg_filter_knobs_[1].set_bound(x + 50, y + 16, 50, 50);
-    arg_filter_knobs_[2].set_bound(x + 100, y + 16, 50, 50);
-    arg_filter_knobs_[3].set_bound(x + 150, y + 16, 50, 50);
-    arg_filter_knobs_[4].set_bound(x, y + 86, 50, 50);
-    arg_filter_knobs_[5].set_bound(x + 50, y + 86, 50, 50);
-    arg_filter_knobs_[6].set_bound(x + 100, y + 86, 50, 50);
-    arg_filter_knobs_[7].set_bound(x + 150, y + 86, 50, 50);
+void FilterLayout::resized() {
+    filter_type_->setBounds(0, 0, getWidth(), 16);
+    for (int i = 0; i < 4; ++i) {
+        arg_filter_knobs_[i]->setBounds(50 * i, 16, 50, 50);
+    }
+    for (int i = 4; i < 8; ++i) {
+        arg_filter_knobs_[i]->setBounds(50 * (i - 4), 86, 50, 50);
+    }
 }
 
 void FilterLayout::OnResonanceTypeChanged(int c) {
@@ -68,7 +43,7 @@ void FilterLayout::OnResonanceTypeChanged(int c) {
     case kParabola:
         SetSingeKnobInfo(arg_filter_knobs_[param::Filter_Resonance::kArgIdx], param::Filter_Resonance{});
         SetSingeKnobInfo(arg_filter_knobs_[param::Filter_ResonanceWidth::kArgIdx], param::Filter_ResonanceWidth{});
-        arg_filter_knobs_[param::Filter_PhaserResoCycles::kArgIdx].SetEnable(false);
+        arg_filter_knobs_[param::Filter_PhaserResoCycles::kArgIdx]->setVisible(false);
         //SetGuiKnobs(arg_reso_knobs_,
         //            param::Filter_Resonance{},
         //            param::Filter_ResonanceWidth{});
@@ -138,6 +113,18 @@ void FilterLayout::OnFilterTypeChanged(int c) {
                     param::VowelFilter_Singer{},
                     param::VowelFilter_Slope{});
         break;
+    }
+}
+
+void FilterLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
+    OnFilterTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
+}
+
+void FilterLayout::sliderValueChanged(juce::Slider* slider) {
+    auto reso_type = param::Filter_ResonanceType::GetChoiceIndex(slider->getValue());
+    if (reso_type != last_resonance_type_) {
+        last_resonance_type_ = reso_type;
+        OnResonanceTypeChanged(reso_type);
     }
 }
 }
