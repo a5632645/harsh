@@ -97,8 +97,9 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    synth_->Init(samplesPerBlock, sampleRate, 400.0f);
+    synth_->Init(samplesPerBlock, sampleRate, 800.0f);
     update_pos_ = synth_->GetUpdateSkip();
+    inv_buffer_length_ = 1.0f / (samplesPerBlock * 1000000.0f / sampleRate);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -131,9 +132,32 @@ bool AudioPluginAudioProcessor::isBusesLayoutSupported(const BusesLayout& layout
     #endif
 }
 
+struct SimpleTimeReporter {
+    SimpleTimeReporter(float inv_buffer_length) : inv_buffer_length_(inv_buffer_length) {
+        start = std::chrono::steady_clock::now();
+    }
+
+    ~SimpleTimeReporter() {
+        auto end = std::chrono::steady_clock::now();
+        if (end - last_output_time_ > std::chrono::seconds(1)) {
+            auto num_us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+            DBG(std::format("[time reporter]: {} us, cpu: {}%",
+                            num_us,
+                            num_us * inv_buffer_length_ * 100.0f));
+            last_output_time_ = end;
+        }
+    }
+
+    std::chrono::time_point<std::chrono::steady_clock> start;
+    float inv_buffer_length_{};
+    inline static auto last_output_time_ = std::chrono::steady_clock::now();
+};
+
 void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
                                              juce::MidiBuffer& midiMessages)
 {
+    SimpleTimeReporter _{ inv_buffer_length_ };
+
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -153,6 +177,7 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+    std::scoped_lock audio_lock{ synth_->GetSynthLock() };
 
     auto num_frame = buffer.getNumSamples();
     auto update_skip = synth_->GetUpdateSkip();

@@ -54,6 +54,7 @@ namespace mana {
 ResynthsisLayout::ResynthsisLayout(Synth& synth)
     : synth_(synth) {
     is_enable_ = std::make_unique<WrapCheckBox>(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.enable"));
+    is_enable_->addListener(this);
     for (int i = 0; auto & k : arg_knobs_) {
         k = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("resynthsis.arg{}", i++)));
     }
@@ -68,33 +69,48 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
 
     is_formant_remap_ = std::make_unique<WrapCheckBox>(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.formant_remap"));
 
+    image_view_ = std::make_unique<juce::ImageComponent>();
+    image_view_->setImagePlacement(juce::RectanglePlacement::stretchToFit);
+    audio_button_ = std::make_unique<juce::TextButton>("audio", "open audio file");
+    image_button_ = std::make_unique<juce::TextButton>("image", "open image file");
+    audio_button_->addListener(this);
+    image_button_->addListener(this);
+
+    audio_file_chooser_ = std::make_unique<juce::FileChooser>("open audio",
+                                                              juce::File{},
+                                                              "*.wav");
+    image_file_chooser_ = std::make_unique<juce::FileChooser>("open image",
+                                                              juce::File{},
+                                                              "*.png;*.jpg;*.jpeg");
+
     // add
     addAndMakeVisible(is_enable_.get());
     addAndMakeVisible(is_formant_remap_.get());
+    addAndMakeVisible(audio_button_.get());
+    addAndMakeVisible(image_button_.get());
     for (auto & k : arg_knobs_) {
         addAndMakeVisible(k.get());
     }
+    addAndMakeVisible(image_view_.get());
 }
 
-void ResynthsisLayout::paint(juce::Graphics& g) {
-    std::scoped_lock lock{ ui_lock_ };
-
-    g.drawImage(render_img_, getLocalBounds().toFloat());
-
+void ResynthsisLayout::paintOverChildren(juce::Graphics& g) {
     float cursor_pos = synth_.GetDisplayOscillor().GetResynthsisProcessor().GetPlayerPosition();
     auto cursor_x = static_cast<int>(cursor_pos * getWidth());
     g.setColour(juce::Colours::white);
-    g.drawVerticalLine(cursor_x, 0.0f, static_cast<float>(getHeight()));
+    g.drawVerticalLine(cursor_x, 50.0f + 16.0f, static_cast<float>(getHeight()));
 }
 
 void ResynthsisLayout::resized() {
-    is_enable_->setBounds(0, 0, 12.0f, 12.0f);
-
+    is_enable_->setBounds(0, 0, 100, 16);
+    is_formant_remap_->setBounds(100, 0, 100, 16);
+    audio_button_->setBounds(200, 0, 100, 16);
+    image_button_->setBounds(300, 0, 100, 16);
     for (int i = 0; auto & k : arg_knobs_) {
-        k->setBounds(50 * i, 12, 50, 50);
+        k->setBounds(50 * i, 16, 50, 50);
         ++i;
     }
-    is_formant_remap_->setBounds(50.0f * arg_knobs_.size(), 12.0f, 16.0f, 16.0f);
+    image_view_->setBounds(0, 16 + 50, getWidth(), getHeight() - 16 - 50);
 }
 
 void ResynthsisLayout::CreateAudioResynthsis(const juce::String& path) {
@@ -146,8 +162,10 @@ void ResynthsisLayout::CreateAudioResynthsis(const juce::String& path) {
         }
 
         {
-            std::scoped_lock lock{ ui_lock_ };
-            render_img_ = std::move(img);
+            /*std::scoped_lock lock{ ui_lock_ };*/
+            //render_img_ = std::move(img);
+            const juce::MessageManagerLock lock{};
+            image_view_->setImage(img);
         }
     };
     std::thread{ std::move(task) }.detach();
@@ -167,51 +185,82 @@ void ResynthsisLayout::CreateImageResynthsis(const juce::String& path) {
         std::clog << std::format(R"([resynthsis]: load file "{}" *success*)", file_path) << std::endl;
 
         if (resynthsis_work_counter_.load() != work_id) {
-            ;
             std::clog << std::format(R"([resynthsis]: file "{}" load *canceled*)", file_path) << std::endl;
             return;
         }
 
         // turn audio data into img
+        const auto& spectrum = frame.frames;
+        const auto display_height = kNumPartials;// hide half fft spectrum and image because it only used in formant stretch
+        const auto display_width = static_cast<int>(spectrum.size());// hide half fft spectrum and image because it only used in formant stretch
+        juce::Image resynthsis_img{ juce::Image::RGB, display_width, display_height,false };
+        for (int x = 0; x < display_width; ++x) {
+            const auto& draw_frame = spectrum.at(x);
+
+            for (int y = 0; y < display_height; ++y) {
+                auto y_idx = display_height - 1 - y;
+
+                // map gain to g
+                auto db_g = utli::GainToDb<-60.0f>(draw_frame.gains[y_idx]) / 60.0f + 1.0f;
+                auto g = static_cast<unsigned char>(std::clamp(0xff * db_g, 0.0f, 255.0f));
+
+                // map ratio_diff to b
+                auto fre_diff = draw_frame.ratio_diffs[y_idx];
+                auto bit_fre_diff = std::clamp(fre_diff, -1.0f, 1.0f);
+                auto nor_fre_diff = 0.5f + 0.5f * bit_fre_diff;
+                auto b = static_cast<unsigned char>(std::clamp(0xff * nor_fre_diff + 0.5f, 0.0f, 255.0f));
+
+                resynthsis_img.setPixelAt(x, y, juce::Colour(0, g, b));
+            }
+        }
+
         {
             std::scoped_lock lock{ synth_.GetSynthLock() };
             synth_.SetResynthsisFrames(std::move(frame));
         }
 
         {
-            std::scoped_lock lock{ ui_lock_ };
-            render_img_ = std::move(img);
+            const juce::MessageManagerLock lock{};
+            image_view_->setImage(resynthsis_img);
         }
     };
     std::thread{ std::move(task) }.detach();
 }
 
-bool ResynthsisLayout::isInterestedInFileDrag(const juce::StringArray& files) {
-    for (const auto& s : files) {
-        if (s.endsWith(".wav")
-            || s.endsWith(".png")
-            || s.endsWith(".jpg")
-            || s.endsWith(".bmp")
-            || s.endsWith(".jpeg")) {
-            return true;
+void ResynthsisLayout::buttonClicked(juce::Button* ptr_button) {
+    if (ptr_button == audio_button_.get()) {
+        audio_file_chooser_->launchAsync(
+            juce::FileBrowserComponent::FileChooserFlags::openMode,
+            [this](const juce::FileChooser& chooser) {
+            if (chooser.getResults().isEmpty()) {
+                return;
+            }
+            auto load_file = chooser.getResult();
+            CreateAudioResynthsis(load_file.getFullPathName());
+        });
+    }
+    else if (ptr_button == image_button_.get()) {
+        image_file_chooser_->launchAsync(
+            juce::FileBrowserComponent::FileChooserFlags::openMode,
+            [this](const juce::FileChooser& chooser) {
+            if (chooser.getResults().isEmpty()) {
+                return;
+            }
+            auto load_file = chooser.getResult();
+            CreateImageResynthsis(load_file.getFullPathName());
+        });
+    }
+    else if (ptr_button == is_enable_.get()) {
+        if (is_enable_->getToggleState()) {
+            startTimerHz(10);
+        }
+        else {
+            stopTimer();
         }
     }
-    return false;
 }
 
-void ResynthsisLayout::filesDropped(const juce::StringArray& files, int x, int y) {
-    for (const auto& s : files) {
-        if (s.endsWith(".wav")) {
-            CreateAudioResynthsis(s);
-            return;
-        }
-        else if (s.endsWith(".png")
-                 || s.endsWith(".jpg")
-                 || s.endsWith(".bmp")
-                 || s.endsWith(".jpeg")) {
-            CreateImageResynthsis(s);
-            return;
-        }
-    }
+void ResynthsisLayout::timerCallback() {
+    repaint();
 }
 }

@@ -10,11 +10,15 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class ResynthsisLayout : public ModuContainer, public juce::Component, private juce::FileDragAndDropTarget {
+class ResynthsisLayout : public ModuContainer,
+    public juce::Component,
+    private juce::Button::Listener,
+    private juce::Timer {
 public:
     ResynthsisLayout(Synth& synth);
+    ~ResynthsisLayout() override { stopTimer(); }
 
-    void paint(juce::Graphics& g) override;
+    void paintOverChildren(juce::Graphics& g) override;
     void resized() override;
 private:
     void CreateAudioResynthsis(const juce::String& path);
@@ -25,11 +29,17 @@ private:
     std::unique_ptr<WrapCheckBox> is_formant_remap_;
     std::array<std::unique_ptr<WrapSlider>, 7> arg_knobs_;
     std::atomic<int> resynthsis_work_counter_;
-    utli::SpinLock ui_lock_;
-    juce::Image render_img_;
+    std::unique_ptr<juce::ImageComponent> image_view_;
 
-    // 通过 FileDragAndDropTarget 继承
-    bool isInterestedInFileDrag(const juce::StringArray& files) override;
-    void filesDropped(const juce::StringArray& files, int x, int y) override;
+    std::unique_ptr<juce::TextButton> audio_button_;
+    std::unique_ptr<juce::TextButton> image_button_;
+    std::unique_ptr<juce::FileChooser> audio_file_chooser_;
+    std::unique_ptr<juce::FileChooser> image_file_chooser_;
+
+    // 通过 Listener 继承
+    void buttonClicked(juce::Button*) override;
+
+    // 通过 Timer 继承
+    void timerCallback() override;
 };
 }

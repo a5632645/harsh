@@ -18,11 +18,7 @@ void SetSingeKnobInfo(WrapSlider& knob, DetailParam) {
     constexpr auto text_getter = DetailParam::GetText;
     constexpr auto param_title = DetailParam::kName;
 
-    //knob.set_title(param_title);
-    //knob.value_to_text_function = text_getter;
-    //knob.SetDefaultValue(DetailParam::GetNormalDefault());
-    //knob.SetEnable(true);
-
+    knob.setDoubleClickReturnValue(true, DetailParam::GetNormalDefault());
     knob.setTitle(juce::String{ param_title.data(), param_title.length() });
     knob.textFromValueFunction = [](double v)->juce::String {
         auto org_text = DetailParam::GetText(v);
@@ -44,7 +40,6 @@ void SetGuiKnobs(Array& knobs, Params... params) {
     };
 
     for (auto& knob : knobs) {
-        //knob.SetEnable(false);
         knob->setVisible(false);
     }
     int use_less[]{ 0, set_gui_knob_info(params)... };

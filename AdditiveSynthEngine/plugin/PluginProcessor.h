@@ -49,6 +49,7 @@ public:
 private:
     int update_pos_{};
     int left_num_render_{};
+    float inv_buffer_length_{};
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 };

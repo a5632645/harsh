@@ -16,15 +16,15 @@ EffectLayout::EffectLayout(Synth& synth, int effect_idx)
         arg_knobs_.emplace_back(std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("effect{}.arg{}", effect_idx, i))));
     }
 
-    // init
-    OnEffectTypeChanged(0);
-
     // add
     for (const auto& k : arg_knobs_) {
         addAndMakeVisible(k.get());
     }
     addAndMakeVisible(is_enable_.get());
     addAndMakeVisible(effect_type_.get());
+
+    // init
+    OnEffectTypeChanged(0);
 }
 
 void EffectLayout::resized() {
