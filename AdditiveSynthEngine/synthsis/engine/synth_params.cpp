@@ -253,33 +253,32 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
             .type = kPoly,
             .id = std::format("lfo{}.rate", lfo_idx),
             .name = std::format("lfo{}.rate", lfo_idx),
-            .vmin = 0.0f,
-            .vmax = 1.0f,
-            .vdefault = 0.0f }));
+            .vmin = param::LFO_Rate::kMin,
+            .vmax = param::LFO_Rate::kMax,
+            .vdefault = param::LFO_Rate::kDefault }));
         //param_bank_.AddParameter(param::LFO_Phase::CreateParam(kPoly, "lfo{}.start_phase", lfo_idx));
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
             .id = std::format("lfo{}.start_phase", lfo_idx),
             .name = std::format("lfo{}.start_phase", lfo_idx),
-            .vmin = 0.0f,
-            .vmax = 1.0f,
-            .vdefault = 0.0f }));
+            .vmin = param::LFO_Phase::kMin,
+            .vmax = param::LFO_Phase::kMax,
+            .vdefault = param::LFO_Phase::kDefault }));
         //param_bank_.AddParameter(param::LFO_Level::CreateParam(kPoly, "lfo{}.level", lfo_idx));
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
             .id = std::format("lfo{}.level", lfo_idx),
             .name = std::format("lfo{}.level", lfo_idx),
-            .vmin = 0.0f,
-            .vmax = 1.0f,
-            .vdefault = 0.0f }));
+            .vmin = param::LFO_Level::kMin,
+            .vmax = param::LFO_Level::kMax,
+            .vdefault = param::LFO_Level::kDefault }));
         //param_bank_.AddParameter(param::LFO_WaveType::CreateParam(kPoly, "lfo{}.wave_type", lfo_idx));
         param_bank_.AddParameter(creator->CreateIntChoiceParameter({
             .id = std::format("lfo{}.wave_type", lfo_idx),
             .name = std::format("lfo{}.wave_type", lfo_idx),
             .choices = {param::LFO_WaveType::kNames.begin(), param::LFO_WaveType::kNames.end()},
             .vdefault = 0 }));
-    };
-
+    }
     // envelop
     for (int env_idx = 0; env_idx < 8; ++env_idx) {
         //param_bank_.AddParameter(param::Env_Attack::CreateParam(kPoly, "envelop{}.attack", env_idx));
@@ -287,35 +286,34 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
             .type = kPoly,
             .id = std::format("envelop{}.attack", env_idx),
             .name = std::format("envelop{}.attack", env_idx),
-            .vmin = 0.0f,
-            .vmax = 1.0f,
-            .vdefault = 0.0f }));
+            .vmin = param::Env_Attack::kMin,
+            .vmax = param::Env_Attack::kMax,
+            .vdefault = param::Env_Attack::kDefault }));
         //param_bank_.AddParameter(param::Env_Decay::CreateParam(kPoly, "envelop{}.decay", env_idx));
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
             .id = std::format("envelop{}.decay", env_idx),
             .name = std::format("envelop{}.decay", env_idx),
-            .vmin = 0.0f,
-            .vmax = 1.0f,
-            .vdefault = 0.0f }));
+            .vmin = param::Env_Decay::kMin,
+            .vmax = param::Env_Decay::kMax,
+            .vdefault = param::Env_Decay::kDefault }));
         //param_bank_.AddParameter(param::Env_Sustain::CreateParam(kPoly, "envelop{}.sustain", env_idx));
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
             .id = std::format("envelop{}.sustain", env_idx),
             .name = std::format("envelop{}.sustain", env_idx),
-            .vmin = 0.0f,
-            .vmax = 1.0f,
-            .vdefault = 0.0f }));
+            .vmin = param::Env_Sustain::kMin,
+            .vmax = param::Env_Sustain::kMax,
+            .vdefault = param::Env_Sustain::kDefault }));
         //param_bank_.AddParameter(param::Env_Release::CreateParam(kPoly, "envelop{}.release", env_idx));
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
             .id = std::format("envelop{}.release", env_idx),
             .name = std::format("envelop{}.release", env_idx),
-            .vmin = 0.0f,
-            .vmax = 1.0f,
-            .vdefault = 0.0f }));
-    };
-
+            .vmin = param::Env_Release::kMin,
+            .vmax = param::Env_Release::kMax,
+            .vdefault = param::Env_Release::kDefault }));
+    }
     // custom curves
     curve_manager_.AddCurve(kNumPartials, "resynthsis.formant_remap")
         .AddCurve(kNumPartials, "resynthsis.pos_offset")

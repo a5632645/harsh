@@ -13,14 +13,16 @@ mana::FilterLayout::FilterLayout(Synth& synth, int idx) {
     for (int i = 0; auto & knob : arg_filter_knobs_) {
         knob = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("filter{}.arg{}", idx, i++)));
     }
-
-    OnFilterTypeChanged(0);
-    OnResonanceTypeChanged(0);
+    arg_filter_knobs_[param::Filter_ResonanceType::kArgIdx]->addListener(this);
 
     addAndMakeVisible(filter_type_.get());
     for (const auto& k : arg_filter_knobs_) {
         addAndMakeVisible(*k);
     }
+
+    // init
+    OnFilterTypeChanged(0);
+    OnResonanceTypeChanged(0);
 }
 
 void FilterLayout::resized() {

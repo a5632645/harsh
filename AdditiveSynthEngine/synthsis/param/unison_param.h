@@ -34,7 +34,7 @@ struct Unison_NumVoice : IntParam<Unison_NumVoice> {
 struct Unison_Pitch : FloatParam<Unison_Pitch> {
     static constexpr auto kName = "pitch"sv;
     static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 2.0f;
+    static constexpr float kMax = 0.5f;
     static constexpr float kDefault = 0.0f;
     static constexpr int kTextPrecision = 3;
     static constexpr auto kStuff = "st";

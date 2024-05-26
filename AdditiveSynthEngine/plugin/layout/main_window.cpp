@@ -21,13 +21,12 @@ MainWindow::MainWindow(Synth & synth)
     auto synth_layout = std::make_unique<SynthLayout>(synth);
     auto effect_layout = std::make_unique<FinalFxLayout>(synth);
     auto resynthsis_layout = std::make_unique<ResynthsisLayout>(synth);
-    auto modulation_matrix_layout = std::make_unique<ModulationMatrixLayout>(synth);
     //auto about_layout = std::make_unique<AboutLayout>(synth);
 
     tabbed_->addTab("Synth", juce::Colours::darkgrey, synth_layout.get(), false);
     tabbed_->addTab("Effect", juce::Colours::darkgrey, effect_layout.get(), false);
     tabbed_->addTab("Resynthsis", juce::Colours::darkgrey, resynthsis_layout.get(), false);
-    tabbed_->addTab("Modulation Matrix", juce::Colours::darkgrey, modulation_matrix_layout.get(), true);
+    tabbed_->addTab("Modulation Matrix", juce::Colours::darkgrey, new ModulationMatrixLayout(synth), true);
     //tabbed_->addTab("About", juce::Colours::green, about_layout.get(), false);
 
     layouts_.emplace_back(std::move(synth_layout));

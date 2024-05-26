@@ -17,7 +17,7 @@ public:
 
     void SetModulationConfig(ModulationConfig* cfg) {
         setToggleState(cfg->enable, juce::dontSendNotification);
-        config_ = cfg; 
+        config_ = cfg;
     }
 private:
     ModulationConfig* config_;
@@ -36,6 +36,7 @@ public:
 
     void SetModulationConfig(ModulationConfig* cfg) {
         setRange(-1.0f, 1.0f);
+        setDoubleClickReturnValue(true, 0.0);
         setValue(cfg->amount);
         config_ = cfg;
     }
@@ -108,13 +109,14 @@ ModulationMatrixLayout::ModulationMatrixLayout(Synth& synth)
     section_selector_ = std::make_unique<juce::ComboBox>("section_selector");
     modulator_selector_ = std::make_unique<juce::ComboBox>("modulator_selector");
     add_button_ = std::make_unique<juce::TextButton>("add");
+    add_button_->addListener(this);
     table_ = std::make_unique<juce::TableListBox>("table", this);
 
     table_->getHeader().addColumn("modulator", 1, 100);
     table_->getHeader().addColumn("param", 2, 100);
     table_->getHeader().addColumn("enable", 3, 100);
     table_->getHeader().addColumn("bipolar", 4, 100);
-    table_->getHeader().addColumn("amount", 5, 100);
+    table_->getHeader().addColumn("amount", 5, 250);
     table_->getHeader().addColumn("remove", 6, 100);
 
     addAndMakeVisible(*param_selector_);
@@ -155,16 +157,21 @@ ModulationMatrixLayout::ModulationMatrixLayout(Synth& synth)
         modulator_selector_->addItemList(sa, 1);
         modulator_selector_->addListener(this);
     }
+    modulator_selector_->setSelectedItemIndex(0, juce::sendNotification);
 }
 
 ModulationMatrixLayout::~ModulationMatrixLayout() = default;
 
 void ModulationMatrixLayout::resized() {
-    section_selector_->setBounds(0, 0, 100, 16);
-    param_selector_->setBounds(0 + 100, 0, 100, 16);
-    modulator_selector_->setBounds(0 + 200, 0, 50, 16);
-    add_button_->setBounds(0 + 250, 0, 50, 16);
-    table_->setBounds(0, 16, getWidth(), getHeight() - 16);
+    constexpr int kTopSize = 24;
+    section_selector_->setBounds(0, 0, 100, kTopSize);
+    param_selector_->setBounds(0 + 100, 0, 100, kTopSize);
+    modulator_selector_->setBounds(0 + 200, 0, 100, kTopSize);
+    add_button_->setBounds(0 + 300, 0, 100, kTopSize);
+
+    auto b = getLocalBounds();
+    b.removeFromTop(kTopSize);
+    table_->setBounds(b);
 }
 
 void ModulationMatrixLayout::OnAddClick() {
@@ -196,11 +203,11 @@ void ModulationMatrixLayout::paintRowBackground(juce::Graphics& g, int rowNumber
 }
 
 void ModulationMatrixLayout::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) {
-    if (columnId != 1 || columnId != 2) {
+    if (columnId != 1 && columnId != 2) {
         return;
     }
 
-    if(rowNumber >= synth_.GetModulatorCount()) {
+    if (rowNumber >= synth_.GetModulatorCount()) {
         return;
     }
 
@@ -215,13 +222,12 @@ void ModulationMatrixLayout::paintCell(juce::Graphics& g, int rowNumber, int col
         g.drawText(juce::String{ param_id.data(), param_id.length() }, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
     }
 
-
     g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
     g.fillRect(width - 1, 0, 1, height);
 }
 
 juce::Component* ModulationMatrixLayout::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, juce::Component* existingComponentToUpdate) {
-    if(rowNumber >= synth_.GetModulatorCount()) {
+    if (rowNumber >= synth_.GetModulatorCount()) {
         return nullptr;
     }
 
@@ -244,7 +250,7 @@ juce::Component* ModulationMatrixLayout::refreshComponentForCell(int rowNumber, 
             return existingComponentToUpdate;
         }
     }
-    else if(columnId == 5) { // amount
+    else if (columnId == 5) { // amount
         if (existingComponentToUpdate == nullptr) {
             return new ModuWrapAmountSlider(config);
         }
@@ -253,7 +259,7 @@ juce::Component* ModulationMatrixLayout::refreshComponentForCell(int rowNumber, 
             return existingComponentToUpdate;
         }
     }
-    else if(columnId == 6) { // remove
+    else if (columnId == 6) { // remove
         if (existingComponentToUpdate == nullptr) {
             auto p = new ModuWrapRemoveButton(config);
             p->addListener(this);
@@ -269,7 +275,7 @@ juce::Component* ModulationMatrixLayout::refreshComponentForCell(int rowNumber, 
 }
 
 void ModulationMatrixLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
-    if(comboBoxThatHasChanged == section_selector_.get()) {
+    if (comboBoxThatHasChanged == section_selector_.get()) {
         int current_section_idx = comboBoxThatHasChanged->getSelectedItemIndex();
         auto param_ids = split_param_ids[sections_[current_section_idx]] | std::views::transform([](SplitParamId& id) {
             return id.detail;
