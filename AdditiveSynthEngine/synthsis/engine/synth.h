@@ -6,7 +6,7 @@
 #include "modulation/ParamBank.h"
 #include "resynthsis/resynthsis_data.h"
 #include "resynthsis/image_base.h"
-#include "utli/spin_lock.h"
+#include <mutex>
 #include "engine/modulation/curve.h"
 
 namespace mana {
@@ -31,6 +31,7 @@ public:
     }
 
     const Oscillor& GetDisplayOscillor() const;
+    const Oscillor& GetOscillor(int idx) const { return m_oscillators[idx]; }
     ParamBank& GetParamBank() { return synth_params_.GetParamBank(); }
     CurveManager& GetCurveManager() { return synth_params_.GetCurveManager(); }
     SynthParams& GetSynthParams() { return synth_params_; }
@@ -42,14 +43,15 @@ public:
     ResynthsisFrames CreateResynthsisFramesFromImage(std::unique_ptr<ImageBase> image_in);
     std::vector<std::string_view> GetModulatorIds() const { return m_oscillators.front().GetModulatorIds(); }
     std::vector<std::string_view> GetModulableParamIds() const { return m_oscillators.front().GetModulableParamIds(); }
-    utli::SpinLock& GetSynthLock() { return synth_lock_; }
+    decltype(auto) GetSynthLock() { return (synth_lock_); }
 
     std::pair<bool, ModulationConfig*> CreateModulation(std::string_view modulator, std::string_view param);
     void RemoveModulation(ModulationConfig& config);
     int GetModulatorCount() const { return synth_params_.GetModulationCount(); }
     std::shared_ptr<ModulationConfig> GetModulationConfig(int index) { return synth_params_.GetModulation(index); }
 private:
-    utli::SpinLock synth_lock_;
+    //utli::SpinLock synth_lock_;
+    std::mutex synth_lock_;
     ResynthsisFrames resynthsis_frames_;
     SynthParams synth_params_;
     std::vector<float> audio_buffer_;

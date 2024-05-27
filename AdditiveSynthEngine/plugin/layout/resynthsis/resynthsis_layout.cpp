@@ -54,7 +54,15 @@ namespace mana {
 ResynthsisLayout::ResynthsisLayout(Synth& synth)
     : synth_(synth) {
     is_enable_ = std::make_unique<WrapCheckBox>(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.enable"));
-    is_enable_->addListener(this);
+    is_enable_->onStateChange = [this]() {
+        if (is_enable_->getToggleState()) {
+            startTimerHz(10);
+        }
+        else {
+            stopTimer();
+        }
+    };
+
     for (int i = 0; auto & k : arg_knobs_) {
         k = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("resynthsis.arg{}", i++)));
     }
@@ -92,6 +100,17 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
         addAndMakeVisible(k.get());
     }
     addAndMakeVisible(image_view_.get());
+
+    // init
+    if (synth_.IsResynthsisAvailable()) {
+        std::thread([this] {
+            auto img = GenerateResynsisImage(synth_.GetResynthsisFrames());
+            {
+                const juce::MessageManagerLock lock{};
+                image_view_->setImage(img);
+            }
+        }).detach();
+    }
 }
 
 void ResynthsisLayout::paintOverChildren(juce::Graphics& g) {
@@ -132,29 +151,7 @@ void ResynthsisLayout::CreateAudioResynthsis(const juce::String& path) {
         }
 
         // turn audio data into img
-        const auto& spectrum = frame.frames;
-        const auto display_height = kNumPartials;// hide half fft spectrum and image because it only used in formant stretch
-        const auto display_width = static_cast<int>(spectrum.size());// hide half fft spectrum and image because it only used in formant stretch
-        juce::Image img{ juce::Image::RGB, display_width, display_height,false };
-        for (int x = 0; x < display_width; ++x) {
-            const auto& draw_frame = spectrum.at(x);
-
-            for (int y = 0; y < display_height; ++y) {
-                auto y_idx = display_height - 1 - y;
-
-                // map gain to g
-                auto db_g = utli::GainToDb<-60.0f>(draw_frame.gains[y_idx]) / 60.0f + 1.0f;
-                auto g = static_cast<unsigned char>(std::clamp(0xff * db_g, 0.0f, 255.0f));
-
-                // map ratio_diff to b
-                auto fre_diff = draw_frame.ratio_diffs[y_idx];
-                auto bit_fre_diff = std::clamp(fre_diff, -1.0f, 1.0f);
-                auto nor_fre_diff = 0.5f + 0.5f * bit_fre_diff;
-                auto b = static_cast<unsigned char>(std::clamp(0xff * nor_fre_diff + 0.5f, 0.0f, 255.0f));
-
-                img.setPixelAt(x, y, juce::Colour(0, g, b));
-            }
-        }
+        auto img = GenerateResynsisImage(frame);
 
         {
             std::scoped_lock lock{ synth_.GetSynthLock() };
@@ -162,8 +159,6 @@ void ResynthsisLayout::CreateAudioResynthsis(const juce::String& path) {
         }
 
         {
-            /*std::scoped_lock lock{ ui_lock_ };*/
-            //render_img_ = std::move(img);
             const juce::MessageManagerLock lock{};
             image_view_->setImage(img);
         }
@@ -190,29 +185,7 @@ void ResynthsisLayout::CreateImageResynthsis(const juce::String& path) {
         }
 
         // turn audio data into img
-        const auto& spectrum = frame.frames;
-        const auto display_height = kNumPartials;// hide half fft spectrum and image because it only used in formant stretch
-        const auto display_width = static_cast<int>(spectrum.size());// hide half fft spectrum and image because it only used in formant stretch
-        juce::Image resynthsis_img{ juce::Image::RGB, display_width, display_height,false };
-        for (int x = 0; x < display_width; ++x) {
-            const auto& draw_frame = spectrum.at(x);
-
-            for (int y = 0; y < display_height; ++y) {
-                auto y_idx = display_height - 1 - y;
-
-                // map gain to g
-                auto db_g = utli::GainToDb<-60.0f>(draw_frame.gains[y_idx]) / 60.0f + 1.0f;
-                auto g = static_cast<unsigned char>(std::clamp(0xff * db_g, 0.0f, 255.0f));
-
-                // map ratio_diff to b
-                auto fre_diff = draw_frame.ratio_diffs[y_idx];
-                auto bit_fre_diff = std::clamp(fre_diff, -1.0f, 1.0f);
-                auto nor_fre_diff = 0.5f + 0.5f * bit_fre_diff;
-                auto b = static_cast<unsigned char>(std::clamp(0xff * nor_fre_diff + 0.5f, 0.0f, 255.0f));
-
-                resynthsis_img.setPixelAt(x, y, juce::Colour(0, g, b));
-            }
-        }
+        auto resynthsis_img = GenerateResynsisImage(frame);
 
         {
             std::scoped_lock lock{ synth_.GetSynthLock() };
@@ -225,6 +198,34 @@ void ResynthsisLayout::CreateImageResynthsis(const juce::String& path) {
         }
     };
     std::thread{ std::move(task) }.detach();
+}
+
+juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
+    // turn audio data into img
+    const auto& spectrum = frames.frames;
+    const auto display_height = kNumPartials;// hide half fft spectrum and image because it only used in formant stretch
+    const auto display_width = static_cast<int>(spectrum.size());// hide half fft spectrum and image because it only used in formant stretch
+    juce::Image resynthsis_img{ juce::Image::RGB, display_width, display_height,false };
+    for (int x = 0; x < display_width; ++x) {
+        const auto& draw_frame = spectrum.at(x);
+
+        for (int y = 0; y < display_height; ++y) {
+            auto y_idx = display_height - 1 - y;
+
+            // map gain to g
+            auto db_g = utli::GainToDb<-60.0f>(draw_frame.gains[y_idx]) / 60.0f + 1.0f;
+            auto g = static_cast<unsigned char>(std::clamp(0xff * db_g, 0.0f, 255.0f));
+
+            // map ratio_diff to b
+            auto fre_diff = draw_frame.ratio_diffs[y_idx];
+            auto bit_fre_diff = std::clamp(fre_diff, -1.0f, 1.0f);
+            auto nor_fre_diff = 0.5f + 0.5f * bit_fre_diff;
+            auto b = static_cast<unsigned char>(std::clamp(0xff * nor_fre_diff + 0.5f, 0.0f, 255.0f));
+
+            resynthsis_img.setPixelAt(x, y, juce::Colour(0, g, b));
+        }
+    }
+    return resynthsis_img;
 }
 
 void ResynthsisLayout::buttonClicked(juce::Button* ptr_button) {
@@ -249,14 +250,6 @@ void ResynthsisLayout::buttonClicked(juce::Button* ptr_button) {
             auto load_file = chooser.getResult();
             CreateImageResynthsis(load_file.getFullPathName());
         });
-    }
-    else if (ptr_button == is_enable_.get()) {
-        if (is_enable_->getToggleState()) {
-            startTimerHz(10);
-        }
-        else {
-            stopTimer();
-        }
     }
 }
 

@@ -34,14 +34,8 @@ public:
 
     void NoteOn(int noteNumber, float v);
 
-    bool canPlayNote(int note) const {
-        if (midi_note_ == -1) return true;
-        return false;
-    }
-
     bool IsPlaying() const {
-        return true;
-        return midi_note_ != -1;
+        return note_on_;
     }
 
     int getMidiNote() const {

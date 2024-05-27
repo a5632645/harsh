@@ -7,7 +7,7 @@ namespace mana {
 class ModuWrapToggleBox : public juce::ToggleButton {
 public:
     ModuWrapToggleBox(ModulationConfig* cfg) {
-        this->onClick = [this]() {
+        this->onStateChange = [this]() {
             if (config_ == nullptr) return;
             config_->enable = this->getToggleState();
         };
@@ -16,8 +16,8 @@ public:
     }
 
     void SetModulationConfig(ModulationConfig* cfg) {
-        setToggleState(cfg->enable, juce::dontSendNotification);
         config_ = cfg;
+        setToggleState(cfg->enable, juce::dontSendNotification);
     }
 private:
     ModulationConfig* config_;
@@ -48,7 +48,7 @@ private:
 class ModuWrapBipolarToggleBox : public juce::ToggleButton {
 public:
     ModuWrapBipolarToggleBox(ModulationConfig* cfg) {
-        this->onClick = [this]() {
+        this->onStateChange = [this]() {
             if (config_ == nullptr) return;
             config_->bipolar = this->getToggleState();
         };

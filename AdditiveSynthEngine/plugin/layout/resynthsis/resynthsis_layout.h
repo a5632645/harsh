@@ -27,6 +27,7 @@ public:
 private:
     void CreateAudioResynthsis(const juce::String& path);
     void CreateImageResynthsis(const juce::String& path);
+    static juce::Image GenerateResynsisImage(ResynthsisFrames& frames);
 
     Synth& synth_;
     std::unique_ptr<WrapCheckBox> is_enable_;

@@ -5,13 +5,25 @@
 #include "engine/synth.h"
 
 namespace mana {
+Spectrum::Spectrum(Synth& synth)
+    : synth_(synth) {
+    startTimerHz(25);
+
+    for (int i = 0; i < kNumOscillors; ++i) {
+        box.addItem(juce::String{ i }, i + 1);
+    }
+    box.setSelectedItemIndex(0, juce::dontSendNotification);
+
+    addAndMakeVisible(box);
+}
+
 void Spectrum::paint(juce::Graphics& g) {
     g.setColour(juce::Colours::white);
 
     mana::Partials drawing_partials_;
     {
-        std::scoped_lock lock{ synth_.GetSynthLock() };
-        drawing_partials_ = synth_.GetDisplayOscillor().GetPartials();
+        //std::scoped_lock lock{ synth_.GetSynthLock() };
+        drawing_partials_ = synth_.GetOscillor(box.getSelectedItemIndex()).GetPartials();
     }
 
     auto bound = getLocalBounds().toFloat();
@@ -30,6 +42,10 @@ void Spectrum::paint(juce::Graphics& g) {
 
     g.setColour(juce::Colours::black);
     g.drawRect(getLocalBounds());
+}
+
+void Spectrum::resized() {
+    box.setBounds(0, 0, 30, 16);
 }
 
 void Spectrum::timerCallback() {

@@ -81,7 +81,7 @@ void Oscillor::NoteOn(int note_number, float velocity) {
 }
 
 void Oscillor::NoteOff() {
-    midi_note_ = -1;
+    note_on_ = false;
     freq_.OnNoteOff();
     phase_.OnNoteOff();
     timber_.OnNoteOff();

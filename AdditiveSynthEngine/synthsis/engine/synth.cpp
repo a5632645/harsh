@@ -21,7 +21,7 @@ Synth::Synth(std::shared_ptr<ParamCreator> creator)
 void Synth::NoteOn(int note, float velocity) {
     // rr one time
     for (size_t i = 0; i < kNumOscillors; ++i) {
-        if (m_oscillators[m_rrPosition].canPlayNote(note)) {
+        if (!m_oscillators[m_rrPosition].IsPlaying()) {
             m_oscillators[m_rrPosition].NoteOn(note, velocity);
             m_rrPosition = (m_rrPosition + 1) % kNumOscillors;
             return;
@@ -92,7 +92,7 @@ void Synth::Render(float* buffer, int num_frame) {
         }
 
         for (int i = 0; i < num_frame; ++i) {
-            *buffer++ += o.SrTick();
+            buffer[i] += o.SrTick();
         };
     }
 

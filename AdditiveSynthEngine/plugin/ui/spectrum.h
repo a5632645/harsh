@@ -10,13 +10,14 @@ class Spectrum
     : public juce::Component
     , private juce::Timer {
 public:
-    Spectrum(Synth& synth) : synth_(synth) { startTimerHz(25); }
+    Spectrum(Synth& synth);
     ~Spectrum() override { stopTimer(); }
 
     void paint(juce::Graphics& g) override;
+    void resized() override;
 private:
     void timerCallback() override;
-
+    juce::ComboBox box;
     Synth& synth_;
 };
 }
