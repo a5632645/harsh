@@ -3,12 +3,13 @@
 #include "engine/synth.h"
 #include "lfo_layout.h"
 #include "envelop_layout.h"
+#include "modulator_button.h"
 
 namespace mana {
 ModulatorsLayout::ModulatorsLayout(Synth& synth)
     : tabbed_(juce::TabbedButtonBar::Orientation::TabsAtTop) {
     const auto& ids = synth.GetModulatorIds();
-    for (auto id : ids) {
+    for (int tab_idx = 0; auto id : ids) {
         if (id.starts_with("lfo")) {
             auto idx_str = id.substr(3);
             int d{};
@@ -25,6 +26,11 @@ ModulatorsLayout::ModulatorsLayout(Synth& synth)
             components_.emplace_back(std::make_unique<EnvelopLayout>(synth, d));
             tabbed_.addTab(juce::String{id.data(), id.length()}, juce::Colours::green, components_.back().get(), false);
         }
+
+        // extra num modulation display and drag component
+        tabbed_.getTabbedButtonBar().getTabButton(tab_idx)->setExtraComponent(new ModulatorButton(id, synth),
+                                                                              juce::TabBarButton::ExtraComponentPlacement::afterText);
+        ++tab_idx;
     }
 
     addAndMakeVisible(tabbed_);

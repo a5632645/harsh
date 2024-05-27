@@ -99,7 +99,7 @@ set(UI_SRC
  "layout/about/about_layout.cpp"
  "layout/master_layout.cpp"
  "ui/spectrum.cpp"
-)
+ "layout/modulators/modulator_button.cpp")
 set(UI_HEADER
 "layout/modulators/envelop_layout.h"
  "layout/synth/synth_layout.h"
@@ -130,7 +130,8 @@ set(UI_HEADER
  "layout/modulators/lfo_layout.h"
  "layout/matrix/modulation_matrix_layout.h"
  "layout/synth/unison_layout.h"
- "layout/modu_container.h")
+ "layout/modu_container.h"
+ "layout/modulators/modulator_button.h")
 
 target_sources(Harsh
     PRIVATE

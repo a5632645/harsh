@@ -46,15 +46,15 @@ public:
 
     std::pair<bool, ModulationConfig*> CreateModulation(std::string_view modulator, std::string_view param);
     void RemoveModulation(ModulationConfig& config);
-    int GetModulatorCount() const { return modulation_configs_.size(); }
-    std::shared_ptr<ModulationConfig> GetModulationConfig(int index) { return modulation_configs_[index]; }
+    int GetModulatorCount() const { return synth_params_.GetModulationCount(); }
+    std::shared_ptr<ModulationConfig> GetModulationConfig(int index) { return synth_params_.GetModulation(index); }
 private:
     utli::SpinLock synth_lock_;
     ResynthsisFrames resynthsis_frames_;
     SynthParams synth_params_;
     std::vector<float> audio_buffer_;
     std::vector<Oscillor> m_oscillators;
-    std::vector<std::shared_ptr<ModulationConfig>> modulation_configs_;
+    //std::vector<std::shared_ptr<ModulationConfig>> modulation_configs_;
     size_t m_rrPosition{};
 
     float sample_rate_{};

@@ -324,4 +324,29 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         curve_manager_.AddCurve(kNumPartials, "lfo{}.wave", i);
     }
 }
+
+std::shared_ptr<ModulationConfig> SynthParams::FindModulation(std::string_view modulator_id, std::string_view param_id) {
+    auto existed_it = std::ranges::find_if(modulation_configs_, [modulator_id, param_id](std::shared_ptr<ModulationConfig>& cfg) {
+        return cfg->modulator_id == modulator_id && cfg->param_id == param_id;
+    });
+
+    if (existed_it != modulation_configs_.cend()) {
+        return *existed_it;
+    }
+    else {
+        return {};
+    }
+}
+
+void SynthParams::AddModulation(std::shared_ptr<ModulationConfig> config) {
+    modulation_configs_.emplace_back(config);
+}
+
+void SynthParams::RemoveModulation(ModulationConfig& config) {
+    auto it = std::ranges::find_if(modulation_configs_, [config](std::shared_ptr<ModulationConfig>& cfg) {
+        return cfg->modulator_id == config.modulator_id
+            && cfg->param_id == config.param_id;
+    });
+    modulation_configs_.erase(it);
+}
 }

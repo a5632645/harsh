@@ -181,9 +181,12 @@ void ModulationMatrixLayout::OnAddClick() {
     auto section = sections_[section_selector_->getSelectedItemIndex()];
     auto param_id = split_param_ids[section][param_idx].id;
 
-    auto&&[added, pconfig] = synth_.CreateModulation(modulator_id, param_id);
-    if (!added) {
-        return;
+    {
+        std::scoped_lock lock{ synth_.GetSynthLock() };
+        auto&&[added, pconfig] = synth_.CreateModulation(modulator_id, param_id);
+        if (!added) {
+            return;
+        }
     }
 
     table_->updateContent();
@@ -299,7 +302,10 @@ void ModulationMatrixLayout::buttonClicked(juce::Button* ptr_button) {
 
     auto* remove_button = static_cast<ModuWrapRemoveButton*>(ptr_button);
     auto config = remove_button->GetModulationConfig();
-    synth_.RemoveModulation(*config);
+    {
+        std::scoped_lock lock{ synth_.GetSynthLock() };
+        synth_.RemoveModulation(*config);
+    }
     table_->updateContent();
 }
 }

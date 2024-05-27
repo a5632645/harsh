@@ -150,43 +150,43 @@ void Synth::SetResynthsisFrames(ResynthsisFrames new_frame) {
 }
 
 std::pair<bool, ModulationConfig*> Synth::CreateModulation(std::string_view modulator, std::string_view param) {
-    {
-        auto existed_it = std::ranges::find_if(modulation_configs_, [modulator, param](std::shared_ptr<ModulationConfig>& cfg) {
-            return cfg->modulator_id == modulator && cfg->param_id == param;
-        });
-        if (existed_it != modulation_configs_.cend()) {
-            return { false, nullptr };
-        }
+    //{
+    //    auto existed_it = std::ranges::find_if(modulation_configs_, [modulator, param](std::shared_ptr<ModulationConfig>& cfg) {
+    //        return cfg->modulator_id == modulator && cfg->param_id == param;
+    //    });
+    //    if (existed_it != modulation_configs_.cend()) {
+    //        return { false, nullptr };
+    //    }
+    //}
+    auto exist_modu = synth_params_.FindModulation(modulator, param);
+    if (exist_modu != nullptr) {
+        return { false, nullptr };
     }
 
     auto new_modulation_cfg = std::make_shared<ModulationConfig>();
     new_modulation_cfg->modulator_id = modulator;
     new_modulation_cfg->param_id = param;
-    modulation_configs_.emplace_back(new_modulation_cfg);
+    //modulation_configs_.emplace_back(new_modulation_cfg);
+    synth_params_.AddModulation(new_modulation_cfg);
 
-    {
-        std::scoped_lock lock{ synth_lock_ };
-        for (auto& osc : m_oscillators) {
-            osc.CreateModulation(param, modulator, new_modulation_cfg.get());
-        }
+    for (auto& osc : m_oscillators) {
+        osc.CreateModulation(param, modulator, new_modulation_cfg.get());
     }
 
     return { true, new_modulation_cfg.get() };
 }
 
 void Synth::RemoveModulation(ModulationConfig& config) {
-    {
-        std::scoped_lock lock{ synth_lock_ };
-        for (auto& osc : m_oscillators) {
-            osc.RemoveModulation(config);
-        }
+    for (auto& osc : m_oscillators) {
+        osc.RemoveModulation(config);
     }
 
-    auto it = std::ranges::find_if(modulation_configs_, [config](std::shared_ptr<ModulationConfig>& cfg) {
-        return cfg->modulator_id == config.modulator_id
-            && cfg->param_id == config.param_id;
-    });
-    modulation_configs_.erase(it);
+    //auto it = std::ranges::find_if(modulation_configs_, [config](std::shared_ptr<ModulationConfig>& cfg) {
+    //    return cfg->modulator_id == config.modulator_id
+    //        && cfg->param_id == config.param_id;
+    //});
+    //modulation_configs_.erase(it);
+    synth_params_.RemoveModulation(config);
 }
 
 ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float sample_rate) {

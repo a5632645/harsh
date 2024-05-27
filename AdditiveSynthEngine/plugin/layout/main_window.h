@@ -6,7 +6,7 @@
 #include "master_layout.h"
 
 namespace mana {
-class MainWindow : public juce::Component {
+class MainWindow : public juce::Component, public juce::DragAndDropContainer {
 public:
     MainWindow(Synth& synth);
 
