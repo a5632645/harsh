@@ -340,6 +340,10 @@ std::shared_ptr<ModulationConfig> SynthParams::FindModulation(std::string_view m
 
 void SynthParams::AddModulation(std::shared_ptr<ModulationConfig> config) {
     modulation_configs_.emplace_back(config);
+
+    for (auto* l : modulation_listeners_) {
+        l->OnModulationAdded(*config);
+    }
 }
 
 void SynthParams::RemoveModulation(ModulationConfig& config) {
@@ -348,5 +352,9 @@ void SynthParams::RemoveModulation(ModulationConfig& config) {
             && cfg->param_id == config.param_id;
     });
     modulation_configs_.erase(it);
+
+    for (auto* l : modulation_listeners_) {
+        l->OnModulationRemoved(config);
+    }
 }
 }

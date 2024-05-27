@@ -1,9 +1,11 @@
 #pragma once
 
+#include <string>
+
 namespace mana {
 struct ModulationConfig {
-    std::string_view modulator_id;
-    std::string_view param_id;
+    std::string modulator_id;
+    std::string param_id;
     float amount{};
     bool enable{};
     bool bipolar{};

@@ -105,6 +105,8 @@ private:
 
 ModulationMatrixLayout::ModulationMatrixLayout(Synth& synth)
     : synth_(synth) {
+    synth.GetSynthParams().AddModulationListener(this);
+
     param_selector_ = std::make_unique<juce::ComboBox>("param_selector");
     section_selector_ = std::make_unique<juce::ComboBox>("section_selector");
     modulator_selector_ = std::make_unique<juce::ComboBox>("modulator_selector");
@@ -160,7 +162,9 @@ ModulationMatrixLayout::ModulationMatrixLayout(Synth& synth)
     modulator_selector_->setSelectedItemIndex(0, juce::sendNotification);
 }
 
-ModulationMatrixLayout::~ModulationMatrixLayout() = default;
+ModulationMatrixLayout::~ModulationMatrixLayout() {
+    synth_.GetSynthParams().RemoveModulationListener(this);
+}
 
 void ModulationMatrixLayout::resized() {
     constexpr int kTopSize = 24;
@@ -189,7 +193,7 @@ void ModulationMatrixLayout::OnAddClick() {
         }
     }
 
-    table_->updateContent();
+    //table_->updateContent();
 }
 
 int ModulationMatrixLayout::getNumRows() {
@@ -306,6 +310,14 @@ void ModulationMatrixLayout::buttonClicked(juce::Button* ptr_button) {
         std::scoped_lock lock{ synth_.GetSynthLock() };
         synth_.RemoveModulation(*config);
     }
+    //table_->updateContent();
+}
+
+void ModulationMatrixLayout::OnModulationAdded(ModulationConfig& config) {
+    table_->updateContent();
+}
+
+void ModulationMatrixLayout::OnModulationRemoved(ModulationConfig& config) {
     table_->updateContent();
 }
 }

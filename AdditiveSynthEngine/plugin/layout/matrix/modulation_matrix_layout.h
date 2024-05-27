@@ -5,12 +5,14 @@
 #include <unordered_map>
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "engine/forward_decalre.h"
+#include "engine/synth_params.h"
 
 namespace mana {
 class ModulationMatrixLayout : public juce::Component
     , public juce::TableListBoxModel
     , private juce::ComboBox::Listener
-    , public juce::Button::Listener {
+    , public juce::Button::Listener
+    , public SynthParams::ModulationListener {
 public:
     ModulationMatrixLayout(Synth& synth);
     ~ModulationMatrixLayout();
@@ -46,5 +48,9 @@ private:
 
     // 通过 Listener 继承
     void buttonClicked(juce::Button*) override;
+
+    // 通过 ModulationListener 继承
+    void OnModulationAdded(ModulationConfig& config) override;
+    void OnModulationRemoved(ModulationConfig& config) override;
 };
 }
