@@ -12,6 +12,10 @@ public:
     TimberLayout(Synth& synth);
 
     void resized() override;
+
+    // 通过 ModuContainer 继承
+    void BeginHighlightModulator(std::string_view id) override;
+    void StopHighliteModulator() override;
 private:
     OscLayout osc1_layout_;
     OscLayout osc2_layout_;

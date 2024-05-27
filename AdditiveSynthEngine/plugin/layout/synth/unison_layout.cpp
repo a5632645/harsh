@@ -27,4 +27,18 @@ void UnisonLayout::resized() {
     phase_->setBounds(0, 16 + 50, 50, 50);
     pan_->setBounds(50, 16 + 50, 50, 50);
 }
+
+void UnisonLayout::BeginHighlightModulator(std::string_view id) {
+    num_voice_->BeginHighlightModulator(id);
+    pitch_->BeginHighlightModulator(id);
+    phase_->BeginHighlightModulator(id);
+    pan_->BeginHighlightModulator(id);
+}
+
+void UnisonLayout::StopHighliteModulator() {
+    num_voice_->StopHighliteModulator();
+    pitch_->StopHighliteModulator();
+    phase_->StopHighliteModulator();
+    pan_->StopHighliteModulator();
+}
 }

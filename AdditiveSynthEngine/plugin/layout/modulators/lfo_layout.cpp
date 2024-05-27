@@ -29,4 +29,16 @@ void LfoLayout::resized() {
     restart_->setBounds(0 + 150, 0, 16, 16);
     wave_type_->setBounds(0 + 216, 0, 100, 16);
 }
+
+void LfoLayout::BeginHighlightModulator(std::string_view id) {
+    rate_->BeginHighlightModulator(id);
+    start_phase_->BeginHighlightModulator(id);
+    level_->BeginHighlightModulator(id);
+}
+
+void LfoLayout::StopHighliteModulator() {
+    rate_->StopHighliteModulator();
+    start_phase_->StopHighliteModulator();
+    level_->StopHighliteModulator();
+}
 }

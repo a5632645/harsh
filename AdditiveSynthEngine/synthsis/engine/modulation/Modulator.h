@@ -6,6 +6,7 @@
 namespace mana {
 class Modulator {
 public:
+    virtual ~Modulator() = default;
     Modulator(std::string_view id) : id_(id) {}
 
     virtual void Init(float sample_rate, float update_rate) = 0;

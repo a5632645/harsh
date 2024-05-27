@@ -15,6 +15,10 @@ public:
     EffectLayout(Synth& synth, int effect_idx);
 
     void resized() override;
+
+    // 通过 ModuContainer 继承
+    void BeginHighlightModulator(std::string_view id) override;
+    void StopHighliteModulator() override;
 private:
     void OnEffectTypeChanged(int c);
 

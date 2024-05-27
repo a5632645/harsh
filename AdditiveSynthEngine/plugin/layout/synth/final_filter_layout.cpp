@@ -15,4 +15,14 @@ void FinalFilterLayout::resized() {
     filter2_.setBounds(0 + 200, 0, 200, getHeight());
     route_.setBounds(0 + 400, 0, getWidth() - 400, getHeight());
 }
+
+void FinalFilterLayout::BeginHighlightModulator(std::string_view id) {
+    filter1_.BeginHighlightModulator(id);
+    filter2_.BeginHighlightModulator(id);
+}
+
+void FinalFilterLayout::StopHighliteModulator() {
+    filter1_.StopHighliteModulator();
+    filter2_.StopHighliteModulator();
+}
 }

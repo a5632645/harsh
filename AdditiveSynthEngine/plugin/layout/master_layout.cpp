@@ -26,4 +26,14 @@ void MasterLayout::resized() {
     //wave_scope_.SetBounds(x + 50, y, w, h / 2);
     spectrum_.setBounds(50.0f, getHeight() / 2.0f, getWidth(), getHeight() / 2.0f);
 }
+
+void MasterLayout::BeginHighlightModulator(std::string_view id) {
+    pitch_bend_->BeginHighlightModulator(id);
+    output_gain_->BeginHighlightModulator(id);
+}
+
+void MasterLayout::StopHighliteModulator() {
+    pitch_bend_->StopHighliteModulator();
+    output_gain_->StopHighliteModulator();
+}
 }

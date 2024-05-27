@@ -1,7 +1,13 @@
 ﻿project ("AdditiveSynthEngine")
+
 if(WIN32)
     add_compile_options(/wd4819)
     add_compile_options("/arch:AVX")
+endif()
+
+option(USE_XSIMD "Use xsimd" OFF)
+if(${USE_XSIMD})
+	add_compile_definitions(AD_ENABLE_SIMD)
 endif()
 
 set(ENGINE_SRC

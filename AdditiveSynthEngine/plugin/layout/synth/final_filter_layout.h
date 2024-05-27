@@ -12,6 +12,10 @@ public:
     FinalFilterLayout(Synth& synth);
 
     void resized() override;
+
+    // 通过 ModuContainer 继承
+    void BeginHighlightModulator(std::string_view id) override;
+    void StopHighliteModulator() override;
 private:
     FilterRouteLayout route_;
     FilterLayout filter1_;

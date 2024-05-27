@@ -10,6 +10,10 @@ public:
     EnvelopLayout(Synth& synth, int idx);
     
     void resized() override;
+
+    // 通过 ModuContainer 继承
+    void BeginHighlightModulator(std::string_view id) override;
+    void StopHighliteModulator() override;
 private:
     std::unique_ptr<WrapSlider> attack_;
     std::unique_ptr<WrapSlider> decay_;

@@ -34,4 +34,5 @@ URL http://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-6.0.0.tar.gz
 DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 FetchContent_MakeAvailable(rtmidi)
 
+set(USE_XSIMD ON)
 add_subdirectory ("AdditiveSynthEngine")

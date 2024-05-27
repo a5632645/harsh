@@ -31,4 +31,22 @@ void TimberLayout::resized() {
     osc1_layout_.setBounds(50, 16, 200, 70);
     osc2_layout_.setBounds(50, 70 + 16, 200, 70);
 }
+
+void TimberLayout::BeginHighlightModulator(std::string_view id) {
+    osc1_layout_.BeginHighlightModulator(id);
+    osc2_layout_.BeginHighlightModulator(id);
+    osc2_beating_->BeginHighlightModulator(id);
+    osc2_shift_->BeginHighlightModulator(id);
+    osc1_gain_->BeginHighlightModulator(id);
+    osc2_gain_->BeginHighlightModulator(id);
+}
+
+void TimberLayout::StopHighliteModulator() {
+    osc1_layout_.StopHighliteModulator();
+    osc2_layout_.StopHighliteModulator();
+    osc2_beating_->StopHighliteModulator();
+    osc2_shift_->StopHighliteModulator();
+    osc1_gain_->StopHighliteModulator();
+    osc2_gain_->StopHighliteModulator();
+}
 }

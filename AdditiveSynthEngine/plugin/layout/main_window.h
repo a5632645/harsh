@@ -12,10 +12,12 @@ public:
 
     void resized() override;
     //Oscilloscope& GetWaveScope() { return master_.GetWaveScope(); }
+    void BeginHighlightModulator(std::string_view id);
+    void StopHighliteModulator();
 private:
     Synth& synth_;
-    ModulatorsLayout modulators_layout_;
-    MasterLayout master_;
+    std::unique_ptr<ModulatorsLayout> modulators_layout_;
+    std::unique_ptr<MasterLayout> master_;
     std::unique_ptr<juce::TabbedComponent> tabbed_;
     std::vector<std::unique_ptr<ModuContainer>> layouts_;
 };

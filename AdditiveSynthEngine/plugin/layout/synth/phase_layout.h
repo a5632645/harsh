@@ -13,6 +13,10 @@ public:
     PhaseLayout(Synth& synth);
 
     void resized() override;
+
+    // 通过 ModuContainer 继承
+    void BeginHighlightModulator(std::string_view id) override;
+    void StopHighliteModulator() override;
 private:
     void OnPhaseTypeChanged(int c);
 
@@ -21,5 +25,6 @@ private:
 
     // 通过 Listener 继承
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
+
 };
 }

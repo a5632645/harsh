@@ -77,4 +77,16 @@ void DissonanceLayout::OnDissonanceTypeChanged(int c) {
 void DissonanceLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
     OnDissonanceTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
 }
+
+void DissonanceLayout::BeginHighlightModulator(std::string_view id) {
+    for(auto& knob : arg_knobs_) {
+        knob->BeginHighlightModulator(id);
+    }
+}
+
+void DissonanceLayout::StopHighliteModulator() {
+    for (auto& knob : arg_knobs_) {
+        knob->StopHighliteModulator();
+    }
+}
 }

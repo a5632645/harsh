@@ -1,5 +1,7 @@
 #include "modulator_button.h"
 
+#include "layout/main_window.h"
+
 class SimpleFlagComponent : public juce::Component {
 public:
     SimpleFlagComponent(std::string_view id)
@@ -23,6 +25,17 @@ public:
         }
 
         drag_container->startDragging(juce::String{ modulator_id_.data(), modulator_id_.length() }, this);
+
+        // highlight
+        auto main_window = findParentComponentOfClass<mana::MainWindow>();
+        if (main_window != nullptr) {
+            main_window->BeginHighlightModulator(modulator_id_);
+        }
+    }
+
+    void mouseUp(const juce::MouseEvent& event) override {
+        auto main_window = findParentComponentOfClass<mana::MainWindow>();
+        main_window->StopHighliteModulator();
     }
 private:
     const std::string_view modulator_id_;

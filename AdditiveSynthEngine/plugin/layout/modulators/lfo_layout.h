@@ -13,6 +13,10 @@ public:
     LfoLayout(Synth& synth, int idx);
     
     void resized() override;
+
+    // 通过 ModuContainer 继承
+    void BeginHighlightModulator(std::string_view id) override;
+    void StopHighliteModulator() override;
 private:
     std::unique_ptr<WrapSlider> rate_;
     std::unique_ptr<WrapSlider> start_phase_;

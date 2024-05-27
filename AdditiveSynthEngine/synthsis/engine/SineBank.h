@@ -61,13 +61,8 @@ private:
     size_t processed_partials_{};
     size_t active_partials_{};
     size_t num_volume_loop_{};
-    #ifdef AD_ENABLE_SIMD
-    batch_float amp_smooth_factor_{};
-    batch_float amp_smooth_factor2_{};
-    #else
     float amp_smooth_factor_{};
     float amp_smooth_factor2_{};
-    #endif
     float sample_rate_{};
     float one_div_nyquist_rate{};
     float nyquist_rate_{};

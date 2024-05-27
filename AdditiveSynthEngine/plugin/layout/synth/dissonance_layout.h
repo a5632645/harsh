@@ -14,6 +14,10 @@ public:
     DissonanceLayout(Synth& synth);
 
     void resized() override;
+
+    // 通过 ModuContainer 继承
+    void BeginHighlightModulator(std::string_view id) override;
+    void StopHighliteModulator() override;
 private:
     void OnDissonanceTypeChanged(int c);
     std::unique_ptr<WrapCheckBox> is_enable_;

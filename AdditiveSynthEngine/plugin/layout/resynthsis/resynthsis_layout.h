@@ -20,6 +20,10 @@ public:
 
     void paintOverChildren(juce::Graphics& g) override;
     void resized() override;
+
+    // 通过 ModuContainer 继承
+    void BeginHighlightModulator(std::string_view id) override;
+    void StopHighliteModulator() override;
 private:
     void CreateAudioResynthsis(const juce::String& path);
     void CreateImageResynthsis(const juce::String& path);

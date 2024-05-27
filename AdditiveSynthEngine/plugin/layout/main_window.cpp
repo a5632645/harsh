@@ -8,14 +8,9 @@
 
 namespace mana {
 MainWindow::MainWindow(Synth & synth)
-    : synth_(synth)
-    //, synth_layout_(synth)
-    //, effect_layout_(synth)
-    //, resynthsis_layout_(synth)
-    //, modulation_matrix_layout_(synth)
-    //, about_layout_(synth)
-    , modulators_layout_(synth)
-    , master_(synth) {
+    : synth_(synth) {
+    modulators_layout_ = std::make_unique<ModulatorsLayout>(synth);
+    master_ = std::make_unique<MasterLayout>(synth);
     tabbed_ = std::make_unique<juce::TabbedComponent>(juce::TabbedButtonBar::Orientation::TabsAtTop);
 
     auto synth_layout = std::make_unique<SynthLayout>(synth);
@@ -35,8 +30,8 @@ MainWindow::MainWindow(Synth & synth)
     //layouts_.emplace_back(std::move(about_layout));
 
     addAndMakeVisible(*tabbed_);
-    addAndMakeVisible(modulators_layout_);
-    addAndMakeVisible(master_);
+    addAndMakeVisible(*modulators_layout_);
+    addAndMakeVisible(*master_);
 }
 
 void MainWindow::resized() {
@@ -57,7 +52,23 @@ void MainWindow::resized() {
 
     constexpr auto kModulatorWidth = 400.0f;
     auto modulator_bound = bottom_bound.removeFromLeft(kModulatorWidth);
-    modulators_layout_.setBounds(modulator_bound);
-    master_.setBounds(bottom_bound);
+    modulators_layout_->setBounds(modulator_bound);
+    master_->setBounds(bottom_bound);
+}
+
+void MainWindow::BeginHighlightModulator(std::string_view id) {
+    for (const auto& c : layouts_) {
+        c->BeginHighlightModulator(id);
+    }
+    master_->BeginHighlightModulator(id);
+    modulators_layout_->BeginHighlightModulator(id);
+}
+
+void MainWindow::StopHighliteModulator() {
+    for (const auto& c : layouts_) {
+        c->StopHighliteModulator();
+    }
+    master_->StopHighliteModulator();
+    modulators_layout_->StopHighliteModulator();
 }
 }

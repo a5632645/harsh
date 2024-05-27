@@ -305,10 +305,10 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
             frame.gains[y] = gain;
             frame.ratio_diffs[y] = ratio_diff;
         }
-        for (int y = kNumPartials; y < kFFtSize / 2; ++y) {
-            frame.gains[y] = 0.0f;
-            frame.ratio_diffs[y] = 0.0f;
-        }
+        //for (int y = kNumPartials; y < kFFtSize / 2; ++y) {
+        //    frame.gains[y] = 0.0f;
+        //    frame.ratio_diffs[y] = 0.0f;
+        //}
     }
 
     auto gain_level_up = 1.0f / max_gain; // maybe 0.0f?
