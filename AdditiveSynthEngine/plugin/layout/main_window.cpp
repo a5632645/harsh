@@ -57,18 +57,10 @@ void MainWindow::resized() {
 }
 
 void MainWindow::BeginHighlightModulator(std::string_view id) {
-    for (const auto& c : layouts_) {
-        c->BeginHighlightModulator(id);
-    }
-    master_->BeginHighlightModulator(id);
-    modulators_layout_->BeginHighlightModulator(id);
+    listeners_.call(&ModulationActionListener::BeginHighlightModulator, id);
 }
 
 void MainWindow::StopHighliteModulator() {
-    for (const auto& c : layouts_) {
-        c->StopHighliteModulator();
-    }
-    master_->StopHighliteModulator();
-    modulators_layout_->StopHighliteModulator();
+    listeners_.call(&ModulationActionListener::StopHighliteModulator);
 }
 }

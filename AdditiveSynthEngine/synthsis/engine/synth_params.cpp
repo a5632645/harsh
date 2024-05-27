@@ -342,19 +342,23 @@ void SynthParams::AddModulation(std::shared_ptr<ModulationConfig> config) {
     modulation_configs_.emplace_back(config);
 
     for (auto* l : modulation_listeners_) {
-        l->OnModulationAdded(*config);
+        l->OnModulationAdded(config);
     }
 }
 
 void SynthParams::RemoveModulation(ModulationConfig& config) {
+    auto modulator_id = config.modulator_id;
+    auto param_id = config.param_id;
+
     auto it = std::ranges::find_if(modulation_configs_, [config](std::shared_ptr<ModulationConfig>& cfg) {
         return cfg->modulator_id == config.modulator_id
             && cfg->param_id == config.param_id;
     });
     modulation_configs_.erase(it);
 
+
     for (auto* l : modulation_listeners_) {
-        l->OnModulationRemoved(config);
+        l->OnModulationRemoved(modulator_id, param_id);
     }
 }
 }

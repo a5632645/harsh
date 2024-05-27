@@ -1,6 +1,7 @@
 #include "modulator_button.h"
 
 #include "layout/main_window.h"
+#include "engine/synth.h"
 
 class SimpleFlagComponent : public juce::Component {
 public:
@@ -43,17 +44,20 @@ private:
 
 namespace mana {
 ModulatorButton::ModulatorButton(std::string_view modulator_id, Synth& synth)
-    : synth_(synth) {
-    num_modulation_label_ = std::make_unique<juce::Label>();
+    : synth_(synth)
+    , modulator_id_(modulator_id) {
+    num_modulation_label_ = std::make_unique<juce::Label>("num_modulation_label", juce::String{ num_modulator_ });
     drag_component_ = std::make_unique<SimpleFlagComponent>(modulator_id);
     // todo: let label listen to modulator's change
     addAndMakeVisible(num_modulation_label_.get());
     addAndMakeVisible(drag_component_.get());
 
     setSize(20, 16);
+    synth_.GetSynthParams().AddModulationListener(this);
 }
 
 ModulatorButton::~ModulatorButton() {
+    synth_.GetSynthParams().RemoveModulationListener(this);
     num_modulation_label_ = nullptr;
     drag_component_ = nullptr;
 }
@@ -62,5 +66,19 @@ void ModulatorButton::resized() {
     auto b = getLocalBounds();
     drag_component_->setBounds(b.removeFromRight(5));
     num_modulation_label_->setBounds(b);
+}
+
+void ModulatorButton::OnModulationAdded(std::shared_ptr<ModulationConfig> config) {
+    if (config->modulator_id == modulator_id_) {
+        num_modulator_++;
+        num_modulation_label_->setText(juce::String{ num_modulator_ }, juce::NotificationType::sendNotification);
+    }
+}
+
+void ModulatorButton::OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) {
+    if (modulator_id == modulator_id_) {
+        num_modulator_--;
+        num_modulation_label_->setText(juce::String{ num_modulator_ }, juce::NotificationType::sendNotification);
+    }
 }
 }

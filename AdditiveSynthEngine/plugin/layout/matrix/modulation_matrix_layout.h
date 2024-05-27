@@ -50,7 +50,7 @@ private:
     void buttonClicked(juce::Button*) override;
 
     // 通过 ModulationListener 继承
-    void OnModulationAdded(ModulationConfig& config) override;
-    void OnModulationRemoved(ModulationConfig& config) override;
+    void OnModulationAdded(std::shared_ptr<ModulationConfig> config) override;
+    void OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) override;
 };
 }

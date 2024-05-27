@@ -17,7 +17,7 @@ public:
     void resized() override;
 
     //Oscilloscope& GetWaveScope() { return wave_scope_; }
-        // 通过 ModuContainer 继承
+    // 通过 ModuContainer 继承
     void BeginHighlightModulator(std::string_view id) override;
     void StopHighliteModulator() override;
 private:

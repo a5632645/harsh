@@ -3,6 +3,7 @@
 #include "data/juce_param.h"
 #include "layout/modulators/modulator_button.h"
 #include "engine/synth.h"
+#include "layout/main_window.h"
 
 namespace mana {
 struct WrapSlider::ParamRefStore {
@@ -44,8 +45,13 @@ WrapSlider::WrapSlider(IntParameter * p)
 }
 
 WrapSlider::~WrapSlider() {
+    if (synth_ != nullptr) {
+        synth_->GetSynthParams().RemoveModulationListener(this);
+    }
+
     attachment_ = nullptr;
     ref_store_ = nullptr;
+    synth_ = nullptr;
 }
 
 void WrapSlider::paint(juce::Graphics& g) {
@@ -53,6 +59,18 @@ void WrapSlider::paint(juce::Graphics& g) {
         g.fillAll(juce::Colours::aqua);
     }
     juce::Slider::paint(g);
+}
+
+void WrapSlider::resized() {
+    if (synth_ == nullptr) {
+        auto* main_window = findParentComponentOfClass<MainWindow>();
+        if (main_window == nullptr) return;
+
+        synth_ = &main_window->GetSynth();
+        synth_->GetSynthParams().AddModulationListener(this);
+        main_window->AddModulationActionListener(this);
+    }
+    juce::Slider::resized();
 }
 
 void WrapSlider::BeginHighlightModulator(std::string_view id) {
@@ -78,11 +96,13 @@ void WrapSlider::itemDropped(const SourceDetails& dragSourceDetails) {
         return;
     }
 
-    // get the component that has the synth ref
-    auto source_button_flag_component = source_button_flag_component_ptr.get();
-    auto* ref_component = static_cast<ModulatorButton*>(source_button_flag_component->getParentComponent());
-    auto& synth = ref_component->synth_;
     auto param_id = parameter_.paramID.toStdString();
-    synth.CreateModulation(modulator_id, param_id);
+    synth_->CreateModulation(modulator_id, param_id);
+}
+
+void WrapSlider::OnModulationAdded(std::shared_ptr<ModulationConfig> config) {
+}
+
+void WrapSlider::OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) {
 }
 }

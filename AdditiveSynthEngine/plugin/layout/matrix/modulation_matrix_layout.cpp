@@ -313,11 +313,11 @@ void ModulationMatrixLayout::buttonClicked(juce::Button* ptr_button) {
     //table_->updateContent();
 }
 
-void ModulationMatrixLayout::OnModulationAdded(ModulationConfig& config) {
+void ModulationMatrixLayout::OnModulationAdded(std::shared_ptr<ModulationConfig> config) {
     table_->updateContent();
 }
 
-void ModulationMatrixLayout::OnModulationRemoved(ModulationConfig& config) {
+void ModulationMatrixLayout::OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) {
     table_->updateContent();
 }
 }

@@ -35,8 +35,8 @@ public:
     public:
         virtual ~ModulationListener() = default;
 
-        virtual void OnModulationAdded(ModulationConfig& config) = 0;
-        virtual void OnModulationRemoved(ModulationConfig& config) = 0;
+        virtual void OnModulationAdded(std::shared_ptr<ModulationConfig> config) = 0;
+        virtual void OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) = 0;
     };
     void AddModulationListener(ModulationListener* listener) { modulation_listeners_.emplace_back(listener); }
     void RemoveModulationListener(ModulationListener* listener) { modulation_listeners_.erase(std::remove(modulation_listeners_.begin(), modulation_listeners_.end(), listener)); }

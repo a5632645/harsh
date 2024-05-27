@@ -131,7 +131,7 @@ set(UI_HEADER
  "layout/matrix/modulation_matrix_layout.h"
  "layout/synth/unison_layout.h"
  "layout/modu_container.h"
- "layout/modulators/modulator_button.h")
+ "layout/modulators/modulator_button.h" "layout/modu_listener.h")
 
 target_sources(Harsh
     PRIVATE
