@@ -8,6 +8,11 @@
 #include "engine/synth_params.h"
 
 namespace mana {
+class ModulationTab;
+class ModulationCircle;
+}
+
+namespace mana {
 class WrapSlider : public juce::Slider
     , public juce::DragAndDropTarget
     , public ModulationActionListener
@@ -25,12 +30,18 @@ public:
     void BeginHighlightModulator(std::string_view id) override;
     void StopHighliteModulator() override;
 private:
+    void mouseEnter(const juce::MouseEvent& event) override;
+    void mouseExit(const juce::MouseEvent& event) override;
+
+    bool CanBeModulateBy(std::string_view modulator_id);
+
     bool shound_highlight_ = false;
     Synth* synth_{};
     std::unique_ptr<ParamRefStore> ref_store_;
 
     juce::RangedAudioParameter& parameter_;
     std::unique_ptr<juce::SliderParameterAttachment> attachment_;
+    std::unique_ptr<ModulationTab> modulation_tab_;
 
     // 通过 DragAndDropTarget 继承
     bool isInterestedInDragSource(const SourceDetails& dragSourceDetails) override;

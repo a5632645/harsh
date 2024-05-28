@@ -64,7 +64,7 @@ ModulatorButton::~ModulatorButton() {
 
 void ModulatorButton::resized() {
     auto b = getLocalBounds();
-    drag_component_->setBounds(b.removeFromRight(5));
+    drag_component_->setBounds(b.removeFromRight(16));
     num_modulation_label_->setBounds(b);
 }
 

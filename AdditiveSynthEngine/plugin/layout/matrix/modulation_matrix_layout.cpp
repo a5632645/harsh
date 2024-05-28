@@ -4,65 +4,101 @@
 #include "engine/synth.h"
 
 namespace mana {
-class ModuWrapToggleBox : public juce::ToggleButton {
+class ModuWrapToggleBox : public juce::ToggleButton, public ModulationConfig::Listener {
 public:
-    ModuWrapToggleBox(ModulationConfig* cfg) {
+    ModuWrapToggleBox(std::shared_ptr<ModulationConfig> cfg) {
         this->onStateChange = [this]() {
             if (config_ == nullptr) return;
-            config_->enable = this->getToggleState();
+            config_->SetEnable(getToggleState());
         };
 
         SetModulationConfig(cfg);
     }
 
-    void SetModulationConfig(ModulationConfig* cfg) {
+    ~ModuWrapToggleBox() {
+        if (config_ != nullptr) {
+            config_->RemoveListener(this);
+        }
+    }
+
+    void SetModulationConfig(std::shared_ptr<ModulationConfig> cfg) {
+        if (config_ != nullptr) {
+            config_->RemoveListener(this);
+        }
+
         config_ = cfg;
+        cfg->AddListener(this);
         setToggleState(cfg->enable, juce::dontSendNotification);
     }
 private:
-    ModulationConfig* config_;
+    std::shared_ptr<ModulationConfig> config_;
+
+    // 通过 Listener 继承
+    void OnConfigChanged(ModulationConfig* config) override {
+        setToggleState(config->enable, juce::dontSendNotification);
+    }
 };
 
-class ModuWrapAmountSlider : public juce::Slider {
+class ModuWrapAmountSlider : public juce::Slider, public ModulationConfig::Listener {
 public:
-    ModuWrapAmountSlider(ModulationConfig* cfg) {
-        this->onValueChange = [this]() {
-            if (config_ == nullptr) return;
-            config_->amount = this->getValue();
-        };
-
-        SetModulationConfig(cfg);
-    }
-
-    void SetModulationConfig(ModulationConfig* cfg) {
+    ModuWrapAmountSlider(std::shared_ptr<ModulationConfig> cfg) {
         setRange(-1.0f, 1.0f);
         setDoubleClickReturnValue(true, 0.0);
-        setValue(cfg->amount);
-        config_ = cfg;
-    }
-
-private:
-    ModulationConfig* config_;
-};
-
-class ModuWrapBipolarToggleBox : public juce::ToggleButton {
-public:
-    ModuWrapBipolarToggleBox(ModulationConfig* cfg) {
-        this->onStateChange = [this]() {
+        this->onValueChange = [this]() {
             if (config_ == nullptr) return;
-            config_->bipolar = this->getToggleState();
+            config_->SetAmount(getValue());
         };
 
         SetModulationConfig(cfg);
     }
 
-    void SetModulationConfig(ModulationConfig* cfg) {
-        setToggleState(cfg->bipolar, juce::dontSendNotification);
+    void SetModulationConfig(std::shared_ptr<ModulationConfig> cfg) {
+        if (config_ != nullptr) {
+            config_->RemoveListener(this);
+        }
+
+        setValue(cfg->amount, juce::dontSendNotification);
         config_ = cfg;
+        cfg->AddListener(this);
     }
 
 private:
-    ModulationConfig* config_;
+    std::shared_ptr<ModulationConfig> config_;
+
+    // 通过 Listener 继承
+    void OnConfigChanged(ModulationConfig* config) override {
+        setValue(config->amount, juce::dontSendNotification);
+    }
+};
+
+class ModuWrapBipolarToggleBox : public juce::ToggleButton, public ModulationConfig::Listener {
+public:
+    ModuWrapBipolarToggleBox(std::shared_ptr<ModulationConfig> cfg) {
+        this->onStateChange = [this]() {
+            if (config_ == nullptr) return;
+            config_->SetBipolar(getToggleState());
+        };
+
+        SetModulationConfig(cfg);
+    }
+
+    void SetModulationConfig(std::shared_ptr<ModulationConfig> cfg) {
+        if (config_ != nullptr) {
+            config_->RemoveListener(this);
+        }
+
+        setToggleState(cfg->bipolar, juce::dontSendNotification);
+        config_ = cfg;
+        cfg->AddListener(this);
+    }
+
+private:
+    std::shared_ptr<ModulationConfig> config_;
+
+    // 通过 Listener 继承
+    void OnConfigChanged(ModulationConfig* config) override {
+        setToggleState(config->bipolar, juce::dontSendNotification);
+    }
 };
 
 class ModuWrapRemoveButton : public juce::TextButton {
@@ -238,7 +274,7 @@ juce::Component* ModulationMatrixLayout::refreshComponentForCell(int rowNumber, 
         return nullptr;
     }
 
-    auto config = synth_.GetModulationConfig(rowNumber).get();
+    auto config = synth_.GetModulationConfig(rowNumber);
     if (columnId == 3) { // enable
         if (existingComponentToUpdate == nullptr) {
             return new ModuWrapToggleBox(config);
@@ -268,12 +304,12 @@ juce::Component* ModulationMatrixLayout::refreshComponentForCell(int rowNumber, 
     }
     else if (columnId == 6) { // remove
         if (existingComponentToUpdate == nullptr) {
-            auto p = new ModuWrapRemoveButton(config);
+            auto p = new ModuWrapRemoveButton(config.get());
             p->addListener(this);
             return p;
         }
         else {
-            static_cast<ModuWrapRemoveButton*>(existingComponentToUpdate)->SetModulationConfig(config);
+            static_cast<ModuWrapRemoveButton*>(existingComponentToUpdate)->SetModulationConfig(config.get());
             return existingComponentToUpdate;
         }
     }
