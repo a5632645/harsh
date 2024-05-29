@@ -5,6 +5,15 @@
 #include "envelop_layout.h"
 #include "modulator_button.h"
 
+//namespace mana {
+//static class ModulatorTabLookAndFeel : public juce::LookAndFeel_V4 {
+//public:
+//    int getTabButtonBestWidth(juce::TabBarButton&, int tabDepth) override {
+//
+//    }
+//} kLookAndFeel;
+//}
+
 namespace mana {
 ModulatorsLayout::ModulatorsLayout(Synth& synth)
     : tabbed_(juce::TabbedButtonBar::Orientation::TabsAtTop) {
@@ -33,7 +42,7 @@ ModulatorsLayout::ModulatorsLayout(Synth& synth)
 
         // extra num modulation display and drag component
         tabbed_.getTabbedButtonBar().getTabButton(tab_idx)->setExtraComponent(new ModulatorButton(id, synth),
-                                                                              juce::TabBarButton::ExtraComponentPlacement::afterText);
+                                                                              juce::TabBarButton::ExtraComponentPlacement::beforeText);
         ++tab_idx;
     }
 
