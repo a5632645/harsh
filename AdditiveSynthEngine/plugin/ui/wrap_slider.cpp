@@ -71,14 +71,25 @@ public:
 namespace mana {
 class ModulationCircle : public juce::Component, public ModulationConfig::Listener, public juce::Slider::Listener {
 public:
-    ModulationCircle(std::shared_ptr<ModulationConfig> config)
-        : config_(config) {
+    ModulationCircle(std::shared_ptr<ModulationConfig> config, WrapSlider& parent)
+        : parent_(parent)
+        , config_(config) {
         slider_ = std::make_unique<juce::Slider>(juce::Slider::SliderStyle::RotaryVerticalDrag,
                                                  juce::Slider::TextEntryBoxPosition::NoTextBox);
         slider_->setLookAndFeel(&kModuLookAndFeel);
         slider_->addListener(this);
         slider_->setRange(-1.0f, 1.0f);
         slider_->setPopupDisplayEnabled(true, true, nullptr);
+        slider_->textFromValueFunction = [this](double v) -> juce::String {
+            auto range = parent_.getNormalisableRange();
+            auto parent_curr = range.convertTo0to1(parent_.getValue());
+            auto up_nor_v = std::clamp(config_->amount + parent_curr, 0.0, 1.0);
+            auto down_nor_v = std::clamp(config_->bipolar ? parent_curr - config_->amount : parent_curr, 0.0, 1.0);
+            return juce::String{ std::format("{}: {}=>{}",
+                                            config_->modulator_id,
+                                            parent_.getTextFromValue(range.convertFrom0to1(down_nor_v)).toStdString(),
+                                             parent_.getTextFromValue(range.convertFrom0to1(up_nor_v)).toStdString()) };
+        };
         addAndMakeVisible(slider_.get());
 
         config_->AddListener(this);
@@ -99,6 +110,7 @@ public:
 
     ModulationConfig& GetConfig() { return *config_; }
 private:
+    WrapSlider& parent_;
     std::shared_ptr<ModulationConfig> config_;
     std::unique_ptr<juce::Slider> slider_;
 
@@ -118,7 +130,9 @@ private:
 namespace mana {
 class ModulationTab : public juce::Component, public juce::Timer {
 public:
-    ModulationTab(Synth& synth) : synth_(synth) {
+    ModulationTab(Synth& synth, WrapSlider& parent) 
+        : synth_(synth)
+        , parent_(parent) {
         startTimer(1000);
     }
 
@@ -130,7 +144,7 @@ public:
     }
 
     void AddModulation(std::shared_ptr<ModulationConfig> config) {
-        const auto& pc = circles_.emplace_back(std::make_unique<ModulationCircle>(config));
+        const auto& pc = circles_.emplace_back(std::make_unique<ModulationCircle>(config, parent_));
         addAndMakeVisible(pc.get());
 
         ReCalcSize();
@@ -162,6 +176,7 @@ private:
     }
 
     Synth& synth_;
+    WrapSlider& parent_;
     std::vector<std::unique_ptr<ModulationCircle>> circles_;
     bool should_hide_{};
 
@@ -225,7 +240,7 @@ void WrapSlider::resized() {
         synth_->GetSynthParams().AddModulationListener(this);
         main_window->AddModulationActionListener(this);
 
-        modulation_tab_ = std::make_unique<ModulationTab>(*synth_);
+        modulation_tab_ = std::make_unique<ModulationTab>(*synth_, *this);
         main_window->addChildComponent(modulation_tab_.get());
     }
 
