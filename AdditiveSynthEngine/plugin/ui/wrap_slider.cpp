@@ -71,9 +71,12 @@ public:
 namespace mana {
 class ModulationCircle : public juce::Component, public ModulationConfig::Listener, public juce::Slider::Listener {
 public:
-    ModulationCircle(std::shared_ptr<ModulationConfig> config, WrapSlider& parent)
+    ModulationCircle(std::shared_ptr<ModulationConfig> config,
+                     WrapSlider& parent,
+                     Synth& synth)
         : parent_(parent)
-        , config_(config) {
+        , config_(config)
+        , synth_(synth) {
         slider_ = std::make_unique<juce::Slider>(juce::Slider::SliderStyle::RotaryVerticalDrag,
                                                  juce::Slider::TextEntryBoxPosition::NoTextBox);
         slider_->setLookAndFeel(&kModuLookAndFeel);
@@ -90,7 +93,11 @@ public:
                                             parent_.getTextFromValue(range.convertFrom0to1(down_nor_v)).toStdString(),
                                              parent_.getTextFromValue(range.convertFrom0to1(up_nor_v)).toStdString()) };
         };
+        slider_->addMouseListener(this, false);
         addAndMakeVisible(slider_.get());
+
+        popup_menu_ = std::make_unique<juce::PopupMenu>();
+        ReCreatePopMenuItems();
 
         config_->AddListener(this);
     }
@@ -108,11 +115,34 @@ public:
         slider_->setBounds(getLocalBounds());
     }
 
+    void mouseDown(const juce::MouseEvent& event) override {
+        if (event.mods.isPopupMenu()) {
+            popup_menu_->showMenuAsync(juce::PopupMenu::Options{});
+        }
+    }
+
     ModulationConfig& GetConfig() { return *config_; }
 private:
+    void ReCreatePopMenuItems() {
+        popup_menu_->clear();
+        popup_menu_->addItem(config_->bipolar ? "unmake bipolar" : "make bipolar", [this]() {
+            config_->SetBipolar(!config_->bipolar);
+            ReCreatePopMenuItems();
+        });
+        popup_menu_->addItem(config_->enable ? "disable" : "enable", [this]() {
+            config_->SetEnable(!config_->enable);
+            ReCreatePopMenuItems();
+        });
+        popup_menu_->addItem("remove", [this]() {
+            synth_.RemoveModulation(*config_);
+        });
+    }
+
     WrapSlider& parent_;
+    Synth& synth_;
     std::shared_ptr<ModulationConfig> config_;
     std::unique_ptr<juce::Slider> slider_;
+    std::unique_ptr<juce::PopupMenu> popup_menu_;
 
     // 通过 Listener 继承
     void OnConfigChanged(ModulationConfig* config) override {
@@ -130,7 +160,7 @@ private:
 namespace mana {
 class ModulationTab : public juce::Component, public juce::Timer {
 public:
-    ModulationTab(Synth& synth, WrapSlider& parent) 
+    ModulationTab(Synth& synth, WrapSlider& parent)
         : synth_(synth)
         , parent_(parent) {
         startTimer(1000);
@@ -144,7 +174,7 @@ public:
     }
 
     void AddModulation(std::shared_ptr<ModulationConfig> config) {
-        const auto& pc = circles_.emplace_back(std::make_unique<ModulationCircle>(config, parent_));
+        const auto& pc = circles_.emplace_back(std::make_unique<ModulationCircle>(config, parent_, synth_));
         addAndMakeVisible(pc.get());
 
         ReCalcSize();
