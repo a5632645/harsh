@@ -11,9 +11,12 @@ ModulatorButton::ModulatorButton(std::string_view modulator_id, Synth& synth)
 }
 
 void ModulatorButton::paint(juce::Graphics& g) {
-    g.fillAll(juce::Colours::black);
+    auto radius = std::min(getWidth(), getHeight());
+    auto circle_bound = juce::Rectangle{ 0,0,radius,radius }.reduced(2).withCentre(getLocalBounds().getCentre());
+    g.setColour(juce::Colours::black);
+    g.fillEllipse(circle_bound.toFloat());
     g.setColour(juce::Colours::white);
-    g.drawRect(getLocalBounds());
+    g.drawEllipse(circle_bound.toFloat(), 1.0f);
 }
 
 void ModulatorButton::mouseDrag(const juce::MouseEvent& event) {
