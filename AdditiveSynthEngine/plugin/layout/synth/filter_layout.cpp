@@ -26,7 +26,7 @@ mana::FilterLayout::FilterLayout(Synth& synth, int idx) {
 }
 
 void FilterLayout::resized() {
-    filter_type_->setBounds(0, 0, getWidth(), 16);
+    filter_type_->setBounds(0, 0, getWidth(), 20);
     for (int i = 0; i < 4; ++i) {
         arg_filter_knobs_[i]->setBounds(50 * i, 16, 50, 50);
     }
@@ -131,7 +131,7 @@ void FilterLayout::sliderValueChanged(juce::Slider* slider) {
 }
 
 void FilterLayout::BeginHighlightModulator(std::string_view id) {
-    for(auto& knob : arg_filter_knobs_) {
+    for (auto& knob : arg_filter_knobs_) {
         knob->BeginHighlightModulator(id);
     }
 }

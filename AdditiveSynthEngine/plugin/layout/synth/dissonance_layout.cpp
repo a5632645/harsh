@@ -24,10 +24,12 @@ DissonanceLayout::DissonanceLayout(Synth& synth) {
 }
 
 void DissonanceLayout::resized() {
-    is_enable_->setBounds(0, 0, getWidth(), 16);
-    type_->setBounds(0, 12, getWidth(), 12);
-    arg_knobs_[0]->setBounds(0, 24, 50, 50);
-    arg_knobs_[1]->setBounds(0, 24 + 50, 50, 50);
+    auto b = getLocalBounds();
+    auto top = b.removeFromTop(20);
+    is_enable_->setBounds(top.removeFromLeft(20));
+    type_->setBounds(top);
+    arg_knobs_[0]->setBounds(b.removeFromTop(50));
+    arg_knobs_[1]->setBounds(b.withHeight(50));
 }
 
 void DissonanceLayout::OnDissonanceTypeChanged(int c) {
@@ -79,7 +81,7 @@ void DissonanceLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
 }
 
 void DissonanceLayout::BeginHighlightModulator(std::string_view id) {
-    for(auto& knob : arg_knobs_) {
+    for (auto& knob : arg_knobs_) {
         knob->BeginHighlightModulator(id);
     }
 }

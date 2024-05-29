@@ -20,7 +20,7 @@ PhaseLayout::PhaseLayout(Synth& synth) {
 }
 
 void PhaseLayout::resized() {
-    phase_type_->setBounds(0, 0, getWidth(), 16);
+    phase_type_->setBounds(0, 0, getWidth(), 20);
     for (int i = 0; auto & k : phase_arg_knobs_) {
         k->setBounds(0, 16 + 50 * i, 50, 50);
         ++i;

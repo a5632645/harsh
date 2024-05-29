@@ -23,9 +23,9 @@ OscLayout::OscLayout(Synth& synth, int idx)
 }
 
 void OscLayout::resized() {
-    timber_type_->setBounds(0, 0, getWidth(), 12);
+    timber_type_->setBounds(0, 0, getWidth(), 20);
     for (int i = 0; i < 4; ++i) {
-        arg_knobs_[i]->setBounds(50 * i, 12, 50, 50);
+        arg_knobs_[i]->setBounds(50 * i, 20, 50, 50);
     }
 }
 

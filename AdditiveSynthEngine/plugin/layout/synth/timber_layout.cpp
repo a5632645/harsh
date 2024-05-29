@@ -24,12 +24,14 @@ TimberLayout::TimberLayout(Synth& synth)
 }
 
 void TimberLayout::resized() {
-    osc2_beating_->setBounds(10, 0, 30, 50);
-    osc2_shift_->setBounds(10, 50, 30, 40);
-    osc1_gain_->setBounds(10, 95, 30, 30);
-    osc2_gain_->setBounds(10, 130, 30, 30);
-    osc1_layout_.setBounds(50, 16, 200, 70);
-    osc2_layout_.setBounds(50, 70 + 16, 200, 70);
+    auto b = getLocalBounds();
+    auto left = b.removeFromLeft(50);
+    osc2_beating_->setBounds(left.removeFromTop(50));
+    osc2_shift_->setBounds(left.removeFromTop(50));
+    osc1_gain_->setBounds(left.removeFromTop(50));
+    osc2_gain_->setBounds(left.removeFromTop(50));
+    osc1_layout_.setBounds(b.removeFromTop(70));
+    osc2_layout_.setBounds(b.removeFromTop(70));
 }
 
 void TimberLayout::BeginHighlightModulator(std::string_view id) {

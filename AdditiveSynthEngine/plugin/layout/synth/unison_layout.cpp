@@ -21,7 +21,7 @@ UnisonLayout::UnisonLayout(SynthParams& params) {
 }
 
 void UnisonLayout::resized() {
-    type_->setBounds(0, 0, getWidth(), 16);
+    type_->setBounds(0, 0, getWidth(), 20);
     num_voice_->setBounds(0, 16, 50, 50);
     pitch_->setBounds(50, 16, 50, 50);
     phase_->setBounds(0, 16 + 50, 50, 50);
