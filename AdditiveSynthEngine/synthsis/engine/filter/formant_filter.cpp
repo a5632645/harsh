@@ -53,7 +53,7 @@ static constexpr std::array kSopranoVowels = ConvertToPitchTable(std::array{
         {0.0f,-16.0f,-35.0f,-40.0f,-60.0f,},
         {50.0f,60.0f,170.0f,180.0f,200.0f,}
     }
-});
+                                                                 });
 
 static constexpr std::array kAltoVowel = ConvertToPitchTable(std::array{
     VowelInfo{
@@ -81,7 +81,7 @@ static constexpr std::array kAltoVowel = ConvertToPitchTable(std::array{
         {0.0f,-12.0f,-30.0f,-40.0f,-64.0f,},
         {50.0f,60.0f,170.0f,180.0f,200.0f,}
     }
-});
+                                                             });
 
 static constexpr std::array kCountertenorVowel = ConvertToPitchTable(std::array{
     VowelInfo{
@@ -109,7 +109,7 @@ static constexpr std::array kCountertenorVowel = ConvertToPitchTable(std::array{
         {0.0f,-20.0f,-23.0f,-30.0f,-34.0f,},
         {40.0f,60.0f,100.0f,120.0f,120.0f,}
     },
-});
+                                                                     });
 
 static constexpr std::array kTenorVowel = ConvertToPitchTable(std::array{
     VowelInfo{
@@ -137,7 +137,7 @@ static constexpr std::array kTenorVowel = ConvertToPitchTable(std::array{
         {0.0f,-20.0f,-17.0f,-14.0f,-26.0f,},
         {40.0f,60.0f,100.0f,120.0f,120.0f,}
     }
-});
+                                                              });
 
 static constexpr std::array kBassVowel = ConvertToPitchTable(std::array{
     VowelInfo{
@@ -165,7 +165,7 @@ static constexpr std::array kBassVowel = ConvertToPitchTable(std::array{
         {0.0f,-20.0f,-32.0f,-28.0f,-36.0f,},
         {40.0f,80.0f,100.0f,120.0f,120.0f,}
     }
-});
+                                                             });
 
 inline static const auto& GetVowelInfoArray(param::VowelFilter_Singer::ParamEnum e) {
     using sgr = param::VowelFilter_Singer::ParamEnum;
@@ -227,7 +227,7 @@ void FormantFilter::Process(Partials& partials, std::vector<float>& out) {
                 gain = parabola_a * xxx * xxx;
             }
 
-            out[i] += utli::DbToGain(gain + amptide + 2.0 * slope);
+            out[i] += utli::DbToGain(gain + amptide + 2.0f * slope);
         }
     }
 }

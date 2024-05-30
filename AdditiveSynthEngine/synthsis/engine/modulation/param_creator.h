@@ -10,9 +10,10 @@ public:
         ModulationType type;
         std::string id;
         std::string name;
-        float vmin;
-        float vmax;
-        float vdefault;
+        float vmin{};
+        float vmax{};
+        float vdefault{};
+        float vblend{1.0f};
     };
 
     struct IntCreateParam {

@@ -255,7 +255,8 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
             .name = std::format("lfo{}.rate", lfo_idx),
             .vmin = param::LFO_Rate::kMin,
             .vmax = param::LFO_Rate::kMax,
-            .vdefault = param::LFO_Rate::kDefault }));
+            .vdefault = param::LFO_Rate::kDefault,
+            .vblend = 0.3f }));
         //param_bank_.AddParameter(param::LFO_Phase::CreateParam(kPoly, "lfo{}.start_phase", lfo_idx));
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,

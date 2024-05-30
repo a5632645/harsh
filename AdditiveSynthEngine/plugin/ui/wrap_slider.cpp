@@ -148,6 +148,7 @@ private:
     void OnConfigChanged(ModulationConfig* config) override {
         if (config != config_.get()) return;
         slider_->setValue(config->amount);
+        ReCreatePopMenuItems();
     }
 
     // 通过 Listener 继承

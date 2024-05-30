@@ -3,6 +3,7 @@
 if(WIN32)
     add_compile_options(/wd4819)
     add_compile_options("/arch:AVX")
+	add_compile_options("/constexpr:steps2147483647")
 endif()
 
 option(USE_XSIMD "Use xsimd" OFF)

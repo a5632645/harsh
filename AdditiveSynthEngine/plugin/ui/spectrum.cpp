@@ -9,8 +9,9 @@ Spectrum::Spectrum(Synth& synth)
     : synth_(synth) {
     startTimerHz(25);
 
+    box.addItem("auto", 1);
     for (int i = 0; i < kNumOscillors; ++i) {
-        box.addItem(juce::String{ i }, i + 1);
+        box.addItem(juce::String{ i }, i + 2);
     }
     box.setSelectedItemIndex(0, juce::dontSendNotification);
 
@@ -21,9 +22,13 @@ void Spectrum::paint(juce::Graphics& g) {
     g.setColour(juce::Colours::white);
 
     mana::Partials drawing_partials_;
-    {
-        //std::scoped_lock lock{ synth_.GetSynthLock() };
-        drawing_partials_ = synth_.GetOscillor(box.getSelectedItemIndex()).GetPartials();
+
+    auto idx = box.getSelectedItemIndex();
+    if (idx == 0) {
+        drawing_partials_ = synth_.GetDisplayOscillor().GetPartials();
+    }
+    else {
+        drawing_partials_ = synth_.GetOscillor(idx - 1).GetPartials();
     }
 
     auto bound = getLocalBounds().toFloat();

@@ -7,8 +7,7 @@ std::unique_ptr<FloatParameter> JuceParamCreator::CreateFloatParameter(FloatCrea
     auto e = std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID(p.id),
         p.name,
-        p.vmin,
-        p.vmax,
+        juce::NormalisableRange<float>{p.vmin, p.vmax, 0.01f, p.vblend},
         p.vdefault
     );
     auto w = std::make_unique<JuceFloatParam>(e.get(), p.type);

@@ -117,7 +117,7 @@ struct Sync_Sync : FloatParam<Sync_Sync> {
     static constexpr int kArgIdx = 1;
     static constexpr auto kName = "sync"sv;
     static constexpr float kMin = 0.0f;
-    static constexpr float kMax = 12.0f * 5.0f;
+    static constexpr float kMax = 12.0f * 6.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr auto kStuff = "st"sv;
     static constexpr int kTextPrecision = 1;

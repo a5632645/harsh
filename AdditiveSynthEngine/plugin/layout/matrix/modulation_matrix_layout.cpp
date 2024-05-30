@@ -4,27 +4,26 @@
 #include "engine/synth.h"
 
 namespace mana {
-class ModuWrapToggleBox : public juce::ToggleButton, public ModulationConfig::Listener {
+class ModuWrapToggleBox : public juce::ToggleButton, public ModulationConfig::Listener, public juce::Button::Listener {
 public:
     ModuWrapToggleBox(std::shared_ptr<ModulationConfig> cfg) {
-        this->onStateChange = [this]() {
-            if (config_ == nullptr) return;
-            config_->SetEnable(getToggleState());
-        };
-
+        this->addListener(this);
         SetModulationConfig(cfg);
     }
 
     ~ModuWrapToggleBox() {
+        removeListener(this);
         if (config_ != nullptr) {
             config_->RemoveListener(this);
         }
     }
 
     void SetModulationConfig(std::shared_ptr<ModulationConfig> cfg) {
-        if (config_ != nullptr) {
+        if (config_ == cfg)
+            return;
+
+        if (config_ != nullptr)
             config_->RemoveListener(this);
-        }
 
         config_ = cfg;
         cfg->AddListener(this);
@@ -36,6 +35,12 @@ private:
     // 通过 Listener 继承
     void OnConfigChanged(ModulationConfig* config) override {
         setToggleState(config->enable, juce::dontSendNotification);
+    }
+
+    // 通过 Listener 继承
+    void buttonClicked(Button*) override {
+        if (config_ == nullptr) return;
+        config_->SetEnable(getToggleState());
     }
 };
 
@@ -52,7 +57,15 @@ public:
         SetModulationConfig(cfg);
     }
 
+    ~ModuWrapAmountSlider() override {
+        if (config_ != nullptr)
+            config_->RemoveListener(this);
+    }
+
     void SetModulationConfig(std::shared_ptr<ModulationConfig> cfg) {
+        if (config_ == cfg)
+            return;
+
         if (config_ != nullptr) {
             config_->RemoveListener(this);
         }
@@ -82,7 +95,15 @@ public:
         SetModulationConfig(cfg);
     }
 
+    ~ModuWrapBipolarToggleBox() override {
+        if (config_ != nullptr)
+            config_->RemoveListener(this);
+    }
+
     void SetModulationConfig(std::shared_ptr<ModulationConfig> cfg) {
+        if (config_ == cfg)
+            return;
+
         if (config_ != nullptr) {
             config_->RemoveListener(this);
         }

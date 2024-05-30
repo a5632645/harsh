@@ -24,7 +24,7 @@ void OscillorParams::UpdateParams() {
 
     for (auto& m : oscillor_modulations_) {
         if (!m.config->enable) {
-            return;
+            continue;
         }
 
         auto v = m.modulator->get_output_value();
