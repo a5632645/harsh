@@ -20,9 +20,7 @@ public:
 
     SineBank();
 
-    void Init(float sample_rate);
-
-    void SetSmoothTime(float milliseconds);
+    void Init(float sample_rate, float update_rate, int update_skip);
 
     void LoadPartials(Partials& partials);
 
@@ -51,8 +49,12 @@ private:
         return 0;
     }
 
-    batch_float_vector target_volume_table_{};
-    batch_float_vector volume_table_{};
+    // smoothing
+    int sr_pos_{};
+    std::vector<float> cos_table_;
+
+    batch_float_vector last_volume_table_{};
+    batch_float_vector current_volume_table_{};
     batch_complex_vector freq_table_{};
     batch_complex_vector phase_table_{};
 
@@ -61,10 +63,9 @@ private:
     size_t processed_partials_{};
     size_t active_partials_{};
     size_t num_volume_loop_{};
-    float amp_smooth_factor_{};
-    float amp_smooth_factor2_{};
     float sample_rate_{};
     float one_div_nyquist_rate{};
+    float update_rate_{};
     float nyquist_rate_{};
 };
 }

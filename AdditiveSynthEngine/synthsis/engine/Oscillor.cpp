@@ -34,11 +34,10 @@ Oscillor::Oscillor(Synth& synth)
     unison_.PrepareParams(*oscillor_param_);
 }
 
-void Oscillor::Init(size_t bufferSize, float sampleRate, float update_rate) {
+void Oscillor::Init(size_t bufferSize, float sampleRate, float update_rate, int update_skip) {
     sample_rate_ = sampleRate;
 
-    sine_bank_.Init(sampleRate);
-    sine_bank_.SetSmoothTime(10.0F);
+    sine_bank_.Init(sampleRate, update_rate, update_skip);
     sine_bank_.SetNumMaxActivePartials(kNumPartials);
 
     freq_.Init(sampleRate, update_rate);

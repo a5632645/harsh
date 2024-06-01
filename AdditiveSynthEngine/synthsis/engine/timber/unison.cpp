@@ -41,69 +41,88 @@ void Unison::Init(float sample_rate, float update_rate) {
 
 void Unison::PrepareParams(OscillorParams& params) {
     unison_type_ = params.GetParam<IntChoiceParameter>("unison.type");
-    num_voice_ = params.GetParam<IntParameter>("unison.num_voice");
+    arg_num_voice_ = params.GetParam<IntParameter>("unison.num_voice");
     pitch_ = params.GetPolyFloatParam("unison.pitch");
     phase_ = params.GetPolyFloatParam("unison.phase");
     pan_ = params.GetPolyFloatParam("unison.pan");
 }
 
 void Unison::Process(Partials& partials) {
-    int num_voice = num_voice_->GetInt();
-    if (num_voice != 1) {
-        using ut = param::Unison_Type::ParamEnum;
-        auto type = param::Unison_Type::GetEnum(unison_type_->GetInt());
+    if (num_voice_ == 1)
+        return;
 
-        if (type == ut::kHzUniform) {
-            auto max_freq_diff = (1.0f - std::exp2(-pitch_->GetValue() / 12.0f)) * partials.base_frequency;
-            for (int i = 0; i < 9; ++i) {
-                auto p_inc = (max_freq_diff * voice_ratios_[i]) * update_skip_;
-                voice_phases_[i] += p_inc;
-                voice_phases_[i] -= static_cast<int>(voice_phases_[i]);
-            }
-        }
-        else {
-            for (int i = 0; i < 9; ++i) {
-                auto freq_ratio = std::exp2(voice_ratios_[i] * pitch_->GetValue() / 12.0f);
-                auto voice_base_freq = partials.base_frequency * freq_ratio;
-                auto p_inc = (voice_base_freq - partials.base_frequency) * update_skip_;
-                voice_phases_[i] += p_inc;
-                voice_phases_[i] -= static_cast<int>(voice_phases_[i]);
-            }
-        }
+    using ut = param::Unison_Type::ParamEnum;
+    auto type = param::Unison_Type::GetEnum(unison_type_->GetInt());
+    switch (type) {
+    case ut::kPUniform:
+        UniformProcess(partials);
+        break;
+    case ut::kRandom:
+        RandomProcess(partials);
+        break;
+    default:
+        assert(false);
+        break;
+    }
+}
 
-        float avg_gain = 1.0f;
-        //float avg_gain = 1.0f / static_cast<float>((num_voice + 1.0f) / 2.0f);
+void Unison::UniformProcess(Partials& partials) {
+    const auto& voice_ratios = kUniformTable[num_voice_ - 1];
+
+    auto max_freq_diff = (std::exp2(pitch_->GetValue() / 12.0f) - 1.0f) * partials.base_frequency;
+    std::array<float, 9> freq_diffs{};
+    for (int i = 0; i < num_voice_; ++i) {
+        auto freq_diff = max_freq_diff * voice_ratios[i];
+        freq_diffs[i] = freq_diff * update_skip_;
+        auto p_inc = freq_diff * update_skip_;
+        voice_phases_[i] += p_inc;
+        voice_phases_[i] -= static_cast<int>(voice_phases_[i]);
+    }
+
+    std::array<float, kNumPartials> output_gains{};
+    output_gains.fill(1.0f);
+
+    for (int j = 0; j < num_voice_; ++j) {
         for (int i = 0; i < kNumPartials; ++i) {
-            float gain = 0.0f;
-            for (int j = 0; j < num_voice; ++j) {
-                gain += std::cos(std::numbers::pi_v<float> *2.0f * voice_phases_[j] * partials.ratios[i]);
+            if (partials.ratios[i] * freq_diffs[j] > 0.5f) {
+                break;
             }
-            partials.gains[i] *= gain * avg_gain;
+
+            output_gains[i] += std::cos(std::numbers::pi_v<float> *2.0f * voice_phases_[j] * partials.ratios[i]);
         }
+    }
+
+    std::ranges::transform(partials.gains, output_gains, partials.gains.begin(), std::multiplies{});
+
+    //for (int i = 0; i < kNumPartials; ++i) {
+    //    float gain = 0.0f;
+    //    for (int j = 0; j < num_voice_; ++j) {
+    //        gain += std::cos(std::numbers::pi_v<float> *2.0f * voice_phases_[j] * partials.ratios[i]);
+    //    }
+    //    partials.gains[i] *= gain;
+    //}
+}
+
+void Unison::RandomProcess(Partials& partials) {
+    for (int i = 0; i < num_voice_; ++i) {
+        auto freq_ratio = std::exp2(random_voice_ratios_[i] * pitch_->GetValue() / 12.0f);
+        auto voice_base_freq = partials.base_frequency * freq_ratio;
+        auto p_inc = (voice_base_freq - partials.base_frequency) * update_skip_;
+        voice_phases_[i] += p_inc;
+        voice_phases_[i] -= static_cast<int>(voice_phases_[i]);
+    }
+
+    for (int i = 0; i < kNumPartials; ++i) {
+        float gain = 1.0f;
+        for (int j = 0; j < num_voice_; ++j) {
+            gain += std::cos(std::numbers::pi_v<float> *2.0f * voice_phases_[j] * partials.ratios[i]);
+        }
+        partials.gains[i] *= gain;
     }
 }
 
 void Unison::OnUpdateTick() {
-    float pitch_scale = pitch_->GetValue();
-    int num_voice = num_voice_->GetInt();
-
-    if (old_num_voice_ != num_voice) {
-        old_num_voice_ = num_voice;
-
-        using ut = param::Unison_Type::ParamEnum;
-        auto type = param::Unison_Type::GetEnum(unison_type_->GetInt());
-        if (type != ut::kRandom) {
-            voice_ratios_ = kUniformTable[num_voice - 1];
-        }
-    }
-
-    //for (int i = 0; i < num_voice; ++i) {
-    //    float pitch_shift = static_cast<float>(i) * pitch_scale / static_cast<float>(num_voice);
-    //    voice_ratios_[i] = std::exp2(pitch_shift / 12.0f);
-    //}
-    //for (int i = num_voice; i < 9; ++i) {
-    //    voice_ratios_[i] = 1.0f;
-    //}
+    num_voice_ = arg_num_voice_->GetInt();
 }
 
 void Unison::OnNoteOn() {
@@ -111,15 +130,7 @@ void Unison::OnNoteOn() {
         return urd_(random_) * phase_->GetValue();
     });
 
-    using enum param::Unison_Type::ParamEnum;
-    auto type = param::Unison_Type::GetEnum(unison_type_->GetInt());
-    switch (type) {
-    case kRandom:
-        std::ranges::generate(voice_ratios_, [this]() {return urd_(random_); });
-        break;
-    default:
-        break;
-    }
+    std::ranges::generate(random_voice_ratios_, [this]() {return urd_(random_); });
 }
 
 void Unison::OnNoteOff() {

@@ -106,7 +106,7 @@ void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {
 
     audio_buffer_.resize(buffer_size);
     for (Oscillor& o : m_oscillators) {
-        o.Init(buffer_size, sample_rate, update_rate_);
+        o.Init(buffer_size, sample_rate, update_rate_, update_skip_);
     }
 }
 

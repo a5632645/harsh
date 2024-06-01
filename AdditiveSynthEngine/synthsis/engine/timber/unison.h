@@ -16,16 +16,19 @@ public:
     void OnNoteOn();
     void OnNoteOff();
 private:
+    void UniformProcess(Partials& partials);
+    void RandomProcess(Partials& partials);
+
     std::default_random_engine random_;
     std::uniform_real_distribution<float> urd_{ -1.0f,1.0f };
     float update_skip_{};
 
-    std::array<float, 9> voice_ratios_;
-    std::array<float, 9> voice_phases_;
+    std::array<float, 9> random_voice_ratios_{};
+    std::array<float, 9> voice_phases_{};
 
     IntChoiceParameter* unison_type_{};
-    IntParameter* num_voice_{};
-    int old_num_voice_{};
+    IntParameter* arg_num_voice_{};
+    int num_voice_{};
     PolyModuFloatParameter* pitch_{};
     PolyModuFloatParameter* phase_{};
     PolyModuFloatParameter* pan_{};

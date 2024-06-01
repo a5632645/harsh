@@ -30,7 +30,7 @@ public:
     Oscillor(Oscillor&&) noexcept = default;
     Oscillor& operator=(Oscillor&&) noexcept = default;
 
-    void Init(size_t bufferSize, float sampleRate, float update_rate);
+    void Init(size_t bufferSize, float sampleRate, float update_rate, int update_skip);
 
     void NoteOn(int noteNumber, float v);
 
