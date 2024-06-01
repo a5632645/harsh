@@ -7,18 +7,20 @@
 // =========================================================
 namespace mana::param {
 struct Unison_Type : IntChoiceParam<Unison_Type> {
-    static constexpr auto kName = "num_voice"sv;
+    static constexpr auto kName = "type"sv;
 
     enum class ParamEnum {
         kPUniform = 0,
         kHzUniform,
         kRandom,
+        kRandomRm,
         kNumEnums
     };
 
     static constexpr std::array kNames{
-        "p.uniform"sv,
-        "hz.uniform"sv,
+        "uniform.rm"sv,
+        "rm.uniform"sv,
+        "random.rm"sv,
         "random"sv
     };
 };

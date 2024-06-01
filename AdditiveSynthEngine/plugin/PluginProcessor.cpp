@@ -97,7 +97,7 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    synth_->Init(samplesPerBlock, sampleRate, 400.0f);
+    synth_->Init(samplesPerBlock, sampleRate, 800.0f);
     update_pos_ = synth_->GetUpdateSkip();
     inv_buffer_length_ = 1.0f / (samplesPerBlock * 1000000.0f / sampleRate);
 }

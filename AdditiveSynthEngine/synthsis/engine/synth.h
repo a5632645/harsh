@@ -12,7 +12,7 @@
 namespace mana {
 class Synth {
 public:
-    Synth(std::shared_ptr<ParamCreator> creator);
+    Synth(std::shared_ptr<ParamCreator> creator, size_t num_osc);
 
     void NoteOn(int note, float velocity);
 
@@ -50,14 +50,13 @@ public:
     int GetModulatorCount() const { return synth_params_.GetModulationCount(); }
     std::shared_ptr<ModulationConfig> GetModulationConfig(int index) { return synth_params_.GetModulation(index); }
 private:
-    //utli::SpinLock synth_lock_;
     std::mutex synth_lock_;
     ResynthsisFrames resynthsis_frames_;
     SynthParams synth_params_;
     std::vector<float> audio_buffer_;
     std::vector<Oscillor> m_oscillators;
-    //std::vector<std::shared_ptr<ModulationConfig>> modulation_configs_;
     size_t m_rrPosition{};
+    const size_t num_oscillor_{};
 
     float sample_rate_{};
     float update_rate_{};

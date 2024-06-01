@@ -127,9 +127,6 @@ void Oscillor::update_state(int step) {
     timber_.Process(partials_);
     resynthsis_.Process(partials_);
 
-    // after mix with resynthsis, do unison
-    unison_.Process(partials_);
-
     filter_.Process(partials_);
     effec0_.Process(partials_);
     effec1_.Process(partials_);
@@ -137,6 +134,7 @@ void Oscillor::update_state(int step) {
     effec3_.Process(partials_);
     effec4_.Process(partials_);
 
+    unison_.Process(partials_);
     // load into sinebank
     sine_bank_.LoadPartials(partials_);
 }

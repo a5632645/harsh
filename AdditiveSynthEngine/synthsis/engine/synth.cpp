@@ -8,10 +8,11 @@
 #include "utli/convert.h"
 
 namespace mana {
-Synth::Synth(std::shared_ptr<ParamCreator> creator)
-    : synth_params_(creator) {
-    m_oscillators.reserve(kNumOscillors);
-    for (int i = 0; i < kNumOscillors; ++i) {
+Synth::Synth(std::shared_ptr<ParamCreator> creator, size_t num_osc)
+    : synth_params_(creator)
+    , num_oscillor_(num_osc) {
+    m_oscillators.reserve(num_oscillor_);
+    for (int i = 0; i < num_oscillor_; ++i) {
         m_oscillators.emplace_back(*this);
     }
 
@@ -20,20 +21,20 @@ Synth::Synth(std::shared_ptr<ParamCreator> creator)
 
 void Synth::NoteOn(int note, float velocity) {
     // rr one time
-    for (size_t i = 0; i < kNumOscillors; ++i) {
+    for (size_t i = 0; i < num_oscillor_; ++i) {
         if (!m_oscillators[m_rrPosition].IsPlaying()) {
             m_oscillators[m_rrPosition].NoteOn(note, velocity);
-            m_rrPosition = (m_rrPosition + 1) % kNumOscillors;
+            m_rrPosition = (m_rrPosition + 1) % num_oscillor_;
             return;
         }
-        m_rrPosition = (m_rrPosition + 1) % kNumOscillors;
+        m_rrPosition = (m_rrPosition + 1) % num_oscillor_;
     }
     // if not found
     // stop rr osciilor
     m_oscillators.at(m_rrPosition).NoteOff();
     // set current note
     m_oscillators.at(m_rrPosition).NoteOn(note, velocity);
-    m_rrPosition = (m_rrPosition + 1) % kNumOscillors;
+    m_rrPosition = (m_rrPosition + 1) % num_oscillor_;
 }
 
 void Synth::NoteOff(int note, float velocity) {
@@ -122,10 +123,10 @@ void Synth::update_state(int step) {
 
 const Oscillor& Synth::GetDisplayOscillor() const {
     auto idx = static_cast<int>(m_rrPosition) - 1;
-    auto last_played = (idx + kNumOscillors) % kNumOscillors;
-    for (size_t i = 0; i < kNumOscillors; ++i) {
-        idx += kNumOscillors;
-        idx %= kNumOscillors;
+    auto last_played = (idx + num_oscillor_) % num_oscillor_;
+    for (size_t i = 0; i < num_oscillor_; ++i) {
+        idx += num_oscillor_;
+        idx %= num_oscillor_;
         if (m_oscillators[idx].IsPlaying()) {
             return m_oscillators[idx];
         }

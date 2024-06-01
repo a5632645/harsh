@@ -17,6 +17,7 @@ public:
     void OnNoteOff();
 private:
     void UniformProcess(Partials& partials);
+    void HzUniformProcess(Partials& partials);
     void RandomProcess(Partials& partials);
 
     std::default_random_engine random_;
