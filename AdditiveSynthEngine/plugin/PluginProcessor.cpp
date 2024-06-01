@@ -15,7 +15,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                      #endif
     ) {
     auto creator = std::make_shared<mana::JuceParamCreator>();
-    synth_ = std::make_unique<mana::Synth>(creator);
+    synth_ = std::make_unique<mana::Synth>(creator, 4);
     auto juce_params = creator->MoveJuceParams();
     apvts_ = std::make_unique<juce::AudioProcessorValueTreeState>(*this,
                                                                   nullptr,

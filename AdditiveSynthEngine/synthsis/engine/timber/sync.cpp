@@ -126,7 +126,7 @@ void Sync::Process(TimberFrame& frame) {
     auto clamp_idx = std::clamp(scale_idx, 0, 630);
 
     const auto& table = GetTable(first_shape_)[clamp_idx];
-    std::ranges::copy(table, frame.gains.begin());
+    std::ranges::copy(table | std::views::take(kNumPartials), frame.gains.begin());
 }
 
 void Sync::OnUpdateTick(OscParam& params) {
