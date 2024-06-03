@@ -60,6 +60,9 @@ void Unison::Process(Partials& partials) {
     case ut::kPUniform:
         UniformProcess(partials);
         break;
+    case ut::kRandomRm:
+        RandomRmProcess(partials);
+        break;
     case ut::kRandom:
         RandomProcess(partials);
         break;
@@ -122,7 +125,7 @@ void Unison::UniformProcess(Partials& partials) {
     }
 }
 
-void Unison::RandomProcess(Partials& partials) {
+void Unison::RandomRmProcess(Partials& partials) {
     for (int i = 0; i < num_voice_; ++i) {
         auto freq_ratio = std::exp2(random_voice_ratios_[i] * pitch_->GetValue() / 12.0f);
         auto voice_base_freq = partials.base_frequency * freq_ratio;
@@ -136,6 +139,23 @@ void Unison::RandomProcess(Partials& partials) {
         for (int j = 0; j < num_voice_; ++j) {
             gain += std::cos(std::numbers::pi_v<float> *2.0f * voice_phases_[j] * partials.ratios[i]);
         }
+        partials.gains[i] *= gain;
+    }
+}
+
+void Unison::RandomProcess(Partials& partials) {
+    auto max_freq_diff = (std::exp2(pitch_->GetValue() * 0.5f / 12.0f) - 1.0f) * partials.base_frequency;
+    for (int i = 0; i < kNumPartials; ++i) {
+        auto rand_p_inc = max_freq_diff * partials.ratios[i] * update_skip_;
+        rand_phase_[i] += rand_p_inc;
+
+        if (rand_phase_[i] > 1.0f) {
+            rand_phase_[i] -= static_cast<int>(rand_phase_[i]);
+            last_rand_[i] = curr_rand_[i];
+            curr_rand_[i] = urd_(random_);
+        }
+
+        auto gain = std::lerp(last_rand_[i], curr_rand_[i], rand_phase_[i]);
         partials.gains[i] *= gain;
     }
 }

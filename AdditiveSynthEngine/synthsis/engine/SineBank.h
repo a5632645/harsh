@@ -51,10 +51,17 @@ private:
 
     // smoothing
     int sr_pos_{};
-    std::vector<float> cos_table_;
-
-    batch_float_vector last_volume_table_{};
+    int lut_pos3_{};
+    int lut_pos2_{};
+    int lut_pos1_{};
+    // std::vector<float> cos_table_;
+    batch_float_vector sinc_last3_gain_;
+    batch_float_vector sinc_last2_gain_;
+    batch_float_vector sinc_last1_gain_;
     batch_float_vector current_volume_table_{};
+    batch_float_vector fir_lut_;
+
+    // batch_float_vector last_volume_table_{};
     batch_complex_vector freq_table_{};
     batch_complex_vector phase_table_{};
 
@@ -66,6 +73,7 @@ private:
     float sample_rate_{};
     float one_div_nyquist_rate{};
     float update_rate_{};
+    int update_skip_{};
     float nyquist_rate_{};
 };
 }

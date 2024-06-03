@@ -12,8 +12,8 @@ struct Unison_Type : IntChoiceParam<Unison_Type> {
     enum class ParamEnum {
         kPUniform = 0,
         kHzUniform,
-        kRandom,
         kRandomRm,
+        kRandom,
         kNumEnums
     };
 

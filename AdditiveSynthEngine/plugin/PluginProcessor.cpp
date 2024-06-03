@@ -15,7 +15,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                      #endif
     ) {
     auto creator = std::make_shared<mana::JuceParamCreator>();
-    synth_ = std::make_unique<mana::Synth>(creator, 4);
+    synth_ = std::make_unique<mana::Synth>(creator, 1);
     auto juce_params = creator->MoveJuceParams();
     apvts_ = std::make_unique<juce::AudioProcessorValueTreeState>(*this,
                                                                   nullptr,
@@ -97,7 +97,7 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    synth_->Init(samplesPerBlock, sampleRate, 800.0f);
+    synth_->Init(samplesPerBlock, sampleRate, 500.0f);
     update_pos_ = synth_->GetUpdateSkip();
     inv_buffer_length_ = 1.0f / (samplesPerBlock * 1000000.0f / sampleRate);
 }

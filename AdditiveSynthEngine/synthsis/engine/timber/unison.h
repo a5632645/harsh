@@ -18,6 +18,7 @@ public:
 private:
     void UniformProcess(Partials& partials);
     void HzUniformProcess(Partials& partials);
+    void RandomRmProcess(Partials& partials);
     void RandomProcess(Partials& partials);
 
     std::default_random_engine random_;
@@ -26,6 +27,11 @@ private:
 
     std::array<float, 9> random_voice_ratios_{};
     std::array<float, 9> voice_phases_{};
+
+    // random gen
+    std::array<float, kNumPartials> last_rand_{};
+    std::array<float, kNumPartials> curr_rand_{};
+    std::array<float, kNumPartials> rand_phase_{};
 
     IntChoiceParameter* unison_type_{};
     IntParameter* arg_num_voice_{};
