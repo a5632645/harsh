@@ -41,6 +41,8 @@ void CurveXYPointComponent::mouseDown(const juce::MouseEvent& e) {
     auto curr_power_type = parent->curve_->GetPoint(idx_).power_type;
     popup_menu_->addItem("keep", true, curr_power_type == pe::kKeep, set_type(pe::kKeep));
     popup_menu_->addItem("pow", true, curr_power_type == pe::kPow, set_type(pe::kPow));
+    popup_menu_->addSeparator();
+    popup_menu_->addItem("delete", [idx = idx_, curve] {curve->Remove(idx); });
     popup_menu_->showMenuAsync(juce::PopupMenu::Options{});
 }
 
@@ -75,6 +77,11 @@ void CurvePowerPointComponent::mouseDrag(const juce::MouseEvent& e) {
     auto* parent = static_cast<CommonCurveEditor*>(getParentComponent());
     auto nor_y = static_cast<float>(e.getDistanceFromDragStartY()) / static_cast<float>(kMaxOfDistance);
     parent->curve_->SetPower(idx_, last_power_ + nor_y);
+}
+
+void CurvePowerPointComponent::mouseDoubleClick(const juce::MouseEvent& e) {
+    // reset power to 0
+    static_cast<CommonCurveEditor*>(getParentComponent())->curve_->SetPower(idx_, 0.0f);
 }
 }
 
@@ -150,6 +157,7 @@ void CommonCurveEditor::mouseDoubleClick(const juce::MouseEvent& e) {
     if (curve_ == nullptr)
         return;
 
+    // todo: solve upside down in pow power mode
     auto nor_x = (e.getMouseDownX() - GetComponentBounds().getX()) / static_cast<float>(GetComponentBounds().getWidth());
     auto nor_y = 1.0f - (e.getMouseDownY() - GetComponentBounds().getY()) / static_cast<float>(GetComponentBounds().getHeight());
     nor_x = std::clamp(nor_x, 0.0f, 1.0f);

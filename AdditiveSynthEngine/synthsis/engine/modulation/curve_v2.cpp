@@ -39,6 +39,9 @@ CurveV2::CurveV2() {
 }
 
 void CurveV2::Remove(int idx) {
+    if (idx == 0 || idx == GetNumPoints() - 1) // do not remove first and last
+        return;
+
     points_.erase(points_.cbegin() + idx);
     PartRender(idx - 1, idx + 1);
     listeners_.CallListener(&Listener::OnRemovePoint, this, idx);

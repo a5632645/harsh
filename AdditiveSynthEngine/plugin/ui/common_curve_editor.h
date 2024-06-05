@@ -40,6 +40,7 @@ public:
     void mouseDrag(const juce::MouseEvent& e) override;
     void mouseEnter(const juce::MouseEvent& e) override { repaint(); }
     void mouseExit(const juce::MouseEvent& e) override { repaint(); }
+    void mouseDoubleClick(const juce::MouseEvent& e) override;
 private:
     friend class CommonCurveEditor;
     int idx_;
