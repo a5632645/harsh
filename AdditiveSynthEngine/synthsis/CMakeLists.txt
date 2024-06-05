@@ -70,7 +70,6 @@ set(ENGINE_HEADER
 "utli/NoiseGenerator.h"
 "engine/effect/decay.h"
 "engine/effect/harmonic_delay.h"
-#"engine/modulation/curve.h"
 "engine/modulation/lfo.h"
 "param/lfo_param.h"
 "engine/modulation/modulator_bank.h"
