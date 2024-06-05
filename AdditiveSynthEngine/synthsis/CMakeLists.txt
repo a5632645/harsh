@@ -96,7 +96,8 @@ set(ENGINE_HEADER
 "engine/resynthsis/image_base.h" 
 "engine/modulation/quantize_map.h" 
 "engine/modulation/curve_v2.h" 
-"utli/listener_list.h" "engine/modulation/curve_bank.h")
+"utli/listener_list.h"
+"engine/modulation/curve_bank.h")
 
 add_library(AdSynthLib STATIC ${ENGINE_SRC} ${ENGINE_HEADER})
 target_link_libraries(AdSynthLib PUBLIC AudioFFT)
