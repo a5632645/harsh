@@ -20,7 +20,7 @@ void Resynthesis::Process(Partials& partials) {
 
     std::array<float, kNumPartials> gains{};
     for (int i = 0; i < kNumPartials; ++i) {
-        float final_frame_nor_pos = pos_offset_curve_->data[i] + frame_pos_;
+        float final_frame_nor_pos = pos_offset_curve_->Get(i) + frame_pos_;
         {
             float temp{};
             final_frame_nor_pos = std::modf(final_frame_nor_pos, &temp);
@@ -76,8 +76,8 @@ void Resynthesis::OnUpdateTick() {
 }
 
 void Resynthesis::PrepareParams(OscillorParams & params) {
-    formant_remap_curve_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("resynthsis.formant_remap");
-    pos_offset_curve_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("resynthsis.pos_offset");
+    formant_remap_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("resynthsis.formant_remap");
+    pos_offset_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("resynthsis.pos_offset");
 
     is_enable_arg_ = params.GetParam<BoolParameter>("resynthsis.enable");
     is_formant_remap_ = params.GetParam<BoolParameter>("resynthsis.formant_remap");
@@ -95,7 +95,7 @@ void Resynthesis::PreGetFreqDiffsInRatio(Partials& partials) {
     using namespace std::views;
 
     for (int i = 0; i < kNumPartials; ++i) {
-        float final_frame_nor_pos = pos_offset_curve_->data[i] + frame_pos_;
+        float final_frame_nor_pos = pos_offset_curve_->Get(i) + frame_pos_;
         {
             float temp{};
             final_frame_nor_pos = std::modf(final_frame_nor_pos, &temp);
@@ -122,7 +122,7 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
 
     if (!is_formant_remap_->GetBool()) { // disable remap
         for (int i = 0; i < kNumPartials; ++i) {
-            float final_frame_nor_pos = pos_offset_curve_->data[i] + frame_pos_;
+            float final_frame_nor_pos = pos_offset_curve_->Get(i) + frame_pos_;
             {
                 float temp{};
                 final_frame_nor_pos = std::modf(final_frame_nor_pos, &temp);
@@ -144,7 +144,7 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
     }
     else {
         for (int i = 0; i < kNumPartials; ++i) {
-            float final_frame_nor_pos = pos_offset_curve_->data[i] + frame_pos_;
+            float final_frame_nor_pos = pos_offset_curve_->Get(i) + frame_pos_;
             {
                 float temp{};
                 final_frame_nor_pos = std::modf(final_frame_nor_pos, &temp);
@@ -154,14 +154,13 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
             const auto& frame = resynthsis_frames[frame_idx];
 
             auto idx = partials.freqs[i] * (kFFtSize / 2) * formant_ratio - 1.0f;
-            //auto int_idx = static_cast<int>(std::round(idx));
             auto norm_idx = idx / static_cast<float>(kFFtSize / 2);
             if (norm_idx < 0.0f || norm_idx > 1.0f) {
                 output[i] = 0.0f;
                 continue;
             }
 
-            auto remap_norm_idx = utli::warp::AtNormalizeIndex(formant_remap_curve_->data, norm_idx);
+            auto remap_norm_idx = formant_remap_curve_->GetNormalize(norm_idx);
             auto remap_idx = static_cast<int>(std::round(remap_norm_idx * kFFtSize / 2));
 
             if (remap_idx < 0 || remap_idx >= kFFtSize / 2) {

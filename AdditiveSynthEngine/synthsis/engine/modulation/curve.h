@@ -11,9 +11,7 @@ class CurveManager {
 public:
     struct Curve {
         constexpr explicit Curve(size_t size) : data(size) {}
-
         constexpr explicit Curve(std::initializer_list<float> init) : data(init) {}
-
         constexpr explicit Curve() = default;
 
         std::vector<float> data;

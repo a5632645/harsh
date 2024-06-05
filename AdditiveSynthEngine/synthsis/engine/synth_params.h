@@ -2,10 +2,10 @@
 
 #include "engine/modulation/ParamBank.h"
 #include "engine/modulation/Parameter.h"
-#include "engine/modulation/curve.h"
 #include "engine/resynthsis/resynthsis_data.h"
 #include "engine/modulation/param_creator.h"
 #include "engine/modulation/Modulation.h"
+#include "modulation/curve_bank.h"
 
 namespace mana {
 class SynthParams {
@@ -20,7 +20,7 @@ public:
     // ========================================================================================
     // curve
     // ========================================================================================
-    CurveManager& GetCurveManager() { return curve_manager_; }
+    CurveBank& GetCurveBank() { return curve_bank_; }
 
     // ========================================================================================
     // resynthsis
@@ -48,7 +48,7 @@ public:
     int GetModulationCount() const { return modulation_configs_.size(); }
     std::shared_ptr<ModulationConfig> GetModulation(int index) const { return modulation_configs_[index]; }
 private:
-    CurveManager curve_manager_;
+    CurveBank curve_bank_;
     ParamBank param_bank_;
     ResynthsisFrames resynthsis_frames_;
     std::vector<std::shared_ptr<ModulationConfig>> modulation_configs_;

@@ -3,6 +3,7 @@
 #include <random>
 #include "engine/oscillor_param.h"
 #include "engine/partials.h"
+#include "engine/modulation/quantize_map.h"
 
 namespace mana {
 class Dissonance {
@@ -19,7 +20,7 @@ private:
     BoolParameter* is_enable_param_{};
     IntChoiceParameter* diss_type_{};
     std::array<PolyModuFloatParameter*, 2>args_{};
-    CurveManager::Curve* pitch_quantize_map_{};
+    QuantizeMap* pitch_quantize_map_{};
 
     bool is_enable_;
 

@@ -29,7 +29,7 @@ void LFO::PrepareParams(OscillorParams& params) {
     restart_ = params.GetParam<BoolParameter>("lfo{}.restart", idx_);
     arg_output_level_ = params.GetPolyFloatParam("lfo{}.level", idx_);
     arg_wave_type_ = params.GetParam<IntChoiceParameter>("lfo{}.wave_type", idx_);
-    wave_curve_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("lfo{}.wave", idx_);
+    wave_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("lfo{}.wave", idx_);
 }
 
 void LFO::OnUpdateTick() {
@@ -70,7 +70,7 @@ void LFO::OnUpdateTick() {
         output_value_ = last_random_value_;
         break;
     case kCustom:
-        output_value_ = utli::warp::AtNormalizeIndex(wave_curve_->data, lfo_phase_);
+        output_value_ = wave_curve_->GetNormalize(lfo_phase_);
         break;
     case kNumEnums:
     default:

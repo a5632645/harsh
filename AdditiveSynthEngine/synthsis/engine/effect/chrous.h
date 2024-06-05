@@ -26,7 +26,7 @@ public:
         }
     }
 
-    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+    void OnUpdateTick(EffectParams& args) override {
         amount_ = param::Chorus_Amount::GetNumber(args.args[param::Chorus_Amount::kArgIdx]->Get01Value());
         depth_num_samples_ = param::Chorus_Depth::GetNumber(args.args[param::Chorus_Depth::kArgIdx]->Get01Value()) * sample_rate_ / 1000.0f;
         offset_num_samples_ = param::Chorus_Offset::GetNumber(args.args[param::Chorus_Offset::kArgIdx]->Get01Value()) * sample_rate_ / 1000.0f;

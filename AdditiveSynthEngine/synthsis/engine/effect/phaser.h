@@ -111,7 +111,7 @@ public:
         }
     }
 
-    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+    void OnUpdateTick(EffectParams& args) override {
         auto cycle01 = helper::GetAlterParamValue(args.args, param::Phaser_Cycles{});
         phaser_cycles_ = cycle01 * kNumPartials / 4;
         flanger_cycles_ = cycle01 * kNumPartials / 2;

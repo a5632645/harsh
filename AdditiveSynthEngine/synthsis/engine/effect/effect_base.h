@@ -2,7 +2,6 @@
 
 #include "engine/partials.h"
 #include "engine/poly_param.h"
-#include "engine/modulation/curve.h"
 #include "engine/oscillor_param.h"
 
 namespace mana {
@@ -24,7 +23,7 @@ public:
 
     virtual void Init(float sample_rate, float update_rate) = 0;
     virtual void Process(Partials& partials) = 0;
-    virtual void OnUpdateTick(EffectParams& args, CurveManager& curves) = 0;
+    virtual void OnUpdateTick(EffectParams& args) = 0;
     virtual void OnNoteOn(int note) = 0;
     virtual void OnNoteOff() = 0;
     virtual void PrepareParams(OscillorParams& params) {}

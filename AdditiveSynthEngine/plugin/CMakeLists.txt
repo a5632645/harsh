@@ -99,7 +99,7 @@ set(UI_SRC
  "layout/about/about_layout.cpp"
  "layout/master_layout.cpp"
  "ui/spectrum.cpp"
- "layout/modulators/modulator_button.cpp")
+ "layout/modulators/modulator_button.cpp" "layout/cruve/curve_layout.cpp" "ui/quantize_map_editor.cpp" "ui/common_curve_editor.cpp")
 set(UI_HEADER
 "layout/modulators/envelop_layout.h"
  "layout/synth/synth_layout.h"
@@ -131,7 +131,7 @@ set(UI_HEADER
  "layout/matrix/modulation_matrix_layout.h"
  "layout/synth/unison_layout.h"
  "layout/modu_container.h"
- "layout/modulators/modulator_button.h" "layout/modu_listener.h")
+ "layout/modulators/modulator_button.h" "layout/modu_listener.h" "layout/cruve/curve_layout.h" "ui/quantize_map_editor.h" "ui/common_curve_editor.h")
 
 target_sources(Harsh
     PRIVATE

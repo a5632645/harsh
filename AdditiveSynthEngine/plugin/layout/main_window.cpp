@@ -5,6 +5,7 @@
 #include "effect/final_fx_layout.h"
 //#include "about/about_layout.h"
 #include "resynthsis/resynthsis_layout.h"
+#include "engine/synth.h"
 
 namespace mana {
 MainWindow::MainWindow(Synth & synth)
@@ -31,7 +32,10 @@ MainWindow::MainWindow(Synth & synth)
 
     addAndMakeVisible(*tabbed_);
     addAndMakeVisible(*modulators_layout_);
-    addAndMakeVisible(*master_);
+    addChildComponent(*master_);
+
+    curve_layout_ = std::make_unique<CurveLayout>(synth.GetSynthParams().GetCurveBank());
+    addAndMakeVisible(curve_layout_.get());
 }
 
 void MainWindow::resized() {
@@ -54,6 +58,7 @@ void MainWindow::resized() {
     auto modulator_bound = bottom_bound.removeFromLeft(kModulatorWidth);
     modulators_layout_->setBounds(modulator_bound);
     master_->setBounds(bottom_bound);
+    curve_layout_->setBounds(bottom_bound);
 }
 
 void MainWindow::BeginHighlightModulator(std::string_view id) {

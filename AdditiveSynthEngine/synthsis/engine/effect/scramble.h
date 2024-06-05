@@ -24,7 +24,7 @@ public:
         }
     }
 
-    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+    void OnUpdateTick(EffectParams& args) override {
         scramble_range_ = helper::GetAlterParamValue(args.args, param::Scramble_Range{});
         lfo_rate_ = helper::GetAlterParamValue(args.args, param::Scramble_Rate{});
         UpdateLfoAndIndexTable();

@@ -3,7 +3,7 @@
 #include "engine/oscillor_param.h"
 #include "resynthsis_data.h"
 #include "engine/partials.h"
-#include "engine/modulation/curve.h"
+#include "engine/modulation/curve_v2.h"
 
 namespace mana {
 class Synth;
@@ -29,8 +29,8 @@ private:
     std::array<PolyModuFloatParameter*, 7> args_{};
     BoolParameter* is_enable_arg_{};
     BoolParameter* is_formant_remap_{};
-    CurveManager::Curve* formant_remap_curve_{};
-    CurveManager::Curve* pos_offset_curve_{};
+    CurveV2* formant_remap_curve_{};
+    CurveV2* pos_offset_curve_{};
     Synth& synth_;
     float sample_rate_{};
     float frame_pos_{};

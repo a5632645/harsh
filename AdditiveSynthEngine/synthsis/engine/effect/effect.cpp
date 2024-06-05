@@ -36,7 +36,6 @@ void Effect::PrepareParams(OscillorParams& params) {
     for (int i = 0; auto & parg : effect_args_.args) {
         parg = params.GetPolyFloatParam("effect{}.arg{}", effect_idx_, i++);
     }
-    curve_manager_ = &params.GetParentSynthParams().GetCurveManager();
 
     for (auto& e : processers_) {
         e.second->PrepareParams(params);
@@ -50,9 +49,8 @@ void Effect::Process(Partials& partials) {
 
 void Effect::OnUpdateTick() {
     effect_type_ = param::EffectType::GetEnum(effect_type_arg_->GetInt());
-
     p_processor_ = processers_.at(effect_type_).get();
-    p_processor_->OnUpdateTick(effect_args_, *curve_manager_);
+    p_processor_->OnUpdateTick(effect_args_);
 }
 
 void Effect::OnNoteOn(int note) {

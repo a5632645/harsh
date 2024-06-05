@@ -5,6 +5,7 @@
 #include "modulators/modulators_layout.h"
 #include "master_layout.h"
 #include "modu_listener.h"
+#include "cruve/curve_layout.h"
 
 namespace mana {
 class MainWindow : public juce::Component, public juce::DragAndDropContainer {
@@ -23,6 +24,7 @@ private:
     Synth& synth_;
     std::unique_ptr<ModulatorsLayout> modulators_layout_;
     std::unique_ptr<MasterLayout> master_;
+    std::unique_ptr<CurveLayout> curve_layout_;
     std::unique_ptr<juce::TabbedComponent> tabbed_;
     std::vector<std::unique_ptr<ModuContainer>> layouts_;
     juce::ListenerList<ModulationActionListener> listeners_;
