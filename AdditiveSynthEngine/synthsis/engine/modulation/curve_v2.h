@@ -14,7 +14,7 @@ public:
 
     enum class PowerEnum {
         kKeep = 0,
-        kPow,
+        kExp,
         kNumPowerEnums
     };
     static float GetPowerYValue(float nor_x, PowerEnum power_type, float power);
@@ -26,7 +26,7 @@ public:
         float x;
         float y;
         float power;
-        PowerEnum power_type{ PowerEnum::kPow };
+        PowerEnum power_type{ PowerEnum::kExp };
     };
 
     class Listener {

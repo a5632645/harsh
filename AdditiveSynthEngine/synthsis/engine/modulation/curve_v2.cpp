@@ -7,20 +7,16 @@ float CurveV2::GetPowerYValue(float nor_x, PowerEnum power_type, float power) {
     switch (power_type) {
     case PowerEnum::kKeep:
         return 0.0f;
-    case PowerEnum::kPow:
+    case PowerEnum::kExp:
     {
-        constexpr auto max_pow = 10;
-        if (power == 0.0f)
+        constexpr auto max_pow = 20;
+        auto mapped_exp_base = power * max_pow;
+        if (std::abs(mapped_exp_base) <= 1e-3) // almost line
             return nor_x;
-        else if (power < 0.0f) {
-            auto mapped_power = std::lerp(1.0f, 10.0f, -power);
-            auto pow_base = 1.0f / mapped_power;
-            return std::pow(nor_x, pow_base);
-        }
-        else {
-            auto mapped_power = std::lerp(1.0f, 10.0f, power);
-            return std::pow(nor_x, mapped_power);
-        }
+
+        auto down = std::exp(mapped_exp_base) - 1.0f;
+        auto up = std::exp(mapped_exp_base * nor_x) - 1.0f;
+        return up / down;
     }
     default:
         assert(false);

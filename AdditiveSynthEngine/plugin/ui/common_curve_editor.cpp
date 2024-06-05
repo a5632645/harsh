@@ -40,7 +40,7 @@ void CurveXYPointComponent::mouseDown(const juce::MouseEvent& e) {
     popup_menu_ = std::make_unique<juce::PopupMenu>();
     auto curr_power_type = parent->curve_->GetPoint(idx_).power_type;
     popup_menu_->addItem("keep", true, curr_power_type == pe::kKeep, set_type(pe::kKeep));
-    popup_menu_->addItem("pow", true, curr_power_type == pe::kPow, set_type(pe::kPow));
+    popup_menu_->addItem("exp", true, curr_power_type == pe::kExp, set_type(pe::kExp));
     popup_menu_->addSeparator();
     popup_menu_->addItem("delete", [idx = idx_, curve] {curve->Remove(idx); });
     popup_menu_->showMenuAsync(juce::PopupMenu::Options{});

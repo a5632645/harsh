@@ -82,4 +82,9 @@ static float Calc1stSmoothFilterCoeff(float time_second, float update_rate) {
 static float Calc1stSmoothFilterCoeffByDecayRate(float db_per_second, float update_rate) {
     return std::exp(-0.11512925464970228420089957273422f * db_per_second / update_rate);
 }
+
+static float RatioToPitch(float ratio, float base_pitch) {
+    ratio = std::max(ratio, 0.0001f);
+    return base_pitch + 12.0f * std::log2(ratio);
+}
 }

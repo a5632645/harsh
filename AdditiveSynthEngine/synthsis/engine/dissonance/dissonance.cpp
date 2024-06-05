@@ -5,11 +5,6 @@
 #include "param/dissonance_param.h"
 #include "utli/convert.h"
 
-static float RatioToPitch(float ratio, float base_pitch) {
-    ratio = std::max(ratio, 0.0001f);
-    return base_pitch + 12.0f * std::log2(ratio);
-}
-
 namespace mana {
 static void DoHarmonicStretch(Partials& partials, float stretch) {
     auto ratio = 1.0f;
@@ -18,7 +13,7 @@ static void DoHarmonicStretch(Partials& partials, float stretch) {
     for (int i = 0; i < kNumPartials; ++i) {
         auto final_ratio = ratio + partials.ratios[i];
         partials.freqs[i] = base_freq * final_ratio;
-        partials.pitches[i] = RatioToPitch(final_ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(final_ratio, partials.base_pitch);
         partials.ratios[i] = final_ratio;
         ratio += stretch;
     }
@@ -33,7 +28,7 @@ static void DoSemitoneSpace(Partials& partials, float semitone) {
     for (i = 0; i < kNumPartials && ratio < kNumPartials * 8.0f; ++i) {
         auto final_ratio = ratio + partials.ratios[i];
         partials.freqs[i] = final_ratio * base_freq;
-        partials.pitches[i] = RatioToPitch(final_ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(final_ratio, partials.base_pitch);
         partials.ratios[i] = final_ratio;
         ratio *= ratio_mul;
     }
@@ -49,14 +44,14 @@ static constexpr std::array kStringRatios{ 1.0f, 0.1f,0.01f,0.001f,0.0001f };
 static void DoStringDiss(Partials& partials, float string_val) {
     auto first_ratio = partials.ratios[0] + 1.0f;
     partials.freqs[0] = first_ratio * partials.base_frequency;
-    partials.pitches[0] = RatioToPitch(first_ratio, partials.base_pitch);
+    partials.pitches[0] = utli::RatioToPitch(first_ratio, partials.base_pitch);
     partials.ratios[0] = first_ratio;
 
     for (int i = 1; i < kNumPartials; ++i) {
         auto n = i + 1.0f + partials.ratios[i];
         auto ratio = n * std::sqrt(1.0f + n * n * string_val);
         partials.freqs[i] = partials.base_frequency * ratio;
-        partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
         partials.ratios[i] = ratio;
     }
 }
@@ -67,7 +62,7 @@ static void DoStringDiss(Partials& partials, float string_val) {
 static void DoDispersion(Partials& partials, float amount, float warp) {
     auto first_ratio = partials.ratios[0] + 1.0f;
     partials.freqs[0] = first_ratio * partials.base_frequency;
-    partials.pitches[0] = RatioToPitch(first_ratio, partials.base_pitch);
+    partials.pitches[0] = utli::RatioToPitch(first_ratio, partials.base_pitch);
     partials.ratios[0] = first_ratio;
 
     if (amount < 0.0f) {
@@ -76,7 +71,7 @@ static void DoDispersion(Partials& partials, float amount, float warp) {
             auto spread = 1.0f + utli::warp::ParabolaWarp(idx01, warp) * std::abs(amount);
             auto ratio = (i + 1.0f + partials.ratios[i]) / spread;
             partials.freqs[i] = partials.base_frequency * ratio;
-            partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
+            partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
             partials.ratios[i] = ratio;
         }
     }
@@ -86,7 +81,7 @@ static void DoDispersion(Partials& partials, float amount, float warp) {
             auto spread = 1.0f + utli::warp::ParabolaWarp(idx01, warp) * std::abs(amount);
             auto ratio = (i + 1.0f + partials.ratios[i]) * spread;
             partials.freqs[i] = partials.base_frequency * ratio;
-            partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
+            partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
             partials.ratios[i] = ratio;
         }
     }
@@ -98,7 +93,7 @@ static void DoDispersion(Partials& partials, float amount, float warp) {
 void Dissonance::DoSyncNoise(Partials& partials) {
     auto first_ratio = partials.ratios[0] + 1.0f;
     partials.freqs[0] = first_ratio * partials.base_frequency;
-    partials.pitches[0] = RatioToPitch(first_ratio, partials.base_pitch);
+    partials.pitches[0] = utli::RatioToPitch(first_ratio, partials.base_pitch);
     partials.ratios[0] = first_ratio;
 
     for (int i = 1; i < kNumPartials; ++i) {
@@ -109,7 +104,7 @@ void Dissonance::DoSyncNoise(Partials& partials) {
         auto error_ratio = ratio_mult * static_noise_[i];
         auto final_ratio = error_ratio + org_ratio;
         partials.freqs[i] = partials.base_frequency * final_ratio;
-        partials.pitches[i] = RatioToPitch(final_ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(final_ratio, partials.base_pitch);
         partials.ratios[i] = final_ratio;
     }
 }
@@ -121,7 +116,7 @@ static void DoFakeUnison(Partials& partials, float ratio0, float ratio1) {
     for (int i = 0; i < kNumPartials; i += 3) {
         auto ratio = i + 1.0f + partials.ratios[i];
         partials.freqs[i] = partials.base_frequency * ratio;
-        partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
         partials.ratios[i] = ratio;
     }
 
@@ -129,7 +124,7 @@ static void DoFakeUnison(Partials& partials, float ratio0, float ratio1) {
         auto ratio = i + 1.0f + partials.ratios[i];
         auto detuned_ratio = ratio * ratio0;
         partials.freqs[i] = partials.base_frequency * detuned_ratio;
-        partials.pitches[i] = RatioToPitch(detuned_ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(detuned_ratio, partials.base_pitch);
         partials.ratios[i] = ratio;
     }
 
@@ -137,7 +132,7 @@ static void DoFakeUnison(Partials& partials, float ratio0, float ratio1) {
         auto ratio = i + 1.0f + partials.ratios[i];
         auto detuned_ratio = ratio * ratio1;
         partials.freqs[i] = partials.base_frequency * detuned_ratio;
-        partials.pitches[i] = RatioToPitch(detuned_ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(detuned_ratio, partials.base_pitch);
         partials.ratios[i] = ratio;
     }
 }
@@ -147,7 +142,7 @@ static void DoFakeUnison2(Partials& partials, float ratio0, float ratio1) {
     for (int i = 0; i < kNumPartials; i += 3) {
         auto ratio = harmonic_idx + partials.ratios[i];
         partials.freqs[i] = partials.base_frequency * ratio;
-        partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
         partials.ratios[i] = ratio;
         ++harmonic_idx;
     }
@@ -157,7 +152,7 @@ static void DoFakeUnison2(Partials& partials, float ratio0, float ratio1) {
         auto ratio = harmonic_idx + partials.ratios[i];
         auto detuned_ratio = ratio * ratio0;
         partials.freqs[i] = partials.base_frequency * detuned_ratio;
-        partials.pitches[i] = RatioToPitch(detuned_ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(detuned_ratio, partials.base_pitch);
         partials.ratios[i] = ratio;
         ++harmonic_idx;
     }
@@ -167,7 +162,7 @@ static void DoFakeUnison2(Partials& partials, float ratio0, float ratio1) {
         auto ratio = harmonic_idx + partials.ratios[i];
         auto detuned_ratio = ratio * ratio1;
         partials.freqs[i] = partials.base_frequency * detuned_ratio;
-        partials.pitches[i] = RatioToPitch(detuned_ratio, partials.base_pitch);
+        partials.pitches[i] = utli::RatioToPitch(detuned_ratio, partials.base_pitch);
         partials.ratios[i] = ratio;
         ++harmonic_idx;
     }
@@ -195,7 +190,7 @@ void Dissonance::Process(Partials& partials) {
         for (int i = 0; i < kNumPartials; ++i) {
             auto ratio = i + 1.0f + partials.ratios[i];
             partials.freqs[i] = ratio * partials.base_frequency;
-            partials.pitches[i] = RatioToPitch(ratio, partials.base_pitch);
+            partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
             partials.ratios[i] = ratio;
         }
         return;
@@ -284,7 +279,7 @@ void Dissonance::DoPitchQuantize(Partials& partials) {
             continue;
         }
 
-        float raw_pitch = RatioToPitch(ratio, partials.base_pitch);
+        float raw_pitch = utli::RatioToPitch(ratio, partials.base_pitch);
         int quantize_pitch = static_cast<int>(std::round(raw_pitch));
 
         // take apart into octave * 12 + semitone
