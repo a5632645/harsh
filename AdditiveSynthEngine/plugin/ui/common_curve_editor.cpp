@@ -2,7 +2,7 @@
 
 static constexpr auto width = 20;
 static constexpr auto height = width;
-static constexpr auto kMaxOfDistance = 300;
+static constexpr auto kMaxOfDistance = 200;
 static constexpr auto kCompCircleSize = 5.0f;
 
 namespace mana::detail {
@@ -18,6 +18,30 @@ void CurveXYPointComponent::paint(juce::Graphics& g) {
     }
     g.setColour(juce::Colours::white);
     g.fillEllipse(juce::Rectangle{ 0.0f,0.0f,kCompCircleSize,kCompCircleSize }.withCentre(getLocalBounds().getCentre().toFloat()));
+}
+
+void CurveXYPointComponent::mouseDown(const juce::MouseEvent& e) {
+    if (!e.mods.isRightButtonDown())
+        return;
+
+    auto* parent = static_cast<CommonCurveEditor*>(getParentComponent());
+    if (parent->IsLastXyPoint(idx_))
+        return;
+
+    auto* curve = parent->curve_;
+    using pe = CurveV2::PowerEnum;
+    auto set_type = [idx = idx_, curve](pe type) {
+        return [i = idx, curve, t = type]() {
+            curve->SetPowerType(i, t);
+        };
+    };
+
+    // will it dangling pointer/ref?
+    popup_menu_ = std::make_unique<juce::PopupMenu>();
+    auto curr_power_type = parent->curve_->GetPoint(idx_).power_type;
+    popup_menu_->addItem("keep", true, curr_power_type == pe::kKeep, set_type(pe::kKeep));
+    popup_menu_->addItem("pow", true, curr_power_type == pe::kPow, set_type(pe::kPow));
+    popup_menu_->showMenuAsync(juce::PopupMenu::Options{});
 }
 
 void CurveXYPointComponent::mouseDrag(const juce::MouseEvent& e) {
@@ -42,8 +66,15 @@ void CurvePowerPointComponent::paint(juce::Graphics& g) {
     g.drawEllipse(juce::Rectangle{ 0.0f,0.0f,kCompCircleSize,kCompCircleSize }.withCentre(getLocalBounds().getCentre().toFloat()), 1.0f);
 }
 
+void CurvePowerPointComponent::mouseDown(const juce::MouseEvent& e) {
+    auto* parent = static_cast<CommonCurveEditor*>(getParentComponent());
+    last_power_ = parent->curve_->GetPoint(idx_).power;
+}
+
 void CurvePowerPointComponent::mouseDrag(const juce::MouseEvent& e) {
-    static_cast<CommonCurveEditor*>(getParentComponent())->DragPowerPoint(*this, e);
+    auto* parent = static_cast<CommonCurveEditor*>(getParentComponent());
+    auto nor_y = static_cast<float>(e.getDistanceFromDragStartY()) / static_cast<float>(kMaxOfDistance);
+    parent->curve_->SetPower(idx_, last_power_ + nor_y);
 }
 }
 
@@ -165,21 +196,19 @@ void CommonCurveEditor::DragXyPoint(detail::CurveXYPointComponent& p, const juce
     curve_->SetXy(p.idx_, nor_x, nor_y);
 }
 
-void CommonCurveEditor::DragPowerPoint(detail::CurvePowerPointComponent& p, const juce::MouseEvent& e) {
-    auto y = e.getDistanceFromDragStartY();
-    auto nor_y = static_cast<float>(y) / static_cast<float>(kMaxOfDistance);
-    curve_->SetPower(p.idx_, nor_y);
-}
-
 void CommonCurveEditor::SetPowerPointPos(detail::CurvePowerPointComponent& p) {
-    auto before_center = xy_points_[p.idx_]->getBounds().getCentre();
-    auto after_center = xy_points_[p.idx_ + 1]->getBounds().getCentre();
+    auto before_center = xy_points_[p.idx_]->getBounds().getCentre().toFloat();
+    auto after_center = xy_points_[p.idx_ + 1]->getBounds().getCentre().toFloat();
+    auto bound = GetComponentBounds().toFloat();
 
     p.setVisible(before_center.x != after_center.x && before_center.y != after_center.y);
 
     auto x = std::midpoint(before_center.x, after_center.x);
-    auto y = std::midpoint(before_center.y, after_center.y);
-    p.setBounds(p.getBounds().withCentre(juce::Point{ x,y }));
+    auto nor_x = (x - bound.getX()) / bound.getWidth();
+    auto y = std::lerp(bound.getBottom(), bound.getY(), curve_->GetNormalize(nor_x));
+    //auto y = std::midpoint(before_center.y, after_center.y);
+    //p.setBounds(p.getBounds().withCentre(juce::Point{ x,y }));
+    p.setBounds(p.getBounds().withCentre(juce::Point{ x,y, }.roundToInt()));
 }
 
 void CommonCurveEditor::SetXyPointPos(detail::CurveXYPointComponent& p) {

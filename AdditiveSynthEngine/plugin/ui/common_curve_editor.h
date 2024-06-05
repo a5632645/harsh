@@ -17,6 +17,8 @@ public:
     CurveXYPointComponent(int idx);
 
     void paint(juce::Graphics& g) override;
+
+    void mouseDown(const juce::MouseEvent& e) override;
     void mouseDrag(const juce::MouseEvent& e) override;
     void mouseEnter(const juce::MouseEvent& e) override { repaint(); }
     void mouseExit(const juce::MouseEvent& e) override { repaint(); }
@@ -24,6 +26,7 @@ public:
 private:
     friend class CommonCurveEditor;
     int idx_;
+    std::unique_ptr<juce::PopupMenu> popup_menu_;
 };
 
 class CurvePowerPointComponent
@@ -33,12 +36,14 @@ public:
 
     void paint(juce::Graphics& g) override;
 
+    void mouseDown(const juce::MouseEvent& e) override;
     void mouseDrag(const juce::MouseEvent& e) override;
     void mouseEnter(const juce::MouseEvent& e) override { repaint(); }
     void mouseExit(const juce::MouseEvent& e) override { repaint(); }
 private:
     friend class CommonCurveEditor;
     int idx_;
+    float last_power_{};
 };
 }
 

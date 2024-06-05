@@ -12,6 +12,13 @@ public:
     static constexpr auto kLineResolution = 1024;
     static constexpr auto kLineSize = 1025;
 
+    enum class PowerEnum {
+        kKeep = 0,
+        kPow,
+        kNumPowerEnums
+    };
+    static float GetPowerYValue(float nor_x, PowerEnum power_type, float power);
+
     struct Point {
         constexpr Point(float x, float y, float power = 0.0f)
             : x(x), y(y), power(power) {}
@@ -19,6 +26,7 @@ public:
         float x;
         float y;
         float power;
+        PowerEnum power_type{ PowerEnum::kPow };
     };
 
     class Listener {
@@ -54,6 +62,7 @@ public:
 
     void SetXy(int idx, float new_x, float new_y);
     void SetPower(int idx, float new_power);
+    void SetPowerType(int idx, PowerEnum new_type);
 
     void PartRender(int begin_point_idx, int end_point_idx);
     void FullRender() { PartRender(0, static_cast<int>(points_.size())); }

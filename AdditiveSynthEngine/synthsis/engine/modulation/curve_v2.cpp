@@ -1,5 +1,34 @@
 #include "curve_v2.h"
 
+#include <cassert>
+
+namespace mana {
+float CurveV2::GetPowerYValue(float nor_x, PowerEnum power_type, float power) {
+    switch (power_type) {
+    case PowerEnum::kKeep:
+        return 0.0f;
+    case PowerEnum::kPow:
+    {
+        constexpr auto max_pow = 10;
+        if (power == 0.0f)
+            return nor_x;
+        else if (power < 0.0f) {
+            auto mapped_power = std::lerp(1.0f, 10.0f, -power);
+            auto pow_base = 1.0f / mapped_power;
+            return std::pow(nor_x, pow_base);
+        }
+        else {
+            auto mapped_power = std::lerp(1.0f, 10.0f, power);
+            return std::pow(nor_x, mapped_power);
+        }
+    }
+    default:
+        assert(false);
+        return 0.0f;
+    }
+}
+}
+
 namespace mana {
 CurveV2::CurveV2() {
     datas_.resize(kLineSize);
@@ -51,14 +80,15 @@ void CurveV2::PartRender(int begin_point_idx, int end_point_idx) {
         if (begin_idx == end_idx) // do not render because it will divide by 0
             continue;
 
-        auto line_power = curr_point.power;
         auto curr_y = curr_point.y;
         auto next_y = next_point.y;
         auto x_range = end_idx - begin_idx;
         auto fx_range = static_cast<float>(x_range);
         for (int x = 0; x < x_range; ++x) {
             auto nor_x = x / fx_range;
-            datas_[x + begin_idx] = std::lerp(curr_y, next_y, nor_x);
+            //datas_[x + begin_idx] = std::lerp(curr_y, next_y, nor_x);
+            auto map_x = CurveV2::GetPowerYValue(nor_x, curr_point.power_type, curr_point.power);
+            datas_[x + begin_idx] = std::lerp(curr_y, next_y, map_x);
         }
     }
     datas_[kLineResolution] = datas_[0];
@@ -95,6 +125,18 @@ void CurveV2::SetPower(int idx, float new_power) {
     auto old_power = points_[idx].power;
     if (old_power != new_power) {
         points_[idx].power = new_power;
+        PartRender(idx, idx + 1);
+        listeners_.CallListener(&Listener::OnPointPowerChanged, this, idx);
+    }
+}
+
+void CurveV2::SetPowerType(int idx, PowerEnum new_type) {
+    if (idx >= GetNumPoints() - 1)
+        return;
+
+    auto old_power = points_[idx].power_type;
+    if (old_power != new_type) {
+        points_[idx].power_type = new_type;
         PartRender(idx, idx + 1);
         listeners_.CallListener(&Listener::OnPointPowerChanged, this, idx);
     }
