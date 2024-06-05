@@ -7,7 +7,6 @@
 #include "resynthsis/resynthsis_data.h"
 #include "resynthsis/image_base.h"
 #include <mutex>
-#include "engine/modulation/curve.h"
 
 namespace mana {
 class Synth {
@@ -33,7 +32,7 @@ public:
     const Oscillor& GetDisplayOscillor() const;
     const Oscillor& GetOscillor(int idx) const { return m_oscillators[idx]; }
     ParamBank& GetParamBank() { return synth_params_.GetParamBank(); }
-    CurveManager& GetCurveManager() { return synth_params_.GetCurveManager(); }
+    CurveBank& GetCurveManager() { return synth_params_.GetCurveBank(); }
     SynthParams& GetSynthParams() { return synth_params_; }
     ResynthsisFrames& GetResynthsisFrames() { return resynthsis_frames_; }
 

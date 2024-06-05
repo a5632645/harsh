@@ -31,7 +31,7 @@ public:
         ProcessBin(partials, last_bin, last_bin_vol);
     }
 
-    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+    void OnUpdateTick(EffectParams& args) override {
         amount_ = helper::GetAlterParamValue(args.args, param::Octaver_Amount{});
         width_ = helper::GetAlterParamValue(args.args, param::Octaver_Width{});
         decay_ = helper::GetAlterParamValue(args.args, param::Octaver_Decay{});

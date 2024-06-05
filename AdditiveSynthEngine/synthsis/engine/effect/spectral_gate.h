@@ -19,7 +19,7 @@ public:
         }
     }
 
-    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+    void OnUpdateTick(EffectParams& args) override {
         gate_level_ = helper::GetAlterParamValue(args.args, param::SpectralGate_Level{});
     }
 

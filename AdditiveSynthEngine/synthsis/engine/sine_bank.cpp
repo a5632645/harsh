@@ -67,24 +67,27 @@ void SineBank::LoadPartials(Partials & partials) {
         partials.update_phase = false;
     }
 
+    std::ranges::copy(sinc_last2_gain_, sinc_last3_gain_.begin());
+    std::ranges::copy(sinc_last1_gain_, sinc_last2_gain_.begin());
+    std::ranges::copy(current_volume_table_, sinc_last1_gain_.begin());
+    //std::ranges::copy(partials.gains, current_volume_table_.begin());
+
+    constexpr auto max_freq = 18000.0f;
+    auto nor_max_freq = max_freq * one_div_nyquist_rate;
     for (size_t i = 0; i < kNumPartials; ++i) {
         const auto normalized_frequency = partials.freqs[i];
         const float radix_frequency = normalized_frequency * std::numbers::pi_v<float>;
         freq_table_[i] = std::polar(1.0f, radix_frequency);
 
-        //if (normalized_frequency <= 0.0f || normalized_frequency > 1.0f) {
-        //    target_volume_table_[i] = 0.0f;
-        //}
-        //else {
-        //    target_volume_table_[i] = partials.gains[i];
-        //}
+        if (normalized_frequency < 0.0f || normalized_frequency > nor_max_freq) {
+            current_volume_table_[i] = 0.0f;
+        }
+        else {
+            current_volume_table_[i] = partials.gains[i];
+        }
     }
 
     //std::ranges::copy(current_volume_table_, last_volume_table_.begin());
-    std::ranges::copy(sinc_last2_gain_, sinc_last3_gain_.begin());
-    std::ranges::copy(sinc_last1_gain_, sinc_last2_gain_.begin());
-    std::ranges::copy(current_volume_table_, sinc_last1_gain_.begin());
-    std::ranges::copy(partials.gains, current_volume_table_.begin());
 
     #ifdef AD_ENABLE_SIMD
     // round num_partials to simd_size
@@ -112,7 +115,7 @@ float SineBank::SrTick() {
     float output{};
     for (size_t i = 0; i < num_volume_loop_; ++i) {
         output += phase_table_[i].imag() * volume_table_[i];
-    }
+}
     return output;
     #else
     for (size_t i = 0; i < processed_partials_; ++i) {

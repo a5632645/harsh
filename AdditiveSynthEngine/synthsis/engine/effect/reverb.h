@@ -50,7 +50,7 @@ public:
         }
     }
 
-    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+    void OnUpdateTick(EffectParams& args) override {
         inv_system_rate_ = 1.0f / update_rate_;
 
         amount_ = helper::GetAlterParamValue(args.args, param::Reverb_Amount{});

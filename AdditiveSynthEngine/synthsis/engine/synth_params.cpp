@@ -316,13 +316,14 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
             .vdefault = param::Env_Release::kDefault }));
     }
     // custom curves
-    curve_manager_.AddCurve(kNumPartials, "resynthsis.formant_remap")
-        .AddCurve(kNumPartials, "resynthsis.pos_offset")
-        .AddCurve(kNumPartials, "effect.harmonic_delay.time")
-        .AddCurve(kNumPartials, "effect.harmonic_delay.feedback")
-        .AddCurve({ 0.0f,1.0f / 11.0f,2.0f / 11.0f,3.0f / 11.0f,4.0f / 11.0f,5.0f / 11.0f,6.0f / 11.0f,7.0f / 11.0f,8.0f / 11.0f,9.0f / 11.0f,10.0f / 11.0f,11.0f / 11.0f }, "dissonance.pitch_quantize");
+    curve_bank_.AddCurve("resynthsis.formant_remap")
+        .AddCurve("resynthsis.pos_offset")
+        .AddCurve("effect.harmonic_delay.time")
+        .AddCurve("effect.harmonic_delay.feedback")
+        .AddQuantizeMap({ 0.f,1.f,2.f,3.f,4.f,5.f,6.f,7.f,8.f,9.f,10.f,11.f },
+                        "dissonance.pitch_quantize");
     for (int i = 0; i < 8; ++i) {
-        curve_manager_.AddCurve(kNumPartials, "lfo{}.wave", i);
+        curve_bank_.AddCurve("lfo{}.wave", i);
     }
 }
 
@@ -356,7 +357,6 @@ void SynthParams::RemoveModulation(ModulationConfig& config) {
             && cfg->param_id == config.param_id;
     });
     modulation_configs_.erase(it);
-
 
     for (auto* l : modulation_listeners_) {
         l->OnModulationRemoved(modulator_id, param_id);

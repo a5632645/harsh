@@ -3,7 +3,7 @@
 #include "Modulator.h"
 
 #include <random>
-#include "engine/modulation/curve.h"
+#include "engine/modulation/curve_v2.h"
 #include "param/lfo_param.h"
 #include "engine/oscillor_param.h"
 
@@ -30,7 +30,7 @@ private:
     float last_random_value_{};
     float start_phase_{};
     param::LFO_WaveType::ParamEnum wave_type_{};
-    CurveManager::Curve* wave_curve_{};
+    CurveV2* wave_curve_{};
     std::random_device random_;
     std::uniform_real_distribution<float> urd_;
 };

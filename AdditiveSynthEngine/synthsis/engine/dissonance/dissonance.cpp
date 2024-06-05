@@ -180,7 +180,7 @@ void Dissonance::Init(float sample_rate, float update_rate) {
 }
 
 void Dissonance::PrepareParams(OscillorParams& params) {
-    pitch_quantize_map_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("dissonance.pitch_quantize");
+    pitch_quantize_map_ = params.GetParentSynthParams().GetCurveBank().GetQuantizeMapPtr("dissonance.pitch_quantize");
 
     is_enable_param_ = params.GetParam<BoolParameter>("dissonance.enable");
     diss_type_ = params.GetParam<IntChoiceParameter>("dissonance.type");
@@ -296,7 +296,7 @@ void Dissonance::DoPitchQuantize(Partials& partials) {
         }
 
         // remap semitone
-        float nor_semitone = pitch_quantize_map_->data[semitone];
+        float nor_semitone = pitch_quantize_map_->Get(semitone);
         semitone = static_cast<int>(nor_semitone * 11.99f);
 
         float final_quantize_pitch = octave * 12.0f + semitone;

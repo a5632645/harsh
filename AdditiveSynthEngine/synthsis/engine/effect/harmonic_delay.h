@@ -7,7 +7,7 @@
 #include "param/effect_param.h"
 #include "param/param.h"
 #include "param/param_helper.h"
-#include "engine/modulation/curve.h"
+#include "engine/modulation/curve_v2.h"
 #include "engine/synth.h"
 
 namespace mana {
@@ -35,7 +35,7 @@ public:
         auto& write_frame = delay_buffer_[write_pos_];
 
         for (int i = 0; i < kNumPartials; ++i) {
-            auto delay_time = delay_time_ * time_map_->data[i];
+            auto delay_time = delay_time_ * time_map_->Get(i);
             auto frame_offset = delay_time * update_rate_ / 1000.0f;
             if (!enable_custom_time_) {
                 frame_offset = frame_offset_;
@@ -45,7 +45,7 @@ public:
             read_pos = (read_pos + buffer_size) % buffer_size;
             const auto& read_frame = delay_buffer_.at(read_pos);
 
-            auto feedback = feedback_ * feedback_map_->data[i];
+            auto feedback = feedback_ * feedback_map_->Get(i);
             if (!enable_custom_feedback_) {
                 feedback = feedback_;
             }
@@ -61,7 +61,7 @@ public:
         write_pos_ = (write_pos_ + 1) % buffer_size;
     }
 
-    void OnUpdateTick(EffectParams& args, CurveManager& curves) override {
+    void OnUpdateTick(EffectParams& args) override {
         frame_offset_ = delay_time_ * update_rate_ / 1000.0f;
         delay_time_ = helper::GetAlterParamValue(args.args, param::Delay_Time{});
         feedback_ = helper::GetAlterParamValue(args.args, param::Delay_Feedback{});
@@ -70,8 +70,8 @@ public:
     }
 
     void PrepareParams(OscillorParams& params) override {
-        time_map_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("effect.harmonic_delay.time");
-        feedback_map_ = params.GetParentSynthParams().GetCurveManager().GetCurvePtr("effect.harmonic_delay.feedback");
+        time_map_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("effect.harmonic_delay.time");
+        feedback_map_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("effect.harmonic_delay.feedback");
     }
 
     void OnNoteOn(int note) override {}
@@ -89,8 +89,8 @@ private:
     float update_rate_{};
     float feedback_{};
     int write_pos_{};
-    CurveManager::Curve* time_map_{};
-    CurveManager::Curve* feedback_map_{};
+    CurveV2* time_map_{};
+    CurveV2* feedback_map_{};
     bool enable_custom_time_{};
     bool enable_custom_feedback_{};
 };

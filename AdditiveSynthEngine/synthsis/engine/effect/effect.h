@@ -20,7 +20,6 @@ private:
     BoolParameter* is_enable_{};
     IntChoiceParameter* effect_type_arg_{};
     EffectParams effect_args_;
-    CurveManager* curve_manager_;
     param::EffectType::ParamEnum effect_type_{};
     std::unordered_map<param::EffectType::ParamEnum, std::unique_ptr<EffectBase>> processers_;
     EffectBase* p_processor_{};
