@@ -22,7 +22,7 @@ void SetSingeKnobInfo(WrapSlider& knob, DetailParam) {
     knob.setTitle(juce::String{ param_title.data(), param_title.length() });
     knob.textFromValueFunction = [](double v)->juce::String {
         auto org_text = DetailParam::GetText(v);
-        return juce::String{ org_text.data(), org_text.length() };
+        return juce::String{ param_title.data(), param_title.length() } + ':' + juce::String{ org_text.data(), org_text.length() };
     };
     knob.setVisible(true);
 }

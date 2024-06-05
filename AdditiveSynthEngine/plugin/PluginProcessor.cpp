@@ -4,6 +4,9 @@
 #include "engine/synth.h"
 #include "data/juce_param_creator.h"
 
+static constexpr auto kUpdateRate = 800.0f;
+static constexpr auto kNumOscillor = 4;
+
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
     : AudioProcessor(BusesProperties()
@@ -15,7 +18,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                      #endif
     ) {
     auto creator = std::make_shared<mana::JuceParamCreator>();
-    synth_ = std::make_unique<mana::Synth>(creator, 1);
+    synth_ = std::make_unique<mana::Synth>(creator, kNumOscillor);
     auto juce_params = creator->MoveJuceParams();
     apvts_ = std::make_unique<juce::AudioProcessorValueTreeState>(*this,
                                                                   nullptr,
@@ -97,7 +100,7 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    synth_->Init(samplesPerBlock, sampleRate, 500.0f);
+    synth_->Init(samplesPerBlock, sampleRate, kUpdateRate);
     update_pos_ = synth_->GetUpdateSkip();
     inv_buffer_length_ = 1.0f / (samplesPerBlock * 1000000.0f / sampleRate);
 }

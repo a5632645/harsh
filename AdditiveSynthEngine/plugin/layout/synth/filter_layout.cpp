@@ -38,6 +38,14 @@ void FilterLayout::resized() {
 void FilterLayout::OnResonanceTypeChanged(int c) {
     using enum param::Filter_ResonanceType::ParamEnum;
 
+    using ft = param::Filter_Type::ParamEnum;
+    auto filter_type = param::Filter_Type::GetEnum(filter_type_->getSelectedItemIndex());
+    if (filter_type != ft::kBandpass
+        && filter_type != ft::kBandstop
+        && filter_type != ft::kHighpass
+        && filter_type != ft::kLowpass)
+        return;
+
     auto type = param::Filter_ResonanceType::GetEnum(c);
     switch (type) {
     case kRamp:
