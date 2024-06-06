@@ -4,8 +4,8 @@
 #include "engine/synth.h"
 #include "data/juce_param_creator.h"
 
-static constexpr auto kUpdateRate = 800.0f;
-static constexpr auto kNumOscillor = 4;
+static constexpr auto kUpdateRate = 400.0f;
+static constexpr auto kNumOscillor = 1;
 
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()

@@ -51,15 +51,18 @@ private:
 
     // smoothing
     int sr_pos_{};
-    int lut_pos3_{};
-    int lut_pos2_{};
-    int lut_pos1_{};
+    //int lut_pos3_{};
+    //int lut_pos2_{};
+    //int lut_pos1_{};
     // std::vector<float> cos_table_;
-    batch_float_vector sinc_last3_gain_;
+    // batch_float_vector sinc_last3_gain_;
     batch_float_vector sinc_last2_gain_;
     batch_float_vector sinc_last1_gain_;
     batch_float_vector current_volume_table_{};
-    batch_float_vector fir_lut_;
+    // batch_float_vector fir_lut_;
+    batch_float_vector fir_curr_lut_;
+    batch_float_vector fir_last1_lut_;
+    batch_float_vector fir_last2_lut_;
 
     // batch_float_vector last_volume_table_{};
     batch_complex_vector freq_table_{};

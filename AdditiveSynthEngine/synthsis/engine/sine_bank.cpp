@@ -10,7 +10,7 @@ SineBank::SineBank() {
     // last_volume_table_.resize(kNumPartials);
     sinc_last1_gain_.resize(kNumPartials);
     sinc_last2_gain_.resize(kNumPartials);
-    sinc_last3_gain_.resize(kNumPartials);
+    // sinc_last3_gain_.resize(kNumPartials);
 }
 
 void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip) {
@@ -29,12 +29,13 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
     //}
 
     constexpr auto pi = std::numbers::pi_v<float>;
-    auto polyphase_fir_length = 3;
+    auto polyphase_fir_length = 2;
     auto fir_order = polyphase_fir_length * update_skip;
     auto fir_length = fir_order + 1;
     auto fir_center = fir_order * 0.5f;
-    fir_lut_.reserve(fir_length);
-    auto fir_cut_f = pi * update_rate / 2.0f / sample_rate;
+    std::vector<float> fir_org_lut(fir_length);
+    // fir_lut_.reserve(fir_length);
+    auto fir_cut_f = pi * update_rate * 0.75f / sample_rate;
 
     auto lowpass_sinc = [=](int n) {
         auto x = n - fir_center;
@@ -49,7 +50,34 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
 
     auto gain_up = update_skip_ * polyphase_fir_length;
     for (int i = 0; i < fir_length; ++i) {
-        fir_lut_.push_back(lowpass_sinc(i) * hann_window(i) * gain_up);
+        // fir_lut_.push_back(lowpass_sinc(i) * hann_window(i) * gain_up);
+        fir_org_lut.push_back(lowpass_sinc(i) * hann_window(i));
+    }
+
+    // none fir polyphase into zero keep polyphase
+    std::ranges::reverse(fir_org_lut);
+    for (int i = 0; i < update_skip; ++i) {
+        {
+            float temp{};
+            for (int j = 0; j < i + 1; ++j) {
+                temp += fir_org_lut[j];
+            }
+            fir_curr_lut_.push_back(temp);
+        }
+        {
+            float temp{};
+            for (int j = i + 1; j < update_skip + i + 1; ++j) {
+                temp += fir_org_lut[j];
+            }
+            fir_last1_lut_.push_back(temp);
+        }
+        {
+            float temp{};
+            for (int j = update_skip + i + 1; j < 2 * update_skip + 1; ++j) {
+                temp += fir_org_lut[j];
+            }
+            fir_last2_lut_.push_back(temp);
+        }
     }
 }
 
@@ -58,16 +86,16 @@ void SineBank::LoadPartials(Partials & partials) {
     processed_partials_ = std::max(processed_partials_, num_processed);
     active_partials_ = std::min(processed_partials_, max_active_partials_);
     sr_pos_ = 0;
-    lut_pos3_ = 3 * update_skip_;
-    lut_pos2_ = 2 * update_skip_;
-    lut_pos1_ = update_skip_;
+    //lut_pos3_ = 3 * update_skip_;
+    //lut_pos2_ = 2 * update_skip_;
+    //lut_pos1_ = update_skip_;
 
     if (partials.update_phase) {
         std::ranges::copy(partials.phases, phase_table_.begin());
         partials.update_phase = false;
     }
 
-    std::ranges::copy(sinc_last2_gain_, sinc_last3_gain_.begin());
+    //std::ranges::copy(sinc_last2_gain_, sinc_last3_gain_.begin());
     std::ranges::copy(sinc_last1_gain_, sinc_last2_gain_.begin());
     std::ranges::copy(current_volume_table_, sinc_last1_gain_.begin());
     //std::ranges::copy(partials.gains, current_volume_table_.begin());
@@ -123,38 +151,48 @@ float SineBank::SrTick() {
     }
 
     float output{};
-    if (sr_pos_ == 0) {
-        for (size_t i = 0; i < active_partials_; ++i) {
-            float gain = current_volume_table_[i] * fir_lut_[lut_pos3_]
-                + sinc_last1_gain_[i] * fir_lut_[lut_pos2_]
-                + sinc_last2_gain_[i] * fir_lut_[lut_pos1_]
-                + sinc_last3_gain_[i] * fir_lut_[0];
-            output += phase_table_[i].imag() * gain;
-        }
-    }
-    else {
-        for (size_t i = 0; i < active_partials_; ++i) {
-            float gain = current_volume_table_[i] * fir_lut_[lut_pos3_]
-                + sinc_last1_gain_[i] * fir_lut_[lut_pos2_]
-                + sinc_last2_gain_[i] * fir_lut_[lut_pos1_];
+    //if (sr_pos_ == 0) {
+    //    for (size_t i = 0; i < active_partials_; ++i) {
+    //        float gain = current_volume_table_[i] * fir_lut_[lut_pos3_]
+    //            + sinc_last1_gain_[i] * fir_lut_[lut_pos2_]
+    //            + sinc_last2_gain_[i] * fir_lut_[lut_pos1_]
+    //            + sinc_last3_gain_[i] * fir_lut_[0];
+    //        output += phase_table_[i].imag() * gain;
+    //    }
+    //}
+    //else {
+    //    for (size_t i = 0; i < active_partials_; ++i) {
+    //        float gain = current_volume_table_[i] * fir_lut_[lut_pos3_]
+    //            + sinc_last1_gain_[i] * fir_lut_[lut_pos2_]
+    //            + sinc_last2_gain_[i] * fir_lut_[lut_pos1_];
 
-            output += phase_table_[i].imag() * gain;
-        }
+    //        output += phase_table_[i].imag() * gain;
+    //    }
 
-        //float current_cos_lerp = cos_table_[sr_pos_++];
-        //for (size_t i = 0; i < active_partials_; ++i) {
-            //auto last_gain = last_volume_table_[i];
-            //auto curr_gain = current_volume_table_[i];
-            //auto gain = last_gain + (curr_gain - last_gain) * current_cos_lerp;
+    //    //float current_cos_lerp = cos_table_[sr_pos_++];
+    //    //for (size_t i = 0; i < active_partials_; ++i) {
+    //        //auto last_gain = last_volume_table_[i];
+    //        //auto curr_gain = current_volume_table_[i];
+    //        //auto gain = last_gain + (curr_gain - last_gain) * current_cos_lerp;
 
-            //output += phase_table_[i].imag() * target_volume_table_[i];
-        //}
+    //        //output += phase_table_[i].imag() * target_volume_table_[i];
+    //    //}
+    //}
+
+    auto fir_coef0 = fir_curr_lut_[sr_pos_];
+    auto fir_coef1 = fir_last1_lut_[sr_pos_];
+    auto fir_coef2 = fir_last2_lut_[sr_pos_];
+    for (size_t i = 0; i < active_partials_; ++i) {
+        auto gain = current_volume_table_[i] * fir_coef0
+            + sinc_last1_gain_[i] * fir_coef1
+            + sinc_last2_gain_[i] * fir_coef2;
+        output += phase_table_[i].imag() * gain;
     }
 
     ++sr_pos_;
-    --lut_pos1_;
-    --lut_pos2_;
-    --lut_pos3_;
+    //--lut_pos1_;
+    //--lut_pos2_;
+    //--lut_pos3_;
     return output;
     #endif
 }
