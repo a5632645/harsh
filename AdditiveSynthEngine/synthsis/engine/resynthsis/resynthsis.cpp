@@ -131,10 +131,10 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
             size_t frame_idx = static_cast<size_t>((resynthsis_frames.size() - 0.01f) * final_frame_nor_pos);
             const auto& frame = resynthsis_frames[frame_idx];
 
-            auto idx = partials.freqs[i] * (kFFtSize / 2) * formant_ratio - 1.0f;
+            auto idx = partials.freqs[i] * (kNumPartials)*formant_ratio - 1.0f;
             auto int_idx = static_cast<int>(std::round(idx));
 
-            if (int_idx < 0 || int_idx >= kFFtSize / 2) {
+            if (int_idx < 0 || int_idx >= kNumPartials) {
                 output[i] = 0.0f;
             }
             else {
@@ -153,17 +153,17 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
             size_t frame_idx = static_cast<size_t>((resynthsis_frames.size() - 0.01f) * final_frame_nor_pos);
             const auto& frame = resynthsis_frames[frame_idx];
 
-            auto idx = partials.freqs[i] * (kFFtSize / 2) * formant_ratio - 1.0f;
-            auto norm_idx = idx / static_cast<float>(kFFtSize / 2);
+            auto idx = partials.freqs[i] * (kNumPartials)*formant_ratio - 1.0f;
+            auto norm_idx = idx / static_cast<float>(kNumPartials);
             if (norm_idx < 0.0f || norm_idx > 1.0f) {
                 output[i] = 0.0f;
                 continue;
             }
 
             auto remap_norm_idx = formant_remap_curve_->GetNormalize(norm_idx);
-            auto remap_idx = static_cast<int>(std::round(remap_norm_idx * kFFtSize / 2));
+            auto remap_idx = static_cast<int>(std::round(remap_norm_idx * kNumPartials));
 
-            if (remap_idx < 0 || remap_idx >= kFFtSize / 2) {
+            if (remap_idx < 0 || remap_idx >= kNumPartials) {
                 output[i] = 0.0f;
             }
             else {

@@ -55,7 +55,7 @@ static float DbToGain(float db, float min_db) {
     return std::exp(0.11512925464970228420089957273422f * db);
 }
 
-template<float kMinDb>
+template<float kMinDb = -300.0f>
 static float GainToDb(float gain) {
     constexpr auto min_gain = cp::DbToGain(kMinDb);
     if (gain <= min_gain) {

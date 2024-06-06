@@ -73,15 +73,13 @@ void SineBank::LoadPartials(Partials & partials) {
     //std::ranges::copy(partials.gains, current_volume_table_.begin());
 
     constexpr auto max_freq = 20000.0f;
-    constexpr auto min_freq = 20.0f;
     auto nor_max_freq = max_freq * one_div_nyquist_rate;
-    auto nor_min_freq = min_freq * one_div_nyquist_rate;
     for (size_t i = 0; i < kNumPartials; ++i) {
         const auto normalized_frequency = partials.freqs[i];
         const float radix_frequency = normalized_frequency * std::numbers::pi_v<float>;
         freq_table_[i] = std::polar(1.0f, radix_frequency);
 
-        if (normalized_frequency < nor_min_freq || normalized_frequency > nor_max_freq) {
+        if (normalized_frequency < 0.0f || normalized_frequency > nor_max_freq) {
             current_volume_table_[i] = 0.0f;
         }
         else {

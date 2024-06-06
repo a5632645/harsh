@@ -38,7 +38,7 @@ public:
 
     void SetResynthsisFrames(ResynthsisFrames new_frame);
     bool IsResynthsisAvailable() const { return !resynthsis_frames_.frames.empty(); }
-    ResynthsisFrames CreateResynthsisFramesFromAudio(const std::vector<float>& audio_in, float sample_rate);
+    ResynthsisFrames CreateResynthsisFramesFromAudio(const std::vector<float>& audio_in, float sample_rate) const;
     ResynthsisFrames CreateResynthsisFramesFromImage(std::unique_ptr<ImageBase> image_in);
     std::vector<std::string_view> GetModulatorIds() const { return m_oscillators.front().GetModulatorIds(); }
     std::vector<std::string_view> GetModulableParamIds() const { return m_oscillators.front().GetModulableParamIds(); }

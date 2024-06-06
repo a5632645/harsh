@@ -16,8 +16,8 @@ public:
     }
 
     void ApplyWindow(std::vector<Ftype>& data) {
-        for (size_t i = 0; auto & s : data) {
-            s *= window_[i++];
+        for (int i = 0; i < window_length_; ++i) {
+            data[i] *= window_[i];
         }
     }
 

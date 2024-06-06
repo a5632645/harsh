@@ -190,15 +190,18 @@ void Synth::RemoveModulation(ModulationConfig& config) {
     synth_params_.RemoveModulation(config);
 }
 
-ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float sample_rate) {
+static constexpr auto analyze_fft_size = 2048;
+static constexpr auto sample_fft_size = 1024;
+static constexpr auto kFFtHop = 256; // equal to harmor
+ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float source_sample_rate) const {
     audiofft::AudioFFT fft;
     Window<float> window;
-    fft.init(kFFtSize);
-    window.Init(kFFtSize);
+    fft.init(analyze_fft_size);
+    window.Init(sample_fft_size);
 
-    const auto sample_rate_ratio = sample_rate / sample_rate_;
-    const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
-    auto num_frame = static_cast<size_t>((sample.size() - static_cast<float>(kFFtSize)) / static_cast<float>(kFFtHop));
+    const auto sample_rate_ratio = source_sample_rate / sample_rate_;
+    const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f;
+    auto num_frame = static_cast<size_t>((sample.size() - static_cast<float>(analyze_fft_size)) / static_cast<float>(kFFtHop));
     ResynthsisFrames audio_frames;
     audio_frames.frames.reserve(num_frame);
     audio_frames.frame_interval_sample = kFFtHop / sample_rate_ratio;
@@ -206,19 +209,21 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
 
     auto read_pos = 0;
     auto max_gain = 0.0f;
-    const auto num_bin = audiofft::AudioFFT::ComplexSize(kFFtSize);
-    std::vector<float> phases(num_bin);
+    const auto num_bin = audiofft::AudioFFT::ComplexSize(analyze_fft_size);
+    const auto max_search_freq_diff = c2_freq;
+    std::vector<float> curr_phases(num_bin);
+    std::vector<float> last_frame_phases(num_bin - 1); // do not contain dc
+    std::vector<float> temp_gains(num_bin);
     std::vector<float> real(num_bin);
     std::vector<float> imag(num_bin);
-    std::vector<float> fft_buffer(kFFtSize, 0.0f);
+    std::vector<float> fft_buffer(analyze_fft_size);
     while (num_frame--) {
-        if (read_pos + kFFtSize <= sample.size()) {
-            // directly fft from sample
+        std::ranges::fill(fft_buffer, 0.0f); // pad 0 expand to analyze fft size
+        if (read_pos + sample_fft_size <= sample.size()) {
             auto it = sample.begin() + read_pos;
-            std::copy(it, it + kFFtSize, fft_buffer.begin());
+            std::copy(it, it + sample_fft_size, fft_buffer.begin());
         }
         else {
-            // fill zero
             const auto num_samples_can_read = sample.size() - read_pos;
             for (int i = 0; i < num_samples_can_read; ++i) {
                 fft_buffer[i] = sample.at(read_pos + i);
@@ -228,41 +233,225 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         window.ApplyWindow(fft_buffer);
         fft.fft(fft_buffer.data(), real.data(), imag.data());
 
+        // turn complex number into phase and gain
+        for (int i = 0; i < num_bin; ++i) {
+            auto cpx = std::complex{ real[i], imag[i] };
+            if (i == 0)
+                temp_gains[i] = std::abs(cpx) / analyze_fft_size;
+            else
+                temp_gains[i] = std::abs(cpx) / (analyze_fft_size / 2);
+            curr_phases[i] = std::arg(cpx);
+        }
+
         ResynthsisFrames::FftFrame new_frame;
         if (audio_frames.frames.empty()) {
-            for (int i = 0; i < kFFtSize / 2; ++i) {
-                const auto c = std::complex(real[i + 1], imag[i + 1]);
-                new_frame.gains[i] = std::abs(c) / (kFFtSize / 2);
-                new_frame.freq_diffs[i] = 0.0f;
-                new_frame.ratio_diffs[i] = 0.0f;
-                phases[i] = std::arg(c);
-            }
-        }
-        else {
-            const auto& last_frame = audio_frames.frames.back();
-            for (int i = 0; i < kFFtSize / 2; ++i) {
-                const auto c = std::complex(real[i + 1], imag[i + 1]);
-                new_frame.gains[i] = std::abs(c) / (kFFtSize / 2);
-                auto this_frame_phase = std::arg(c);
+            // startup frame
+            // use 抛物线 to find the best freq and gain partial
 
-                // calculate instant frequency
-                const auto bin_frequency = static_cast<float>(i + 1) * std::numbers::pi_v<float> *2.0f / static_cast<float>(kFFtSize);
-                const auto target_phase = bin_frequency * kFFtHop + phases[i];
-                const auto phase_diff = PhaseWrap(this_frame_phase - target_phase);
-                const auto instant_freq = phase_diff / (kFFtHop * std::numbers::pi_v<float>) + (1.0f + i) / static_cast<float>(kFFtSize / 2);
-                new_frame.ratio_diffs[i] = instant_freq * sample_rate_ratio / c2_freq - (i + 1.0f);
-                phases[i] = this_frame_phase;
+            // https://cloud.tencent.com/developer/ask/sof/105773
+            //auto find_parabola_peak = [](float x1, float y1, float x2, float y2, float x3, float y3)
+            //{
+            //    long double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
+            //    long double A = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
+            //    long double B = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / denom;
+            //    long double C = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
+
+            //    struct R {
+            //        float xv;
+            //        float yv;
+            //    } r{};
+            //    long double inv_A = 1.0 / A;
+            //    long double xx = -B * 0.5 * inv_A;
+            //    long double yy = C - B * B * 0.25 * inv_A;
+            //    r.xv = xx;
+            //    r.yv = yy;
+            //    return r;
+            //};
+            // https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
+            auto find_parabola_peak = [](double x1, double y1, double x2, double y2, double x3, double y3) {
+                struct R {
+                    float xv;
+                    float yv;
+                } r{};
+
+                double alpha = y1;
+                double beta = y2;
+                double gama = y3;
+                auto up = alpha - gama;
+                auto down = alpha - 2.0 * beta + gama;
+                auto p = 0.5 * up / down;
+                r.xv = x2 + p * (x2 - x1);
+                r.yv = beta - 0.25 * p * (alpha - gama);
+                return r;
+            };
+
+            // convert to db scale
+            std::vector<float> temp_db_gains(num_bin);
+            for (int i = 0; auto gain : temp_gains) {
+                temp_db_gains[i++] = utli::GainToDb(gain);
             }
+
+            // shit parabola only have num_bin - 2 data
+            struct GainAndFreqPhase {
+                float freq;
+                float db_gain;
+                float phase;
+            };
+            std::vector<GainAndFreqPhase> parabola_datas(num_bin - 1);
+            for (int i = 0; i < num_bin - 2; ++i) {
+                auto left_freq = i * source_sample_rate / analyze_fft_size;
+                auto center_freq = (i + 1) * source_sample_rate / analyze_fft_size;
+                auto right_freq = (i + 2) * source_sample_rate / analyze_fft_size;
+                if (temp_db_gains[i] < temp_db_gains[i + 1]
+                    && temp_db_gains[i + 1] > temp_db_gains[i + 2]) {
+                    auto [peak_freq, peak_db] = find_parabola_peak(left_freq, temp_db_gains[i],
+                                                                   center_freq, temp_db_gains[i + 1],
+                                                                   right_freq, temp_db_gains[i + 2]);
+                    parabola_datas[i].freq = peak_freq;
+                    parabola_datas[i].db_gain = peak_db;
+
+                    if (peak_freq < center_freq) { // interp phase with left and center
+                        auto nor_x = (peak_freq - left_freq) / (center_freq - left_freq);
+                        auto interp_cpx = nor_x * std::complex{ real[i], imag[i] } + (1.0f - nor_x) * std::complex{ real[i + 1],imag[i + 1] };
+                        parabola_datas[i].phase = std::arg(interp_cpx);
+                    }
+                    else if (peak_freq > center_freq) { // interp phase with right and center
+                        auto nor_x = (peak_freq - center_freq) / (right_freq - center_freq);
+                        auto interp_cpx = nor_x * std::complex{ real[i + 1], imag[i + 1] } + (1.0f - nor_x) * std::complex{ real[i + 2],imag[i + 2] };
+                        parabola_datas[i].phase = std::arg(interp_cpx);
+                    }
+                    else { // equal to center phase
+                        parabola_datas[i].phase = curr_phases[i + 1];
+                    }
+                }
+                else {
+                    parabola_datas[i].freq = center_freq;
+                    parabola_datas[i].db_gain = temp_db_gains[i + 1];
+                    parabola_datas[i].phase = curr_phases[i + 1];
+                }
+            }
+            // copy the last bin
+            auto& last_parabola_data = parabola_datas.back();
+            last_parabola_data.db_gain = temp_db_gains.back();
+            last_parabola_data.freq = (num_bin - 1) * source_sample_rate / analyze_fft_size;
+            last_parabola_data.phase = curr_phases.back();
+            //{ // mirror freqs
+            //    const auto left_idx = num_bin - 2;
+            //    const auto center_idx = num_bin - 1;
+            //    const auto right_idx = left_idx;
+            //    auto left_freq = (num_bin - 2) * source_sample_rate / analyze_fft_size;
+            //    auto center_freq = (num_bin - 1) * source_sample_rate / analyze_fft_size;
+            //    auto right_freq = (num_bin)*source_sample_rate / analyze_fft_size;
+            //    auto [peak_freq, peak_db] = find_parabola_peak(left_freq, temp_db_gains[left_idx],
+            //                                                   center_freq, temp_db_gains[center_idx],
+            //                                                   right_freq, temp_db_gains[num_bin - 2]);
+            //    parabola_datas.back().freq = peak_freq;
+            //    parabola_datas.back().db_gain = peak_db;
+
+            //    if (peak_freq < center_freq) { // interp phase with left and center
+            //        auto nor_x = (peak_freq - left_freq) / (center_freq - left_freq);
+            //        auto interp_cpx = nor_x * std::complex{ real[left_freq], imag[left_idx] } +
+            //            (1.0f - nor_x) * std::complex{ real[center_idx],imag[center_idx] };
+            //        parabola_datas.back().phase = std::arg(interp_cpx);
+            //    }
+            //    else if (peak_freq > center_freq) { // interp phase with right and center
+            //        auto nor_x = (peak_freq - center_freq) / (right_freq - center_freq);
+            //        auto interp_cpx = nor_x * std::complex{ real[center_idx], imag[center_idx] }
+            //        + (1.0f - nor_x) * std::complex{ real[right_idx],imag[right_idx] };
+            //        parabola_datas.back().phase = std::arg(interp_cpx);
+            //    }
+            //    else { // equal to center phase
+            //        parabola_datas.back().phase = curr_phases[center_idx];
+            //    }
+            //}
+            // copy phase for next frame
+            for (int i = 0; auto & p : last_frame_phases) {
+                p = parabola_datas[i++].phase;
+            }
+            // trying to find the best partial
+            for (int i = 0; i < kNumPartials; ++i) {
+                auto res_partial_freq = c2_freq * (i + 1.0f);
+                auto min_freq = res_partial_freq - max_search_freq_diff;
+                auto max_freq = res_partial_freq + max_search_freq_diff;
+                auto begin_it = std::ranges::find_if(parabola_datas, [min_freq](auto d) {return d.freq >= min_freq; });
+                auto end_it = std::ranges::find_if(parabola_datas, [max_freq](auto d) {return d.freq > max_freq; });
+
+                auto max_gain_it = std::max_element(begin_it, end_it, [](GainAndFreqPhase max, GainAndFreqPhase ele) {
+                    return ele.db_gain > max.db_gain;
+                });
+                auto max_gain = *max_gain_it;
+
+                auto ratio_diff = (max_gain.freq - res_partial_freq) / c2_freq;
+                auto gain = utli::DbToGain(max_gain.db_gain);
+                new_frame.gains[i] = gain;
+                new_frame.ratio_diffs[i] = ratio_diff;
+            }
+            /*const auto c = std::complex(real[i + 1], imag[i + 1]);
+            new_frame.gains[i] = std::abs(c) / (analyze_fft_size / 2);
+            new_frame.freq_diffs[i] = 0.0f;
+            new_frame.ratio_diffs[i] = 0.0f;
+            curr_phases[i] = std::arg(c);*/
+        }
+        else { // todo: use phase lock
+            struct GainAndFreq {
+                float freq;
+                float gain;
+            };
+            std::vector<GainAndFreq> high_resolution_infos(num_bin - 1);
+            for (int i = 1; i < num_bin; ++i) {
+                // calculate instant frequency
+                const auto bin_frequency = static_cast<float>(i) * std::numbers::pi_v<float> *2.0f / static_cast<float>(analyze_fft_size);
+                const auto target_phase = bin_frequency * kFFtHop + last_frame_phases[i - 1];
+                const auto phase_diff = PhaseWrap(curr_phases[i] - target_phase);
+                const auto nor_instant_freq = phase_diff / (kFFtHop * std::numbers::pi_v<float> *2.0f) + static_cast<float>(i) / static_cast<float>(analyze_fft_size);
+                high_resolution_infos[i - 1].freq = nor_instant_freq * source_sample_rate;
+                high_resolution_infos[i - 1].gain = temp_gains[i];
+                last_frame_phases[i - 1] = curr_phases[i];
+            }
+
+            // trying to find the best partial
+            for (int i = 0; i < kNumPartials; ++i) {
+                auto res_partial_freq = c2_freq * (i + 1.0f);
+                auto min_freq = res_partial_freq - max_search_freq_diff;
+                auto max_freq = res_partial_freq + max_search_freq_diff;
+                auto begin_it = std::ranges::find_if(high_resolution_infos, [min_freq](auto d) {return d.freq >= min_freq; });
+                auto end_it = std::ranges::find_if(high_resolution_infos, [max_freq](auto d) {return d.freq > max_freq; });
+
+                auto max_gain_it = std::max_element(begin_it, end_it, [](GainAndFreq max, GainAndFreq ele) {
+                    return ele.gain > max.gain;
+                });
+                auto max_gain = *max_gain_it;
+
+                auto ratio_diff = (max_gain.freq - res_partial_freq) / c2_freq;
+                new_frame.gains[i] = max_gain.gain;
+                new_frame.ratio_diffs[i] = ratio_diff;
+            }
+
+            //for (int i = 0; i < analyze_fft_size / 2; ++i) {
+            //    const auto c = std::complex(real[i + 1], imag[i + 1]);
+            //    new_frame.gains[i] = std::abs(c) / (analyze_fft_size / 2);
+            //    auto this_frame_phase = std::arg(c);
+
+            //    // calculate instant frequency
+            //    const auto bin_frequency = static_cast<float>(i + 1) * std::numbers::pi_v<float> *2.0f / static_cast<float>(analyze_fft_size);
+            //    const auto target_phase = bin_frequency * kFFtHop + curr_phases[i];
+            //    const auto phase_diff = PhaseWrap(this_frame_phase - target_phase);
+            //    const auto instant_freq = phase_diff / (kFFtHop * std::numbers::pi_v<float>) + (1.0f + i) / static_cast<float>(analyze_fft_size / 2);
+            //    new_frame.ratio_diffs[i] = instant_freq * sample_rate_ratio / c2_freq - (i + 1.0f);
+            //    curr_phases[i] = this_frame_phase;
+            //}
         }
         max_gain = std::max(max_gain, *std::ranges::max_element(new_frame.gains));
         audio_frames.frames.emplace_back(std::move(new_frame));
         read_pos += kFFtHop;
     }
 
-    auto gain_level_up = 1.0f / max_gain; // maybe 0.0f?
-    for (auto& frame : audio_frames.frames) {
-        for (auto& level : frame.gains) {
-            level *= gain_level_up;
+    if (max_gain == 0.0f) {
+        auto gain_level_up = 1.0f / max_gain; // maybe 0.0f?
+        for (auto& frame : audio_frames.frames) {
+            for (auto& level : frame.gains) {
+                level *= gain_level_up;
+            }
         }
     }
 

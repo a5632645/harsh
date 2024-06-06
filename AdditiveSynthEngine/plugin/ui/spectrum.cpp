@@ -10,7 +10,7 @@ Spectrum::Spectrum(Synth& synth)
     startTimerHz(25);
 
     box.addItem("auto", 1);
-    for (int i = 0; i < kNumOscillors; ++i) {
+    for (int i = 0; i < 1; ++i) {
         box.addItem(juce::String{ i }, i + 2);
     }
     box.setSelectedItemIndex(0, juce::dontSendNotification);
