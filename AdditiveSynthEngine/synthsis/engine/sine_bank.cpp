@@ -2,6 +2,11 @@
 
 #include "utli/convert.h"
 
+// ================================================================================
+// the smoothing fir filter
+// see the `smooth_compare.py` file
+// ================================================================================
+
 namespace mana {
 SineBank::SineBank() {
     phase_table_.resize(kNumPartials);
