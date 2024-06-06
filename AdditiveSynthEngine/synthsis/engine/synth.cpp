@@ -475,6 +475,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
     image_frame.base_freq = c2_freq;
 
+    // todo: when image height is smaller than num_partials, do not strech image
     for (int x = 0; x < w; ++x) {
         auto& frame = image_frame.frames[x];
         for (int y = 0; y < kNumPartials; ++y) {
@@ -495,10 +496,6 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
             frame.gains[y] = gain;
             frame.ratio_diffs[y] = ratio_diff;
         }
-        //for (int y = kNumPartials; y < kFFtSize / 2; ++y) {
-        //    frame.gains[y] = 0.0f;
-        //    frame.ratio_diffs[y] = 0.0f;
-        //}
     }
 
     auto gain_level_up = 1.0f / max_gain; // maybe 0.0f?
