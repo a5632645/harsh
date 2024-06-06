@@ -203,6 +203,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f;
     auto num_frame = static_cast<size_t>((sample.size() - static_cast<float>(analyze_fft_size)) / static_cast<float>(kFFtHop));
     ResynthsisFrames audio_frames;
+    audio_frames.source_type = ResynthsisFrames::Type::kAudio;
     audio_frames.frames.reserve(num_frame);
     audio_frames.frame_interval_sample = kFFtHop / sample_rate_ratio;
     audio_frames.base_freq = c2_freq;
@@ -458,7 +459,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     return audio_frames;
 }
 
-ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBase> image_in) {
+ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBase> image_in, bool stretch_image) {
     ResynthsisFrames image_frame;
 
     /*
@@ -474,21 +475,28 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     image_frame.frame_interval_sample = kFFtHop;
     const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
     image_frame.base_freq = c2_freq;
+    image_frame.source_type = ResynthsisFrames::Type::kImage;
 
     // todo: when image height is smaller than num_partials, do not strech image
+    auto y_loop = kNumPartials;
+    if (!stretch_image)
+        y_loop = std::min(y_loop, h);
+
     for (int x = 0; x < w; ++x) {
         auto& frame = image_frame.frames[x];
-        for (int y = 0; y < kNumPartials; ++y) {
-            auto y_nor = static_cast<float>(y) / static_cast<float>(kNumPartials);
-            auto image_y_idx = std::clamp(static_cast<int>(h - y_nor * h), 0, h - 1);
+
+        for (int y = 0; y < y_loop; ++y) {
+            auto image_y_idx = y_loop - y - 1;
+            if (stretch_image) {
+                auto y_nor = static_cast<float>(y) / static_cast<float>(kNumPartials - 1);
+                image_y_idx = std::clamp(static_cast<int>(h - y_nor * h), 0, h - 1);
+            }
             auto pixel = image_in->GetPixel(x, image_y_idx);
 
             // map g to gain
             auto gain = 0.0f;
-            if (pixel.g != 0) {
-                auto db = std::lerp(-60.0f, 0.0f, static_cast<float>(pixel.g) / 255.0f);
-                gain = Db2Gain(db) / (y + 1.0f);
-            }
+            auto db = std::lerp(-60.0f, 0.0f, static_cast<float>(pixel.g) / 255.0f);
+            gain = Db2Gain(db) / (y + 1.0f);            
             max_gain = std::max(gain, max_gain);
 
             // map b to ratio diff

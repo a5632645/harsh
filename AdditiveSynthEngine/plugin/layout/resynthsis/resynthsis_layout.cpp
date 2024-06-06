@@ -166,8 +166,8 @@ void ResynthsisLayout::CreateAudioResynthsis(const juce::String& path) {
     std::thread{ std::move(task) }.detach();
 }
 
-void ResynthsisLayout::CreateImageResynthsis(const juce::String& path) {
-    auto task = [file_path = path, work_id = ++resynthsis_work_counter_, this] {
+void ResynthsisLayout::CreateImageResynthsis(const juce::String& path, bool stretch_image) {
+    auto task = [file_path = path, work_id = ++resynthsis_work_counter_, stretch_image, this] {
         ResynthsisFrames frame;
 
         auto img = juce::ImageFileFormat::loadFrom(juce::File(file_path));
@@ -176,7 +176,7 @@ void ResynthsisLayout::CreateImageResynthsis(const juce::String& path) {
             return;
         }
 
-        frame = synth_.CreateResynthsisFramesFromImage(std::make_unique<JuceImageAdpter>(img));
+        frame = synth_.CreateResynthsisFramesFromImage(std::make_unique<JuceImageAdpter>(img), stretch_image);
         std::clog << std::format(R"([resynthsis]: load file "{}" *success*)", file_path) << std::endl;
 
         if (resynthsis_work_counter_.load() != work_id) {
@@ -206,6 +206,8 @@ juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
     const auto display_height = kNumPartials;// hide half fft spectrum and image because it only used in formant stretch
     const auto display_width = static_cast<int>(spectrum.size());// hide half fft spectrum and image because it only used in formant stretch
     juce::Image resynthsis_img{ juce::Image::RGB, display_width, display_height,false };
+    auto should_6dB_level_up = frames.source_type == ResynthsisFrames::Type::kImage;
+
     for (int x = 0; x < display_width; ++x) {
         const auto& draw_frame = spectrum.at(x);
 
@@ -213,7 +215,10 @@ juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
             auto y_idx = display_height - 1 - y;
 
             // map gain to g
-            auto db_g = utli::GainToDb<-60.0f>(draw_frame.gains[y_idx]) / 60.0f + 1.0f;
+            auto gain = draw_frame.gains[y_idx];
+            if (should_6dB_level_up)
+                gain *= (y + 1.0f);
+            auto db_g = utli::GainToDb<-60.0f>(gain) / 60.0f + 1.0f;
             auto g = static_cast<unsigned char>(std::clamp(0xff * db_g, 0.0f, 255.0f));
 
             // map ratio_diff to b
@@ -247,8 +252,18 @@ void ResynthsisLayout::buttonClicked(juce::Button* ptr_button) {
             if (chooser.getResults().isEmpty()) {
                 return;
             }
+
             auto load_file = chooser.getResult();
-            CreateImageResynthsis(load_file.getFullPathName());
+            image_post_process_selector_ = std::make_unique<juce::AlertWindow>("image stretch",
+                                                                               "do you want to stretch the image?",
+                                                                               juce::MessageBoxIconType::QuestionIcon);
+            image_post_process_selector_->addButton("stretch", 0);
+            image_post_process_selector_->addButton("keep", 1);
+            image_post_process_selector_->enterModalState(true, juce::ModalCallbackFunction::create([this, file = load_file](int w) {
+                image_post_process_selector_->exitModalState(w);
+                image_post_process_selector_->setVisible(false);
+                CreateImageResynthsis(file.getFullPathName(), w == 0);
+            }));
         });
     }
 }
