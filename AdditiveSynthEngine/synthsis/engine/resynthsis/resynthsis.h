@@ -33,6 +33,7 @@ private:
     CurveV2* pos_offset_curve_{};
     Synth& synth_;
     float sample_rate_{};
+    float inv_sample_rate_{};
     float frame_pos_{};
     float frame_player_pos_{};
     int skip_{};

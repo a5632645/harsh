@@ -473,7 +473,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     image_frame.frames.resize(w);
     auto max_gain = 0.0f;
     image_frame.frame_interval_sample = kFFtHop;
-    const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f * 2.0f / sample_rate_;
+    const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f;
     image_frame.base_freq = c2_freq;
     image_frame.source_type = ResynthsisFrames::Type::kImage;
 
@@ -496,7 +496,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
             // map g to gain
             auto gain = 0.0f;
             auto db = std::lerp(-60.0f, 0.0f, static_cast<float>(pixel.g) / 255.0f);
-            gain = Db2Gain(db) / (y + 1.0f);            
+            gain = Db2Gain(db) / (y + 1.0f);
             max_gain = std::max(gain, max_gain);
 
             // map b to ratio diff

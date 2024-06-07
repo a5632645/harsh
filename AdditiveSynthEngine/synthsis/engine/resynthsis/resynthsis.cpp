@@ -8,6 +8,7 @@
 namespace mana {
 void Resynthesis::Init(float sample_rate, float update_rate) {
     sample_rate_ = sample_rate;
+    inv_sample_rate_ = 1.0f / sample_rate;
     skip_ = sample_rate / update_rate;
 }
 
@@ -120,6 +121,7 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
     auto formant_ratio = std::exp2(-formant_shift_ / 12.0f);
     std::array<float, kNumPartials> output{};
 
+    const auto& resynthsis_datas = synth_.GetResynthsisFrames();
     if (!is_formant_remap_->GetBool()) { // disable remap
         for (int i = 0; i < kNumPartials; ++i) {
             float final_frame_nor_pos = pos_offset_curve_->Get(i) + frame_pos_;
@@ -131,18 +133,39 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
             size_t frame_idx = static_cast<size_t>((resynthsis_frames.size() - 0.01f) * final_frame_nor_pos);
             const auto& frame = resynthsis_frames[frame_idx];
 
-            auto idx = partials.freqs[i] * (kNumPartials)*formant_ratio - 1.0f;
-            auto int_idx = static_cast<int>(std::round(idx));
+            //auto idx = partials.freqs[i] * (kNumPartials)*formant_ratio - 1.0f;
+            //auto int_idx = static_cast<int>(std::round(idx));
 
-            if (int_idx < 0 || int_idx >= kNumPartials) {
+            //if (int_idx < 0 || int_idx >= kNumPartials) {
+            //    output[i] = 0.0f;
+            //}
+            //else {
+            //    output[i] = frame.gains[int_idx];
+            //}
+            auto remap_freq = partials.freqs[i] * 0.5f * sample_rate_ * formant_ratio;
+            auto formant_max_freq = (kNumPartials + 1.0f) * resynthsis_datas.base_freq;
+            auto formant_data_max_freq = kNumPartials * resynthsis_datas.base_freq;
+            if (remap_freq > formant_max_freq || remap_freq < 0.0f) {
                 output[i] = 0.0f;
             }
+            else if (remap_freq < resynthsis_datas.base_freq) {
+                auto frac = remap_freq / resynthsis_datas.base_freq;
+                output[i] = frac * frame.gains.front();
+            }
+            else if (remap_freq > formant_data_max_freq) {
+                auto frac = 1.0f - (remap_freq - formant_data_max_freq) / resynthsis_datas.base_freq;
+                output[i] = frac * frame.gains.back();
+            }
             else {
-                output[i] = frame.gains[int_idx];
+                auto index_k = remap_freq / resynthsis_datas.base_freq - 1.0f;
+                auto left_idx = static_cast<int>(std::floor(index_k));
+                auto right_idx = static_cast<int>(std::ceil(index_k)) & (kNumPartials - 1); // if idx euqal to 256 that is mirror to bin 0
+                auto frac = index_k - left_idx;
+                output[i] = std::lerp(frame.gains[left_idx], frame.gains[right_idx], frac);
             }
         }
     }
-    else {
+    else { // enable formant remap
         for (int i = 0; i < kNumPartials; ++i) {
             float final_frame_nor_pos = pos_offset_curve_->Get(i) + frame_pos_;
             {
@@ -153,7 +176,7 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
             size_t frame_idx = static_cast<size_t>((resynthsis_frames.size() - 0.01f) * final_frame_nor_pos);
             const auto& frame = resynthsis_frames[frame_idx];
 
-            auto idx = partials.freqs[i] * (kNumPartials)*formant_ratio - 1.0f;
+            /*auto idx = partials.freqs[i] * (kNumPartials)*formant_ratio - 1.0f;
             auto norm_idx = idx / static_cast<float>(kNumPartials);
             if (norm_idx < 0.0f || norm_idx > 1.0f) {
                 output[i] = 0.0f;
@@ -168,6 +191,39 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
             }
             else {
                 output[i] = frame.gains[remap_idx];
+            }*/
+
+            // remap frequency
+            auto org_freq = 0.5f * sample_rate_ * partials.freqs[i];
+            auto remap_freq = org_freq;
+            constexpr auto blend_min = 20.0f;
+            constexpr auto blend_max = 20000.0f;
+            if (org_freq >= blend_min && org_freq <= blend_max) {
+                auto map_input_x = (1.0f / 3.0f) * std::log10(org_freq / blend_min);
+                auto map_x = formant_remap_curve_->GetNormalize(map_input_x);
+                remap_freq = blend_min * std::exp(std::numbers::ln10_v<float> *map_x * 3.0f);
+            }
+
+            // do formant shift
+            auto formant_max_freq = (kNumPartials + 1.0f) * resynthsis_datas.base_freq;
+            auto formant_data_max_freq = kNumPartials * resynthsis_datas.base_freq;
+            if (remap_freq > formant_max_freq || remap_freq < 0.0f) {
+                output[i] = 0.0f;
+            }
+            else if (remap_freq < resynthsis_datas.base_freq) {
+                auto frac = remap_freq / resynthsis_datas.base_freq;
+                output[i] = frac * frame.gains.front();
+            }
+            else if (remap_freq > formant_data_max_freq) {
+                auto frac = 1.0f - (remap_freq - formant_data_max_freq) / resynthsis_datas.base_freq;
+                output[i] = frac * frame.gains.back();
+            }
+            else {
+                auto index_k = remap_freq / resynthsis_datas.base_freq - 1.0f;
+                auto left_idx = static_cast<int>(std::floor(index_k));
+                auto right_idx = static_cast<int>(std::ceil(index_k)) & (kNumPartials - 1); // if idx euqal to 256 that is mirror to bin 0
+                auto frac = index_k - left_idx;
+                output[i] = std::lerp(frame.gains[left_idx], frame.gains[right_idx], frac);
             }
         }
     }
