@@ -291,8 +291,7 @@ void Dissonance::DoPitchQuantize(Partials& partials) {
         }
 
         // remap semitone
-        float nor_semitone = pitch_quantize_map_->Get(semitone);
-        semitone = static_cast<int>(nor_semitone * 11.99f);
+        semitone = static_cast<int>(pitch_quantize_map_->Get(semitone));
 
         float final_quantize_pitch = octave * 12.0f + semitone;
         float final_pitch = std::lerp(raw_pitch, final_quantize_pitch, amount);
