@@ -137,16 +137,4 @@ void FilterLayout::sliderValueChanged(juce::Slider* slider) {
         OnResonanceTypeChanged(reso_type);
     }
 }
-
-void FilterLayout::BeginHighlightModulator(std::string_view id) {
-    for (auto& knob : arg_filter_knobs_) {
-        knob->BeginHighlightModulator(id);
-    }
-}
-
-void FilterLayout::StopHighliteModulator() {
-    for (auto& knob : arg_filter_knobs_) {
-        knob->StopHighliteModulator();
-    }
-}
 }

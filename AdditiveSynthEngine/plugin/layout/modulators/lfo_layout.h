@@ -5,18 +5,13 @@
 #include "ui/wrap_slider.h"
 #include "ui/wrap_drop_box.h"
 #include "ui/wrap_check_box.h"
-#include "layout/modu_container.h"
 
 namespace mana {
-class LfoLayout : public juce::Component, public ModuContainer {
+class LfoLayout : public juce::Component {
 public:
     LfoLayout(Synth& synth, int idx);
     
     void resized() override;
-
-    // 通过 ModuContainer 继承
-    void BeginHighlightModulator(std::string_view id) override;
-    void StopHighliteModulator() override;
 private:
     std::unique_ptr<WrapSlider> rate_;
     std::unique_ptr<WrapSlider> start_phase_;

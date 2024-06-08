@@ -151,14 +151,6 @@ void Synth::SetResynthsisFrames(ResynthsisFrames new_frame) {
 }
 
 std::pair<bool, ModulationConfig*> Synth::CreateModulation(std::string_view modulator, std::string_view param) {
-    //{
-    //    auto existed_it = std::ranges::find_if(modulation_configs_, [modulator, param](std::shared_ptr<ModulationConfig>& cfg) {
-    //        return cfg->modulator_id == modulator && cfg->param_id == param;
-    //    });
-    //    if (existed_it != modulation_configs_.cend()) {
-    //        return { false, nullptr };
-    //    }
-    //}
     auto exist_modu = synth_params_.FindModulation(modulator, param);
     if (exist_modu != nullptr) {
         return { false, nullptr };
@@ -167,7 +159,6 @@ std::pair<bool, ModulationConfig*> Synth::CreateModulation(std::string_view modu
     auto new_modulation_cfg = std::make_shared<ModulationConfig>();
     new_modulation_cfg->modulator_id = modulator;
     new_modulation_cfg->param_id = param;
-    //modulation_configs_.emplace_back(new_modulation_cfg);
     synth_params_.AddModulation(new_modulation_cfg);
 
     for (auto& osc : m_oscillators) {
@@ -182,17 +173,12 @@ void Synth::RemoveModulation(ModulationConfig& config) {
         osc.RemoveModulation(config);
     }
 
-    //auto it = std::ranges::find_if(modulation_configs_, [config](std::shared_ptr<ModulationConfig>& cfg) {
-    //    return cfg->modulator_id == config.modulator_id
-    //        && cfg->param_id == config.param_id;
-    //});
-    //modulation_configs_.erase(it);
     synth_params_.RemoveModulation(config);
 }
 
 static constexpr auto analyze_fft_size = 2048;
-static constexpr auto sample_fft_size = 1024;
-static constexpr auto kFFtHop = 256; // equal to harmor
+static constexpr auto sample_fft_size = 512;
+static constexpr auto kFFtHop = 256;
 ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float source_sample_rate) const {
     audiofft::AudioFFT fft;
     Window<float> window;
@@ -248,26 +234,6 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         if (audio_frames.frames.empty()) {
             // startup frame
             // use 抛物线 to find the best freq and gain partial
-
-            // https://cloud.tencent.com/developer/ask/sof/105773
-            //auto find_parabola_peak = [](float x1, float y1, float x2, float y2, float x3, float y3)
-            //{
-            //    long double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
-            //    long double A = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
-            //    long double B = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / denom;
-            //    long double C = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
-
-            //    struct R {
-            //        float xv;
-            //        float yv;
-            //    } r{};
-            //    long double inv_A = 1.0 / A;
-            //    long double xx = -B * 0.5 * inv_A;
-            //    long double yy = C - B * B * 0.25 * inv_A;
-            //    r.xv = xx;
-            //    r.yv = yy;
-            //    return r;
-            //};
             // https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
             auto find_parabola_peak = [](double x1, double y1, double x2, double y2, double x3, double y3) {
                 struct R {
@@ -336,35 +302,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
             last_parabola_data.db_gain = temp_db_gains.back();
             last_parabola_data.freq = (num_bin - 1) * source_sample_rate / analyze_fft_size;
             last_parabola_data.phase = curr_phases.back();
-            //{ // mirror freqs
-            //    const auto left_idx = num_bin - 2;
-            //    const auto center_idx = num_bin - 1;
-            //    const auto right_idx = left_idx;
-            //    auto left_freq = (num_bin - 2) * source_sample_rate / analyze_fft_size;
-            //    auto center_freq = (num_bin - 1) * source_sample_rate / analyze_fft_size;
-            //    auto right_freq = (num_bin)*source_sample_rate / analyze_fft_size;
-            //    auto [peak_freq, peak_db] = find_parabola_peak(left_freq, temp_db_gains[left_idx],
-            //                                                   center_freq, temp_db_gains[center_idx],
-            //                                                   right_freq, temp_db_gains[num_bin - 2]);
-            //    parabola_datas.back().freq = peak_freq;
-            //    parabola_datas.back().db_gain = peak_db;
 
-            //    if (peak_freq < center_freq) { // interp phase with left and center
-            //        auto nor_x = (peak_freq - left_freq) / (center_freq - left_freq);
-            //        auto interp_cpx = nor_x * std::complex{ real[left_freq], imag[left_idx] } +
-            //            (1.0f - nor_x) * std::complex{ real[center_idx],imag[center_idx] };
-            //        parabola_datas.back().phase = std::arg(interp_cpx);
-            //    }
-            //    else if (peak_freq > center_freq) { // interp phase with right and center
-            //        auto nor_x = (peak_freq - center_freq) / (right_freq - center_freq);
-            //        auto interp_cpx = nor_x * std::complex{ real[center_idx], imag[center_idx] }
-            //        + (1.0f - nor_x) * std::complex{ real[right_idx],imag[right_idx] };
-            //        parabola_datas.back().phase = std::arg(interp_cpx);
-            //    }
-            //    else { // equal to center phase
-            //        parabola_datas.back().phase = curr_phases[center_idx];
-            //    }
-            //}
             // copy phase for next frame
             for (int i = 0; auto & p : last_frame_phases) {
                 p = parabola_datas[i++].phase;
@@ -387,11 +325,6 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
                 new_frame.gains[i] = gain;
                 new_frame.ratio_diffs[i] = ratio_diff;
             }
-            /*const auto c = std::complex(real[i + 1], imag[i + 1]);
-            new_frame.gains[i] = std::abs(c) / (analyze_fft_size / 2);
-            new_frame.freq_diffs[i] = 0.0f;
-            new_frame.ratio_diffs[i] = 0.0f;
-            curr_phases[i] = std::arg(c);*/
         }
         else { // todo: use phase lock
             struct GainAndFreq {
@@ -427,20 +360,6 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
                 new_frame.gains[i] = max_gain.gain;
                 new_frame.ratio_diffs[i] = ratio_diff;
             }
-
-            //for (int i = 0; i < analyze_fft_size / 2; ++i) {
-            //    const auto c = std::complex(real[i + 1], imag[i + 1]);
-            //    new_frame.gains[i] = std::abs(c) / (analyze_fft_size / 2);
-            //    auto this_frame_phase = std::arg(c);
-
-            //    // calculate instant frequency
-            //    const auto bin_frequency = static_cast<float>(i + 1) * std::numbers::pi_v<float> *2.0f / static_cast<float>(analyze_fft_size);
-            //    const auto target_phase = bin_frequency * kFFtHop + curr_phases[i];
-            //    const auto phase_diff = PhaseWrap(this_frame_phase - target_phase);
-            //    const auto instant_freq = phase_diff / (kFFtHop * std::numbers::pi_v<float>) + (1.0f + i) / static_cast<float>(analyze_fft_size / 2);
-            //    new_frame.ratio_diffs[i] = instant_freq * sample_rate_ratio / c2_freq - (i + 1.0f);
-            //    curr_phases[i] = this_frame_phase;
-            //}
         }
         max_gain = std::max(max_gain, *std::ranges::max_element(new_frame.gains));
         audio_frames.frames.emplace_back(std::move(new_frame));
@@ -472,7 +391,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     auto h = image_in->GetHeight();
     image_frame.frames.resize(w);
     auto max_gain = 0.0f;
-    image_frame.frame_interval_sample = kFFtHop;
+    image_frame.frame_interval_sample = 256; // equal to harmor
     const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f;
     image_frame.base_freq = c2_freq;
     image_frame.source_type = ResynthsisFrames::Type::kImage;

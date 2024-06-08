@@ -6,12 +6,10 @@
 #include "utli/spin_lock.h"
 #include "ui/wrap_check_box.h"
 #include "ui/wrap_drop_box.h"
-#include "layout/modu_container.h"
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class ResynthsisLayout : public ModuContainer,
-    public juce::Component,
+class ResynthsisLayout : public juce::Component,
     private juce::Button::Listener,
     private juce::Timer {
 public:
@@ -20,10 +18,6 @@ public:
 
     void paintOverChildren(juce::Graphics& g) override;
     void resized() override;
-
-    // 通过 ModuContainer 继承
-    void BeginHighlightModulator(std::string_view id) override;
-    void StopHighliteModulator() override;
 private:
     void CreateAudioResynthsis(const juce::String& path);
     void CreateImageResynthsis(const juce::String& path, bool stretch_image);

@@ -271,16 +271,4 @@ void ResynthsisLayout::buttonClicked(juce::Button* ptr_button) {
 void ResynthsisLayout::timerCallback() {
     repaint();
 }
-
-void ResynthsisLayout::BeginHighlightModulator(std::string_view id) {
-    for (const auto& p : arg_knobs_) {
-        p->BeginHighlightModulator(id);
-    }
-}
-
-void ResynthsisLayout::StopHighliteModulator() {
-    for (const auto& p : arg_knobs_) {
-        p->StopHighliteModulator();
-    }
-}
 }

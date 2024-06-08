@@ -5,15 +5,6 @@
 #include "envelop_layout.h"
 #include "modulator_button.h"
 
-//namespace mana {
-//static class ModulatorTabLookAndFeel : public juce::LookAndFeel_V4 {
-//public:
-//    int getTabButtonBestWidth(juce::TabBarButton&, int tabDepth) override {
-//
-//    }
-//} kLookAndFeel;
-//}
-
 namespace mana {
 ModulatorsLayout::ModulatorsLayout(Synth& synth)
     : tabbed_(juce::TabbedButtonBar::Orientation::TabsAtTop) {
@@ -26,8 +17,7 @@ ModulatorsLayout::ModulatorsLayout(Synth& synth)
             assert(err == std::error_code{});
 
             auto comp = std::make_unique<LfoLayout>(synth, d);
-            tabbed_.addTab(juce::String{ id.data(), id.length() }, juce::Colours::green, comp.get(), false);
-            components_.emplace_back(std::move(comp));
+            tabbed_.addTab(juce::String{ id.data(), id.length() }, juce::Colours::green, comp.get(), true);
         }
         else if (id.starts_with("env")) {
             auto idx_str = id.substr(3);
@@ -36,8 +26,7 @@ ModulatorsLayout::ModulatorsLayout(Synth& synth)
             assert(err == std::error_code{});
 
             auto comp = std::make_unique<EnvelopLayout>(synth, d);
-            tabbed_.addTab(juce::String{ id.data(), id.length() }, juce::Colours::green, comp.get(), false);
-            components_.emplace_back(std::move(comp));
+            tabbed_.addTab(juce::String{ id.data(), id.length() }, juce::Colours::green, comp.get(), true);
         }
 
         // extra num modulation display and drag component
@@ -51,17 +40,5 @@ ModulatorsLayout::ModulatorsLayout(Synth& synth)
 
 void ModulatorsLayout::resized() {
     tabbed_.setBounds(getLocalBounds());
-}
-
-void ModulatorsLayout::BeginHighlightModulator(std::string_view id) {
-    for (const auto& c : components_) {
-        c->BeginHighlightModulator(id);
-    }
-}
-
-void ModulatorsLayout::StopHighliteModulator() {
-    for (const auto& c : components_) {
-        c->StopHighliteModulator();
-    }
 }
 }

@@ -70,16 +70,4 @@ void OscLayout::OnTimberTypeChanged(int c) {
 void OscLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
     OnTimberTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
 }
-
-void OscLayout::BeginHighlightModulator(std::string_view id) {
-    for (auto& knob : arg_knobs_) {
-        knob->BeginHighlightModulator(id);
-    }
-}
-
-void OscLayout::StopHighliteModulator() {
-    for (auto& knob : arg_knobs_) {
-        knob->StopHighliteModulator();
-    }
-}
 }

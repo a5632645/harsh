@@ -53,16 +53,4 @@ void PhaseLayout::OnPhaseTypeChanged(int c) {
 void PhaseLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
     OnPhaseTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
 }
-
-void PhaseLayout::BeginHighlightModulator(std::string_view id) {
-    for (auto& knob : phase_arg_knobs_) {
-        knob->BeginHighlightModulator(id);
-    }
-}
-
-void PhaseLayout::StopHighliteModulator() {
-    for (auto& knob : phase_arg_knobs_) {
-        knob->StopHighliteModulator();
-    }
-}
 }

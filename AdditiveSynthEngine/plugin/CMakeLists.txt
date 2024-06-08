@@ -130,7 +130,7 @@ set(UI_HEADER
  "layout/modulators/lfo_layout.h"
  "layout/matrix/modulation_matrix_layout.h"
  "layout/synth/unison_layout.h"
- "layout/modu_container.h"
+ 
  "layout/modulators/modulator_button.h" "layout/modu_listener.h" "layout/cruve/curve_layout.h" "ui/quantize_map_editor.h" "ui/common_curve_editor.h")
 
 target_sources(Harsh

@@ -25,18 +25,4 @@ void EnvelopLayout::resized() {
     sustain_->setBounds(0 + 100, 0, 50, 50);
     release_->setBounds(0 + 150, 0, 50, 50);
 }
-
-void EnvelopLayout::BeginHighlightModulator(std::string_view id) {
-    attack_->BeginHighlightModulator(id);
-    decay_->BeginHighlightModulator(id);
-    sustain_->BeginHighlightModulator(id);
-    release_->BeginHighlightModulator(id);
-}
-
-void EnvelopLayout::StopHighliteModulator() {
-    attack_->StopHighliteModulator();
-    decay_->StopHighliteModulator();
-    sustain_->StopHighliteModulator();
-    release_->StopHighliteModulator();
-}
 }

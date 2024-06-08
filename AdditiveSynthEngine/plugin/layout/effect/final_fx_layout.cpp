@@ -17,16 +17,4 @@ void FinalFxLayout::resized() {
         ++i;
     }
 }
-
-void FinalFxLayout::BeginHighlightModulator(std::string_view id) {
-    for (const auto& p : sp_effects_) {
-        p->BeginHighlightModulator(id);
-    }
-}
-
-void FinalFxLayout::StopHighliteModulator() {
-    for (const auto& p : sp_effects_) {
-        p->StopHighliteModulator();
-    }
-}
 }

@@ -26,7 +26,6 @@ private:
     std::unique_ptr<MasterLayout> master_;
     std::unique_ptr<CurveLayout> curve_layout_;
     std::unique_ptr<juce::TabbedComponent> tabbed_;
-    std::vector<std::unique_ptr<ModuContainer>> layouts_;
     juce::ListenerList<ModulationActionListener> listeners_;
 };
 }

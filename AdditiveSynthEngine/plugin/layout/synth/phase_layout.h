@@ -2,21 +2,17 @@
 
 #include <array>
 #include "engine/forward_decalre.h"
-#include "layout/modu_container.h"
+ 
 #include "ui/wrap_drop_box.h"
 #include "ui/wrap_slider.h"
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class PhaseLayout : public ModuContainer, public juce::Component, private juce::ComboBox::Listener {
+class PhaseLayout :   public juce::Component, private juce::ComboBox::Listener {
 public:
     PhaseLayout(Synth& synth);
 
     void resized() override;
-
-    // 通过 ModuContainer 继承
-    void BeginHighlightModulator(std::string_view id) override;
-    void StopHighliteModulator() override;
 private:
     void OnPhaseTypeChanged(int c);
 

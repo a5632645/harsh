@@ -104,16 +104,4 @@ void EffectLayout::OnEffectTypeChanged(int c) {
 void EffectLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
     OnEffectTypeChanged(comboBoxThatHasChanged->getSelectedItemIndex());
 }
-
-void EffectLayout::BeginHighlightModulator(std::string_view id) {
-    for (const auto& p : arg_knobs_) {
-        p->BeginHighlightModulator(id);
-    }
-}
-
-void EffectLayout::StopHighliteModulator() {
-    for (const auto& p : arg_knobs_) {
-        p->StopHighliteModulator();
-    }
-}
 }

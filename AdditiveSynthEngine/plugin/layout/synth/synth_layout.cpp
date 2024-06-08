@@ -23,20 +23,4 @@ void SynthLayout::resized() {
     phase_.setBounds(0 + 450, 0, 50, 200);
     filter_.setBounds(0, 0 + 200, getWidth(), getHeight() - 200);
 }
-
-void SynthLayout::BeginHighlightModulator(std::string_view id) {
-    timber_.BeginHighlightModulator(id);
-    unison_.BeginHighlightModulator(id);
-    diss_.BeginHighlightModulator(id);
-    phase_.BeginHighlightModulator(id);
-    filter_.BeginHighlightModulator(id);
-}
-
-void SynthLayout::StopHighliteModulator() {
-    timber_.StopHighliteModulator();
-    unison_.StopHighliteModulator();
-    diss_.StopHighliteModulator();
-    phase_.StopHighliteModulator();
-    filter_.StopHighliteModulator();
-}
 }

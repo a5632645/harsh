@@ -6,20 +6,16 @@
 #include "timber_layout.h"
 #include "unison_layout.h"
 #include "phase_layout.h"
-#include "layout/modu_container.h"
+ 
 #include <juce_gui_basics/juce_gui_basics.h>
 // one last place holder layout
 
 namespace mana {
-class SynthLayout : public ModuContainer, public juce::Component {
+class SynthLayout :   public juce::Component {
 public:
     SynthLayout(Synth& synth);
 
     void resized() override;
-
-    // 通过 ModuContainer 继承
-    void BeginHighlightModulator(std::string_view id) override;
-    void StopHighliteModulator() override;
 private:
     TimberLayout timber_;
     UnisonLayout unison_;

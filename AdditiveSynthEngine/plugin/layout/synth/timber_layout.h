@@ -3,19 +3,15 @@
 #include "engine/forward_decalre.h"
 #include "osc_layout.h"
 #include "ui/wrap_slider.h"
-#include "layout/modu_container.h"
+ 
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class TimberLayout : public ModuContainer, public juce::Component {
+class TimberLayout :   public juce::Component {
 public:
     TimberLayout(Synth& synth);
 
     void resized() override;
-
-    // 通过 ModuContainer 继承
-    void BeginHighlightModulator(std::string_view id) override;
-    void StopHighliteModulator() override;
 private:
     OscLayout osc1_layout_;
     OscLayout osc2_layout_;

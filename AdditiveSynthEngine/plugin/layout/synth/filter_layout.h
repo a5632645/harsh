@@ -3,20 +3,15 @@
 #include <array>
 #include "ui/wrap_drop_box.h"
 #include "ui/wrap_slider.h"
-#include "layout/modu_container.h"
 #include "engine/forward_decalre.h"
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class FilterLayout : public ModuContainer, public juce::Component, private juce::ComboBox::Listener, private juce::Slider::Listener {
+class FilterLayout : public juce::Component, private juce::ComboBox::Listener, private juce::Slider::Listener {
 public:
     FilterLayout(Synth& synth, int idx);
 
-    void resized();
-
-    // 通过 ModuContainer 继承
-    void BeginHighlightModulator(std::string_view id) override;
-    void StopHighliteModulator() override;
+    void resized() override;
 private:
     void OnResonanceTypeChanged(int c);
     void OnFilterTypeChanged(int c);

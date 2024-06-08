@@ -6,19 +6,14 @@
 #include "ui/wrap_check_box.h"
 #include "ui/wrap_drop_box.h"
 #include "ui/wrap_slider.h"
-#include "layout/modu_container.h"
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace mana {
-class EffectLayout : public ModuContainer, public juce::Component, private juce::ComboBox::Listener {
+class EffectLayout : public juce::Component, private juce::ComboBox::Listener {
 public:
     EffectLayout(Synth& synth, int effect_idx);
 
     void resized() override;
-
-    // 通过 ModuContainer 继承
-    void BeginHighlightModulator(std::string_view id) override;
-    void StopHighliteModulator() override;
 private:
     void OnEffectTypeChanged(int c);
 

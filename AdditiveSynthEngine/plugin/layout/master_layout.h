@@ -7,19 +7,15 @@
 #include "ui/wrap_check_box.h"
 //#include "ui/oscilloscope.h"
 #include "ui/spectrum.h"
-#include "layout/modu_container.h"
 
 namespace mana {
-class MasterLayout : public juce::Component, public ModuContainer {
+class MasterLayout : public juce::Component {
 public:
     MasterLayout(Synth& synth);
 
     void resized() override;
 
     //Oscilloscope& GetWaveScope() { return wave_scope_; }
-    // 通过 ModuContainer 继承
-    void BeginHighlightModulator(std::string_view id) override;
-    void StopHighliteModulator() override;
 private:
     Synth& synth_;
 
