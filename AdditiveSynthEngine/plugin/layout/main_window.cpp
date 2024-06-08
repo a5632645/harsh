@@ -21,7 +21,7 @@ MainWindow::MainWindow(Synth & synth)
 
     addAndMakeVisible(*tabbed_);
     addAndMakeVisible(*modulators_layout_);
-    addChildComponent(*master_);
+    addAndMakeVisible(*master_);
 
     curve_layout_ = std::make_unique<CurveLayout>(synth.GetSynthParams().GetCurveBank());
     addAndMakeVisible(curve_layout_.get());
@@ -29,13 +29,14 @@ MainWindow::MainWindow(Synth & synth)
 
 void MainWindow::resized() {
     auto bound = getLocalBounds();
-    auto bottom_bound = bound.removeFromBottom(200);
+    master_->setBounds(bound.removeFromTop(50));
+
+    auto bottom_bound = bound.removeFromBottom(180);
     tabbed_->setBounds(bound);
 
     constexpr auto kModulatorWidth = 400.0f;
     auto modulator_bound = bottom_bound.removeFromLeft(kModulatorWidth);
     modulators_layout_->setBounds(modulator_bound);
-    master_->setBounds(bottom_bound);
     curve_layout_->setBounds(bottom_bound);
 }
 

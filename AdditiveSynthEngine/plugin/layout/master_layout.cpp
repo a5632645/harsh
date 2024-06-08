@@ -21,9 +21,10 @@ MasterLayout::MasterLayout(Synth& synth)
 }
 
 void MasterLayout::resized() {
-    pitch_bend_->setBounds(0, 0, 50, 50);
-    output_gain_->setBounds(0, 0 + 50, 50, 50);
+    auto b = getLocalBounds();
+    pitch_bend_->setBounds(b.removeFromLeft(50));
+    output_gain_->setBounds(b.removeFromLeft(50));
     //wave_scope_.SetBounds(x + 50, y, w, h / 2);
-    spectrum_.setBounds(50.0f, getHeight() / 2.0f, getWidth(), getHeight() / 2.0f);
+    spectrum_.setBounds(b);
 }
 }

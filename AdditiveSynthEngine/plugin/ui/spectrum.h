@@ -14,10 +14,8 @@ public:
     ~Spectrum() override { stopTimer(); }
 
     void paint(juce::Graphics& g) override;
-    void resized() override;
 private:
     void timerCallback() override;
-    juce::ComboBox box;
     Synth& synth_;
 };
 }
