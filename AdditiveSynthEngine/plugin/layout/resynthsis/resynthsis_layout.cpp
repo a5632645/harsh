@@ -63,17 +63,15 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
         }
     };
 
-    for (int i = 0; auto & k : arg_knobs_) {
-        k = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("resynthsis.arg{}", i++)));
-    }
-
-    SetGuiKnobs(arg_knobs_,
-                param::Resynthsis_FormantMix{},
-                param::Resynthsis_FormantShift{},
-                param::Resynthsis_FrameOffset{},
-                param::Resynthsis_FrameSpeed{},
-                param::Resynthsis_FreqScale{},
-                param::Resynthsis_GainMix{});
+    auto& bank = synth.GetSynthParams().GetParamBank();
+    arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.freq_scale")));
+    arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.start_offset")));
+    arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.speed")));
+    arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.speedx")));
+    arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.formant_mix")));
+    arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.formant_shift")));
+    arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.gain_mix")));
+    arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.start_range")));
 
     is_formant_remap_ = std::make_unique<WrapCheckBox>(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.formant_remap"));
 
@@ -114,10 +112,19 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
 }
 
 void ResynthsisLayout::paintOverChildren(juce::Graphics& g) {
-    float cursor_pos = synth_.GetDisplayOscillor().GetResynthsisProcessor().GetPlayerPosition();
-    auto cursor_x = static_cast<int>(cursor_pos * getWidth());
-    g.setColour(juce::Colours::white);
-    g.drawVerticalLine(cursor_x, 50.0f + 16.0f, static_cast<float>(getHeight()));
+    if (!synth_.IsResynthsisAvailable())
+        return;
+    auto cursor_pos = synth_.GetDisplayOscillor().GetResynthsisProcessor().GetPartialPositions();
+
+    auto partial_height = static_cast<float>(image_view_->getHeight()) / static_cast<float>(kNumPartials);
+    auto partial_y = static_cast<float>(image_view_->getBottom());
+    g.setColour(juce::Colours::black);
+    for (int i = 0; i < kNumPartials; ++i) {
+        auto cursor_x = cursor_pos[i] * getWidth();
+        auto cursor_bound = juce::Rectangle{ cursor_x, partial_y - partial_height, 3.0f, partial_height };
+        g.fillRect(cursor_bound);
+        partial_y -= partial_height;
+    }
 }
 
 void ResynthsisLayout::resized() {
@@ -208,6 +215,15 @@ juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
     juce::Image resynthsis_img{ juce::Image::RGB, display_width, display_height,false };
     auto should_6dB_level_up = frames.source_type == ResynthsisFrames::Type::kImage;
 
+    constexpr auto db6up_table = []() {
+        std::array<float, kNumPartials> out{};
+        for (int i = 0; i < kNumPartials; ++i)
+            out[i] = utli::cp::GainToDb(i + 1.0L, -300.0L);
+        return out;
+    }();
+    constexpr auto min_db = -60.0f;
+    constexpr auto max_db = 0.0f;
+
     for (int x = 0; x < display_width; ++x) {
         const auto& draw_frame = spectrum.at(x);
 
@@ -215,21 +231,30 @@ juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
             auto y_idx = display_height - 1 - y;
 
             // map gain to g
-            auto gain = draw_frame.gains[y_idx];
+            auto db_g = draw_frame.db_gains[y_idx];
             if (should_6dB_level_up)
-                gain *= (y + 1.0f);
-            auto db_g = utli::GainToDb<-60.0f>(gain) / 60.0f + 1.0f;
-            auto g = static_cast<unsigned char>(std::clamp(0xff * db_g, 0.0f, 255.0f));
+                db_g += db6up_table[y_idx];
+            auto nor_db_g = (db_g - min_db) / (max_db - min_db);
+            auto g = static_cast<unsigned char>(std::clamp(0xff * nor_db_g, 0.0f, 255.0f));
 
             // map ratio_diff to b
             auto fre_diff = draw_frame.ratio_diffs[y_idx];
-            auto bit_fre_diff = std::clamp(fre_diff, -1.0f, 1.0f);
-            auto nor_fre_diff = 0.5f + 0.5f * bit_fre_diff;
-            auto b = static_cast<unsigned char>(std::clamp(0xff * nor_fre_diff + 0.5f, 0.0f, 255.0f));
+            auto bit_fre_diff = std::clamp(fre_diff, -0.5f, 0.5f);
+            auto nor_fre_diff = 0.5f + bit_fre_diff;
+            auto b = static_cast<unsigned char>(std::clamp(0xff * nor_fre_diff, 0.0f, 255.0f));
 
             resynthsis_img.setPixelAt(x, y, juce::Colour(0, g, b));
         }
     }
+
+    juce::PNGImageFormat f;
+    juce::File out_img{ R"(C:\Users\Kawai\Desktop\res_output.png)" };
+    if (out_img.exists()) {
+        out_img.deleteFile();
+    }
+    juce::FileOutputStream s{ out_img };
+    f.writeImageToStream(resynthsis_img, s);
+
     return resynthsis_img;
 }
 

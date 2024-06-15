@@ -1,5 +1,6 @@
 #pragma once
 
+#include <random>
 #include "engine/oscillor_param.h"
 #include "resynthsis_data.h"
 #include "engine/partials.h"
@@ -19,33 +20,41 @@ public:
     void OnUpdateTick();
     void PrepareParams(OscillorParams& params);
     void OnNoteOn(int note);
-    void OnNoteOff() { is_running_ = false; }
+    void OnNoteOff() {}
 
     void PreGetFreqDiffsInRatio(Partials& partials);
-    float GetPlayerPosition() const { return frame_pos_; }
+    //float GetPlayerPosition() const { return frame_pos_; }
+    decltype(auto) GetPartialPositions() const { return partials_frame_idxs_; }
 private:
     bool IsWork() const;
     std::array<float, kNumPartials> GetFormantGains(Partials& partials) const;
-    std::array<PolyModuFloatParameter*, 7> args_{};
-    BoolParameter* is_enable_arg_{};
+
+    using R = struct { float gain_db; float ratio_diff; };
+    R GetFrameGain(int partial_idx, int harmonic_idx) const;
+
+    std::default_random_engine random_;
+    std::array<float, kNumPartials> partials_init_frame_idxs_{};
+    std::array<float, kNumPartials> partials_runnig_frame_idxs_{};
+    std::array<float, kNumPartials> partials_frame_idxs_{};
+
+    PolyModuFloatParameter* freq_scale_{};
+    PolyModuFloatParameter* nor_start_pos_{};
+    FloatParameter* partial_start_range_second_{};
+    PolyModuFloatParameter* speed_{};
+    PolyModuFloatParameter* speedx_{};
+    PolyModuFloatParameter* formant_mix_{};
+    PolyModuFloatParameter* formant_shift_{};
+    PolyModuFloatParameter* gain_mix_{};
+
+    BoolParameter* is_enable_{};
     BoolParameter* is_formant_remap_{};
     CurveV2* formant_remap_curve_{};
+    CurveV2* speed_curve_{};
     CurveV2* pos_offset_curve_{};
     Synth& synth_;
     float sample_rate_{};
     float inv_sample_rate_{};
-    float frame_pos_{};
-    float frame_player_pos_{};
-    int skip_{};
-
-    // parameters
-    bool is_running_{};
-    bool is_enable_{};
-    float formant_mix_{};
-    float formant_shift_{};
-    float freq_scale_{};
-    float frame_offset_{};
-    float frame_speed_{};
-    float gain_mix_{};
+    float update_skip_{};
+    float final_speed_{};
 };
 }

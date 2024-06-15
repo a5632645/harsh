@@ -12,10 +12,8 @@ SineBank::SineBank() {
     phase_table_.resize(kNumPartials);
     current_volume_table_.resize(kNumPartials);
     freq_table_.resize(kNumPartials);
-    // last_volume_table_.resize(kNumPartials);
     sinc_last1_gain_.resize(kNumPartials);
     sinc_last2_gain_.resize(kNumPartials);
-    // sinc_last3_gain_.resize(kNumPartials);
 }
 
 void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip) {
@@ -25,21 +23,12 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
     update_rate_ = update_rate;
     update_skip_ = update_skip;
 
-    // smooth time should smaller than inv update_rate
-    //cos_table_.resize(update_skip);
-    //for (int i = 0; i < update_skip; ++i) {
-    //    auto nor = static_cast<float>(i) / static_cast<float>(update_skip); // 0..1
-    //    auto pi = nor * std::numbers::pi_v<float>;                          // 0..pi
-    //    cos_table_[i] = 0.5f - 0.5f * std::cos(pi);                         // cos interpole
-    //}
-
     constexpr auto pi = std::numbers::pi_v<float>;
     auto polyphase_fir_length = 2;
     auto fir_order = polyphase_fir_length * update_skip;
     auto fir_length = fir_order + 1;
     auto fir_center = fir_order * 0.5f;
     std::vector<float> fir_org_lut(fir_length);
-    // fir_lut_.reserve(fir_length);
     auto fir_cut_f = pi * update_rate * 0.75f / sample_rate;
 
     auto lowpass_sinc = [=](int n) {
@@ -55,7 +44,6 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
 
     auto gain_up = update_skip_ * polyphase_fir_length;
     for (int i = 0; i < fir_length; ++i) {
-        // fir_lut_.push_back(lowpass_sinc(i) * hann_window(i) * gain_up);
         fir_org_lut.push_back(lowpass_sinc(i) * hann_window(i));
     }
 
@@ -91,19 +79,14 @@ void SineBank::LoadPartials(Partials & partials) {
     processed_partials_ = std::max(processed_partials_, num_processed);
     active_partials_ = std::min(processed_partials_, max_active_partials_);
     sr_pos_ = 0;
-    //lut_pos3_ = 3 * update_skip_;
-    //lut_pos2_ = 2 * update_skip_;
-    //lut_pos1_ = update_skip_;
 
     if (partials.update_phase) {
         std::ranges::copy(partials.phases, phase_table_.begin());
         partials.update_phase = false;
     }
 
-    //std::ranges::copy(sinc_last2_gain_, sinc_last3_gain_.begin());
     std::ranges::copy(sinc_last1_gain_, sinc_last2_gain_.begin());
     std::ranges::copy(current_volume_table_, sinc_last1_gain_.begin());
-    //std::ranges::copy(partials.gains, current_volume_table_.begin());
 
     constexpr auto max_freq = 20000.0f;
     auto nor_max_freq = max_freq * one_div_nyquist_rate;
@@ -121,8 +104,6 @@ void SineBank::LoadPartials(Partials & partials) {
             current_volume_table_[i] = partials.gains[i];
         }
     }
-
-    //std::ranges::copy(current_volume_table_, last_volume_table_.begin());
 
     #ifdef AD_ENABLE_SIMD
     // round num_partials to simd_size
@@ -158,34 +139,6 @@ float SineBank::SrTick() {
     }
 
     float output{};
-    //if (sr_pos_ == 0) {
-    //    for (size_t i = 0; i < active_partials_; ++i) {
-    //        float gain = current_volume_table_[i] * fir_lut_[lut_pos3_]
-    //            + sinc_last1_gain_[i] * fir_lut_[lut_pos2_]
-    //            + sinc_last2_gain_[i] * fir_lut_[lut_pos1_]
-    //            + sinc_last3_gain_[i] * fir_lut_[0];
-    //        output += phase_table_[i].imag() * gain;
-    //    }
-    //}
-    //else {
-    //    for (size_t i = 0; i < active_partials_; ++i) {
-    //        float gain = current_volume_table_[i] * fir_lut_[lut_pos3_]
-    //            + sinc_last1_gain_[i] * fir_lut_[lut_pos2_]
-    //            + sinc_last2_gain_[i] * fir_lut_[lut_pos1_];
-
-    //        output += phase_table_[i].imag() * gain;
-    //    }
-
-    //    //float current_cos_lerp = cos_table_[sr_pos_++];
-    //    //for (size_t i = 0; i < active_partials_; ++i) {
-    //        //auto last_gain = last_volume_table_[i];
-    //        //auto curr_gain = current_volume_table_[i];
-    //        //auto gain = last_gain + (curr_gain - last_gain) * current_cos_lerp;
-
-    //        //output += phase_table_[i].imag() * target_volume_table_[i];
-    //    //}
-    //}
-
     auto fir_coef0 = fir_curr_lut_[sr_pos_];
     auto fir_coef1 = fir_last1_lut_[sr_pos_];
     auto fir_coef2 = fir_last2_lut_[sr_pos_];
@@ -195,11 +148,7 @@ float SineBank::SrTick() {
             + sinc_last2_gain_[i] * fir_coef2;
         output += phase_table_[i].imag() * gain;
     }
-
     ++sr_pos_;
-    //--lut_pos1_;
-    //--lut_pos2_;
-    //--lut_pos3_;
     return output;
     #endif
 }

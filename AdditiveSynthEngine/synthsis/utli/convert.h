@@ -35,7 +35,7 @@ static constexpr float Calc1stSmoothFilterCoeff(float time_second, float update_
     return gcem::exp(-1.0f / (update_rate * time_second));
 }
 
-static constexpr float GainToDb(float gain, float min_db) {
+static constexpr auto GainToDb(std::floating_point auto gain, std::floating_point auto min_db) {
     auto min_gain = DbToGain(min_db);
     if (gain <= min_gain) {
         return min_db;

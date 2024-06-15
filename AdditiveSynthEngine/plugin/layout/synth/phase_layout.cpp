@@ -11,12 +11,13 @@ PhaseLayout::PhaseLayout(Synth& synth) {
     for (int i = 0; auto & arg_knob : phase_arg_knobs_) {
         arg_knob = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("phase.arg{}", i++)));
     }
-    OnPhaseTypeChanged(0);
 
     addAndMakeVisible(phase_type_.get());
     for (const auto& k : phase_arg_knobs_) {
         addAndMakeVisible(*k);
     }
+
+    OnPhaseTypeChanged(0);
 }
 
 void PhaseLayout::resized() {

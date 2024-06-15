@@ -18,6 +18,9 @@ MasterLayout::MasterLayout(Synth& synth)
     addAndMakeVisible(output_gain_.get());
     //addAndMakeVisible(wave_scope_.GetWidget());
     addAndMakeVisible(spectrum_);
+
+    info_label_ = std::make_unique<juce::Label>();
+    addAndMakeVisible(info_label_.get());
 }
 
 void MasterLayout::resized() {
@@ -25,6 +28,7 @@ void MasterLayout::resized() {
     pitch_bend_->setBounds(b.removeFromLeft(50));
     output_gain_->setBounds(b.removeFromLeft(50));
     //wave_scope_.SetBounds(x + 50, y, w, h / 2);
+    info_label_->setBounds(b.removeFromRight(200));
     spectrum_.setBounds(b);
 }
 }

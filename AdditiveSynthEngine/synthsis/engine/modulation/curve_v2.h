@@ -10,7 +10,6 @@ namespace mana {
 class CurveV2 {
 public:
     static constexpr auto kLineResolution = 1024;
-    static constexpr auto kLineSize = 1025;
 
     enum class PowerEnum {
         kKeep = 0,
@@ -39,7 +38,11 @@ public:
         virtual void OnReload(CurveV2* generator) = 0;
     };
 
-    CurveV2();
+    CurveV2(int size = kLineResolution);
+    CurveV2(const CurveV2&) = delete;
+    CurveV2& operator=(const CurveV2&) = delete;
+    CurveV2(CurveV2&&) = default;
+    CurveV2& operator=(CurveV2&&) = default;
 
     void Remove(int idx);
     void AddBehind(int idx, Point point);
@@ -53,7 +56,7 @@ public:
         auto frac = idx - before;
         return std::lerp(Get(before), Get(after), frac);
     }
-    float GetNormalize(float nor) { return Get((kLineResolution - 1) * nor); }
+    float GetNormalize(float nor) { return Get(num_data_ * nor); }
 
     decltype(auto) GetAllPoints() { return (points_); }
     decltype(auto) GetAllPoints() const { return (points_); }
@@ -70,6 +73,7 @@ public:
     void AddListener(Listener* l) { listeners_.AddListener(l); }
     void RemoveListener(Listener* l) { listeners_.RemoveListener(l); }
 private:
+    int num_data_;
     std::vector<Point> points_;
     std::vector<float> datas_;
     utli::ListenerList<Listener> listeners_;

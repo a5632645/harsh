@@ -15,7 +15,6 @@ void SetSingeKnobInfo(const std::unique_ptr<WrapSlider>& knob, DetailParam) {
 
 template<typename DetailParam>
 void SetSingeKnobInfo(WrapSlider& knob, DetailParam) {
-    constexpr auto text_getter = DetailParam::GetText;
     constexpr auto param_title = DetailParam::kName;
 
     knob.setDoubleClickReturnValue(true, DetailParam::GetNormalDefault());

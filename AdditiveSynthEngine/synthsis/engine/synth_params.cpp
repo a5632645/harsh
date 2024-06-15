@@ -205,16 +205,63 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         .id = "resynthsis.formant_remap",
         .name = "resynthsis.formant_remap",
         .vdefault = false }));
-    for (int arg_idx = 0; arg_idx < 7; ++arg_idx) {
-        //param_bank_.AddOrCreateIfNull(kPoly, kUnitRange, "", "resynthsis.arg{}", arg_idx);
-        param_bank_.AddParameter(creator->CreateFloatParameter({
-            .type = kPoly,
-            .id = std::format("resynthsis.arg{}", arg_idx),
-            .name = std::format("resynthsis.arg{}", arg_idx),
-            .vmin = 0.0f,
-            .vmax = 1.0f,
-            .vdefault = 0.0f }));
-    }
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+    .type = kPoly,
+    .id = "resynthsis.freq_scale",
+    .name = "resynthsis.freq_scale",
+    .vmin = param::Resynthsis_FreqScale::kMin,
+    .vmax = param::Resynthsis_FreqScale::kMax,
+    .vdefault = param::Resynthsis_FreqScale::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+    .type = kPoly,
+    .id = "resynthsis.start_offset",
+    .name = "resynthsis.start_offset",
+    .vmin = param::Resynthsis_FrameOffset::kMin,
+    .vmax = param::Resynthsis_FrameOffset::kMax,
+    .vdefault = param::Resynthsis_FrameOffset::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+    .type = kPoly,
+    .id = "resynthsis.speed",
+    .name = "resynthsis.speed",
+    .vmin = param::Resynthsis_FrameSpeed::kMin,
+    .vmax = param::Resynthsis_FrameSpeed::kMax,
+    .vdefault = param::Resynthsis_FrameSpeed::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+    .type = kPoly,
+    .id = "resynthsis.speedx",
+    .name = "resynthsis.speedx",
+    .vmin = param::Resynthsis_FrameSpeedMulti::kMin,
+    .vmax = param::Resynthsis_FrameSpeedMulti::kMax,
+    .vdefault = param::Resynthsis_FrameSpeedMulti::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+    .type = kPoly,
+    .id = "resynthsis.formant_mix",
+    .name = "resynthsis.formant_mix",
+    .vmin = param::Resynthsis_FormantMix::kMin,
+    .vmax = param::Resynthsis_FormantMix::kMax,
+    .vdefault = param::Resynthsis_FormantMix::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+    .type = kPoly,
+    .id = "resynthsis.formant_shift",
+    .name = "resynthsis.formant_shift",
+    .vmin = param::Resynthsis_FormantShift::kMin,
+    .vmax = param::Resynthsis_FormantShift::kMax,
+    .vdefault = param::Resynthsis_FormantShift::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+    .type = kPoly,
+    .id = "resynthsis.gain_mix",
+    .name = "resynthsis.gain_mix",
+    .vmin = param::Resynthsis_GainMix::kMin,
+    .vmax = param::Resynthsis_GainMix::kMax,
+    .vdefault = param::Resynthsis_GainMix::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+    .type = kDisable,
+    .id = "resynthsis.start_range",
+    .name = "resynthsis.start_range",
+    .vmin = param::Resynthsis_StartRange::kMin,
+    .vmax = param::Resynthsis_StartRange::kMax,
+    .vdefault = param::Resynthsis_StartRange::kDefault,
+    .vblend = 0.3f }));
 
     // effect
     for (int effect_idx = 0; effect_idx < 5; ++effect_idx) {
@@ -317,9 +364,10 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     }
     // custom curves
     curve_bank_.AddCurve("resynthsis.formant_remap")
-        .AddCurve("resynthsis.pos_offset")
+        .AddCurve("resynthsis.rand_start_pos_mask")
         .AddCurve("effect.harmonic_delay.time")
         .AddCurve("effect.harmonic_delay.feedback")
+        .AddCurve(CurveV2{ kNumPartials }, "resynthsis.speed")
         .AddQuantizeMap({ 0.f,1.f,2.f,3.f,4.f,5.f,6.f,7.f,8.f,9.f,10.f,11.f },
                         "dissonance.pitch_quantize");
     for (int i = 0; i < 8; ++i) {

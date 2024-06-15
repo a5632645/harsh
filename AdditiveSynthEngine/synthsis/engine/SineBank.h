@@ -38,6 +38,8 @@ public:
     decltype(auto) GetPhaseTable() const {
         return (phase_table_);
     }
+
+    decltype(auto) GetSmoothGainTable() const { return (current_volume_table_); }
 private:
     size_t count_process_particles(const Partials& particles) {
         // find last not aliasing partial idx

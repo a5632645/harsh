@@ -45,7 +45,7 @@ public:
     // notice: this function just add config
     void AddModulation(std::shared_ptr<ModulationConfig> config);
     void RemoveModulation(ModulationConfig& config);
-    int GetModulationCount() const { return modulation_configs_.size(); }
+    int GetModulationCount() const { return static_cast<int>(modulation_configs_.size()); }
     std::shared_ptr<ModulationConfig> GetModulation(int index) const { return modulation_configs_[index]; }
 private:
     CurveBank curve_bank_;

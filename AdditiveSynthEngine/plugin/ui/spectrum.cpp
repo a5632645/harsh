@@ -8,20 +8,22 @@
 namespace mana {
 Spectrum::Spectrum(Synth& synth)
     : synth_(synth) {
-    startTimerHz(25);
+    startTimerHz(60);
 }
 
 void Spectrum::paint(juce::Graphics& g) {
     g.setColour(juce::Colours::white);
 
-    constexpr auto min_pitch = utli::cp::FreqToPitch(20.0f);
-    constexpr auto max_pitch = utli::cp::FreqToPitch(20000.0f);
+    constexpr auto min_freq = 20.0f;
+    constexpr auto max_freq = 20000.0f;
+    constexpr auto min_pitch = utli::cp::FreqToPitch(min_freq);
+    constexpr auto max_pitch = utli::cp::FreqToPitch(max_freq);
     constexpr auto min_db = -60.0f;
     constexpr auto max_db = 20.0f;
 
-    const auto& synth_partials = synth_.GetDisplayOscillor().GetPartials();
-    auto gains = synth_partials.gains;
-    auto pitches = synth_partials.pitches;
+    const auto& osc = synth_.GetDisplayOscillor();
+    auto gains = osc.GetSmoothedGain();
+    auto pitches = osc.GetPartials().pitches;
 
     auto bound = getLocalBounds().toFloat();
     for (size_t i = 0; i < mana::kNumPartials; ++i) {

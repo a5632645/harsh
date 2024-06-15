@@ -12,9 +12,16 @@ class CurveBank {
 public:
     template<class... T>
     CurveBank& AddCurve(std::format_string<T...> format_text, T&&... args) {
-        curves_[std::format(format_text, std::forward<T>(args)...)] = CurveV2{};
+        /*curves_[std::format(format_text, std::forward<T>(args)...)] = CurveV2{};
+        return *this;*/
+        return AddCurve(CurveV2{}, format_text, std::forward<T>(args)...);
+    }
+    template<class... T>
+    CurveBank& AddCurve(CurveV2 curve, std::format_string<T...> format_text, T&&... args) {
+        curves_.emplace(std::format(format_text, std::forward<T>(args)...), std::move(curve));
         return *this;
     }
+
     template<class... T>
     CurveV2& GetCurve(std::format_string<T...> format_text, T&&... args) { return curves_.at(std::format(format_text, std::forward<T>(args)...)); }
     template<class... T> requires (sizeof...(T) > 0)

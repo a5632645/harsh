@@ -11,6 +11,7 @@ struct WrapSlider::ParamRefStore {
 
     virtual bool IsModulatable() = 0;
     virtual std::string_view GetId() = 0;
+    virtual std::string_view GetName() = 0;
 
     template<class T> requires std::derived_from<T, WrapSlider::ParamRefStore>
     T& As() { return *static_cast<T*>(this); }
@@ -24,6 +25,7 @@ struct FloatParamRefStore : public WrapSlider::ParamRefStore {
 
     // 通过 ParamRefStore 继承
     std::string_view GetId() override { return param_.GetId(); }
+    std::string_view GetName() override { return param_.GetName(); }
 };
 
 struct IntParamRefStore : public WrapSlider::ParamRefStore {
@@ -34,6 +36,7 @@ struct IntParamRefStore : public WrapSlider::ParamRefStore {
 
     // 通过 ParamRefStore 继承
     std::string_view GetId() override { return param_.GetId(); }
+    std::string_view GetName() override { return param_.GetName(); }
 };
 }
 
@@ -296,6 +299,11 @@ void WrapSlider::StopHighliteModulator() {
 void WrapSlider::mouseEnter(const juce::MouseEvent& event) {
     juce::Slider::mouseEnter(event);
 
+    juce::String t{ ref_store_->GetName().data(), ref_store_->GetName().size() };
+    t << '\n';
+    t << getTextFromValue(getValue());
+    findParentComponentOfClass<MainWindow>()->SetInfoLabelText(t);
+
     if (modulation_tab_ == nullptr)
         return;
 
@@ -304,6 +312,7 @@ void WrapSlider::mouseEnter(const juce::MouseEvent& event) {
 
 void WrapSlider::mouseExit(const juce::MouseEvent& event) {
     juce::Slider::mouseExit(event);
+    findParentComponentOfClass<MainWindow>()->SetInfoLabelText("");
 
     if (modulation_tab_ == nullptr)
         return;

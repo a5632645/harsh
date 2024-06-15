@@ -26,8 +26,8 @@ float CurveV2::GetPowerYValue(float nor_x, PowerEnum power_type, float power) {
 }
 
 namespace mana {
-CurveV2::CurveV2() {
-    datas_.resize(kLineSize);
+CurveV2::CurveV2(int size) : num_data_(size) {
+    datas_.resize(size + 2);
     points_.clear();
     points_.emplace_back(0.0f, 0.0f);
     points_.emplace_back(1.0f, 1.0f);
@@ -73,8 +73,8 @@ void CurveV2::PartRender(int begin_point_idx, int end_point_idx) {
 
         const auto& curr_point = points_[i];
         const auto& next_point = points_[i + 1];
-        auto begin_idx = static_cast<int>(std::round(curr_point.x * kLineResolution));
-        auto end_idx = static_cast<int>(std::round(next_point.x * kLineResolution));
+        auto begin_idx = static_cast<int>(std::round(curr_point.x * num_data_));
+        auto end_idx = static_cast<int>(std::round(next_point.x * num_data_));
 
         if (begin_idx == end_idx) // do not render because it will divide by 0
             continue;
@@ -90,7 +90,8 @@ void CurveV2::PartRender(int begin_point_idx, int end_point_idx) {
             datas_[x + begin_idx] = std::lerp(curr_y, next_y, map_x);
         }
     }
-    datas_[kLineResolution] = datas_[0];
+    datas_[num_data_] = datas_[0];
+    datas_[num_data_ + 1] = datas_[0];
 }
 
 void CurveV2::SetXy(int idx, float new_x, float new_y) {

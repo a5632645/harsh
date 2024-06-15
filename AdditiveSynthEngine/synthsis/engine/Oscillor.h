@@ -46,6 +46,7 @@ public:
 
     Partials& get_particles() { return partials_; }
     const Partials& GetPartials() const { return partials_; }
+    decltype(auto) GetSmoothedGain() const { return sine_bank_.GetSmoothGainTable(); }
 
     Resynthesis& GetResynthsisProcessor() { return resynthsis_; }
     const Resynthesis& GetResynthsisProcessor() const { return resynthsis_; }

@@ -20,6 +20,8 @@ public:
     Synth& GetSynth() { return synth_; }
     void AddModulationActionListener(ModulationActionListener* listener) { listeners_.add(listener); }
     void RemoveModulationActionListener(ModulationActionListener* listener) { listeners_.remove(listener); }
+
+    void SetInfoLabelText(const juce::String& t) { master_->SetInfoLabelText(t); }
 private:
     Synth& synth_;
     std::unique_ptr<ModulatorsLayout> modulators_layout_;

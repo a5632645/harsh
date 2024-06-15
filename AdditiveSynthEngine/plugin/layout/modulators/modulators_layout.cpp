@@ -16,8 +16,7 @@ ModulatorsLayout::ModulatorsLayout(Synth& synth)
             auto [ptr, err] = std::from_chars(idx_str.cbegin()._Unwrapped(), idx_str.cend()._Unwrapped(), d);
             assert(err == std::error_code{});
 
-            auto comp = std::make_unique<LfoLayout>(synth, d);
-            tabbed_.addTab(juce::String{ id.data(), id.length() }, juce::Colours::green, comp.get(), true);
+            tabbed_.addTab(juce::String{ id.data(), id.length() }, juce::Colours::green, new LfoLayout(synth, d), true);
         }
         else if (id.starts_with("env")) {
             auto idx_str = id.substr(3);
@@ -25,8 +24,7 @@ ModulatorsLayout::ModulatorsLayout(Synth& synth)
             auto [ptr, err] = std::from_chars(idx_str.cbegin()._Unwrapped(), idx_str.cend()._Unwrapped(), d);
             assert(err == std::error_code{});
 
-            auto comp = std::make_unique<EnvelopLayout>(synth, d);
-            tabbed_.addTab(juce::String{ id.data(), id.length() }, juce::Colours::green, comp.get(), true);
+            tabbed_.addTab(juce::String{ id.data(), id.length() }, juce::Colours::green, new EnvelopLayout(synth, d), true);
         }
 
         // extra num modulation display and drag component

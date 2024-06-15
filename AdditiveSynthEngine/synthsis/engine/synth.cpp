@@ -5,6 +5,7 @@
 #include "param/standard_param.h"
 #include "AudioFFT.h"
 #include <mutex>
+#include <numeric>
 #include "utli/convert.h"
 
 namespace mana {
@@ -111,10 +112,6 @@ void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {
     }
 }
 
-static float Db2Gain(float db) {
-    return std::exp(0.11512925464970228420089957273422f * db);
-}
-
 void Synth::update_state(int step) {
     for (Oscillor& o : m_oscillators) {
         o.update_state(step);
@@ -176,205 +173,335 @@ void Synth::RemoveModulation(ModulationConfig& config) {
     synth_params_.RemoveModulation(config);
 }
 
-static constexpr auto analyze_fft_size = 2048;
-static constexpr auto sample_fft_size = 512;
-static constexpr auto kFFtHop = 256;
-ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float source_sample_rate) const {
-    audiofft::AudioFFT fft;
-    Window<float> window;
-    fft.init(analyze_fft_size);
-    window.Init(sample_fft_size);
+class FuriesTransform {
+public:
+    static double KaiserParamBeta(double lobe_level) {
+        assert(lobe_level >= 0);
+        if (lobe_level < 21.0) {
+            return 0.0;
+        }
+        else if (lobe_level <= 50.0) {
+            return 0.5842 * std::pow(lobe_level - 21.0, 0.4)
+                + 0.07886 * (lobe_level - 21.0);
+        }
+        else {
+            return 0.1102 * (lobe_level - 8.7);
+        }
+    }
 
-    const auto sample_rate_ratio = source_sample_rate / sample_rate_;
-    const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f;
-    auto num_frame = static_cast<size_t>((sample.size() - static_cast<float>(analyze_fft_size)) / static_cast<float>(kFFtHop));
+    int KaiserWindow(float side_lobe_level,
+                     float main_lobe_width) {
+        auto beta = KaiserParamBeta(side_lobe_level);
+        auto alpha = beta / std::numbers::pi;
+        auto main_width_in_bin = 2.0 * std::sqrt(1.0 + alpha * alpha);
+        auto n = static_cast<int>(std::ceil(main_width_in_bin / main_lobe_width));
+        if (n % 2 == 0) ++n;
+
+        window_.resize(n);
+        dwindow_.resize(n);
+
+        auto inc = 2.0 / (n - 1);
+        auto down = 1.0f / std::cyl_bessel_i(0, beta);
+        for (int i = 0; i < n; ++i) {
+            auto t = -1.0 + i * inc;
+            auto arg = std::sqrt(1.0 - t * t);
+            window_[i] = std::cyl_bessel_i(0, beta * arg) * down;
+
+            constexpr auto kTimeDelta = 0.001f;
+            if (i == 0) {
+                dwindow_.front() = (std::cyl_bessel_i(0, beta * std::sqrt(1.0 - (t + kTimeDelta) * (t + kTimeDelta))) * down - window_.front()) / kTimeDelta;
+            }
+            else if (i == n - 1) {
+                dwindow_.back() = (std::cyl_bessel_i(0, beta * std::sqrt(1.0 - (t - kTimeDelta) * (t - kTimeDelta))) * down - window_.back()) / -kTimeDelta;
+            }
+            else {
+                dwindow_[i] = std::cyl_bessel_i(1, beta * arg) * beta * (-t / arg) * down;
+            }
+        }
+
+        auto window_sum = std::accumulate(window_.cbegin(), window_.cend(), 0.0f);
+        window_scale_ = 2.0f / window_sum;
+        dwindow_scale_ = window_scale_ / (2 * std::numbers::pi);
+
+        return n;
+    }
+
+    int BlackManWin(float main_lobe_width) {
+        auto main_width_in_bin = 2.0 * 1.727;
+        auto n = static_cast<int>(std::ceil(main_width_in_bin / main_lobe_width));
+        if (n % 2 == 0) ++n;
+
+        window_.resize(n);
+        dwindow_.resize(n);
+
+        auto alpha = 0.17;
+        auto a0 = (1.0 - alpha) / 2.0;
+        auto a2 = alpha / 2.0;
+        for (int i = 0; i < n; ++i) {
+            auto t = static_cast<float>(i) / (n - 1.0);
+            window_[i] = a0 - 0.5 * std::cos(std::numbers::pi * 2 * t) + a2 * std::cos(std::numbers::pi * 4 * t);
+            dwindow_[i] = 0.5 * std::numbers::pi * 2 * std::sin(std::numbers::pi * 2 * t) - a2 * std::numbers::pi * 4 * std::sin(std::numbers::pi * 4 * t);
+        }
+
+        auto window_sum = std::accumulate(window_.cbegin(), window_.cend(), 0.0f);
+        window_scale_ = 2.0f / window_sum;
+        dwindow_scale_ = window_scale_ / (2 * std::numbers::pi);
+
+        return n;
+    }
+
+    void Transform(const std::vector<float>& buffer) {
+        assert(buffer.size() == WindowLen());
+        xh_data_.resize(FftDataLen());
+        xdh_data_.resize(FftDataLen());
+
+        std::vector<float> real(FftDataLen());
+        std::vector<float> imag(FftDataLen());
+        std::vector<float> sample(fft_size);
+        std::vector<float> dsample(fft_size);
+
+        // 加窗和零相补0
+        {
+            auto k = (WindowLen() - 1) / 2;
+            std::ranges::transform(buffer | std::views::take(k), window_ | std::views::take(k), sample.begin() + fft_size - k, std::multiplies{});
+            std::ranges::transform(buffer | std::views::drop(k), window_ | std::views::drop(k), sample.begin(), std::multiplies{});
+            std::ranges::transform(buffer | std::views::take(k), dwindow_ | std::views::take(k), dsample.begin() + fft_size - k, std::multiplies{});
+            std::ranges::transform(buffer | std::views::drop(k), dwindow_ | std::views::drop(k), dsample.begin(), std::multiplies{});
+        }
+
+        {
+            audiofft::AudioFFT fft;
+            fft.init(fft_size);
+            fft.fft(sample.data(), real.data(), imag.data());
+            for (int i = 0; auto & cpx : xh_data_) {
+                cpx = std::complex{ real[i] ,imag[i] } *window_scale_;
+                ++i;
+            }
+            fft.fft(dsample.data(), real.data(), imag.data());
+            for (int i = 0; auto & cpx : xdh_data_) {
+                cpx = std::complex{ real[i],imag[i] } *dwindow_scale_;
+                ++i;
+            }
+        }
+    }
+
+    int WindowLen() const {
+        return static_cast<int>(window_.size());
+    }
+
+    int FftDataLen() const {
+        return fft_size / 2 + 1;
+    }
+
+    float CorrectFreq(int i) const {
+        auto up = xdh_data_[i].imag() * xh_data_[i].real() - xdh_data_[i].real() * xh_data_[i].imag();
+        auto down = std::norm(xh_data_[i]);
+        float oversample = static_cast<float>(fft_size) / WindowLen();
+        auto freq_c = -up * oversample / down;
+        return i + freq_c;
+    }
+
+    float CorrectNorFreq(int i) const {
+        return CorrectFreq(i) / fft_size;
+    }
+
+    float CorrectGain(int i) const {
+        return std::abs(xh_data_[i]);
+    }
+
+    int FftSize() const { return fft_size; }
+private:
+    float window_scale_{};
+    float dwindow_scale_{};
+
+    int fft_size = 8192;
+    std::vector<float> window_;
+    std::vector<float> dwindow_;
+    std::vector<std::complex<float>> xh_data_;
+    std::vector<std::complex<float>> xdh_data_;
+};
+
+ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float source_sample_rate) const {
+    constexpr auto c2_freq = utli::cp::PitchToFreq(36.0f);
+    constexpr auto analyze_fft_size = 8192;
+    constexpr auto kFFtHop = 256;
+
+    FuriesTransform transform;
+    //int win_len = transform.KaiserWindow(65.0f, c2_freq * 0.9f / source_sample_rate);
+    int win_len = transform.BlackManWin(c2_freq / source_sample_rate);
+
+    auto num_frame = static_cast<size_t>(sample.size() / static_cast<float>(kFFtHop));
     ResynthsisFrames audio_frames;
     audio_frames.source_type = ResynthsisFrames::Type::kAudio;
     audio_frames.frames.reserve(num_frame);
-    audio_frames.frame_interval_sample = kFFtHop / sample_rate_ratio;
+    audio_frames.frame_interval_sample = kFFtHop / (source_sample_rate / sample_rate_);
     audio_frames.base_freq = c2_freq;
 
+    /*
+    *    zero | zero | gain
+    *           idx    curr
+    */
+    std::vector<std::vector<int>> transit_discontinue(kNumPartials);
+    /*
+    *    gain | gain | zero
+    *           idx    curr
+    */
+    std::vector<std::vector<int>> silence_discontinue(kNumPartials);
+    std::array<bool, kNumPartials> last_frame_peak_state;
+
     auto read_pos = 0;
-    auto max_gain = 0.0f;
-    const auto num_bin = audiofft::AudioFFT::ComplexSize(analyze_fft_size);
-    const auto max_search_freq_diff = c2_freq;
-    std::vector<float> curr_phases(num_bin);
-    std::vector<float> last_frame_phases(num_bin - 1); // do not contain dc
-    std::vector<float> temp_gains(num_bin);
-    std::vector<float> real(num_bin);
-    std::vector<float> imag(num_bin);
-    std::vector<float> fft_buffer(analyze_fft_size);
-    while (num_frame--) {
-        std::ranges::fill(fft_buffer, 0.0f); // pad 0 expand to analyze fft size
-        if (read_pos + sample_fft_size <= sample.size()) {
+    auto max_db = -999.0f;
+    int frame_idx = 0;
+    std::vector<float> sample_buffer(win_len);
+    while (read_pos < sample.size()) {
+        std::ranges::fill(sample_buffer, 0.0f);
+        if (read_pos + win_len <= sample.size()) {
             auto it = sample.begin() + read_pos;
-            std::copy(it, it + sample_fft_size, fft_buffer.begin());
+            std::copy(it, it + win_len, sample_buffer.begin());
         }
         else {
+            // todo: solve the click
             const auto num_samples_can_read = sample.size() - read_pos;
+            const auto center_idx = (num_samples_can_read + 1) / 2;
+            auto begin_idx = center_idx - num_samples_can_read / 2;
             for (int i = 0; i < num_samples_can_read; ++i) {
-                fft_buffer[i] = sample.at(read_pos + i);
+                sample_buffer[begin_idx++] = sample[read_pos + i];
+            }
+        }
+        read_pos += kFFtHop;
+        transform.Transform(sample_buffer);
+
+        struct GainAndFreqPhase {
+            float freq{};
+            float gain_db{};
+            float phase{};
+        };
+        std::vector<GainAndFreqPhase> high_resolution_infos(transform.FftDataLen());
+        for (int i = 0; auto & s : high_resolution_infos) {
+            s.freq = transform.CorrectNorFreq(i) * source_sample_rate;
+            s.gain_db = utli::GainToDb<-300.0f>(transform.CorrectGain(i));
+            s.phase = 0.0f;
+            ++i;
+        }
+
+        std::vector<GainAndFreqPhase> peaks;
+        for (int i = 0; i < high_resolution_infos.size() - 1; ++i) {
+            if (!(transform.CorrectFreq(i) > i && transform.CorrectFreq(i + 1) < i + 1)) {
+                continue;
+            }
+
+            if (transform.CorrectGain(i) > transform.CorrectGain(i + 1)) {
+                if (high_resolution_infos[i].gain_db > -60.0f) {
+                    peaks.push_back(high_resolution_infos[i]);
+                }
+            }
+            else {
+                if (high_resolution_infos[i + 1].gain_db > -60.0f) {
+                    peaks.push_back(high_resolution_infos[i + 1]);
+                }
             }
         }
 
-        window.ApplyWindow(fft_buffer);
-        fft.fft(fft_buffer.data(), real.data(), imag.data());
-
-        // turn complex number into phase and gain
-        for (int i = 0; i < num_bin; ++i) {
-            auto cpx = std::complex{ real[i], imag[i] };
-            if (i == 0)
-                temp_gains[i] = std::abs(cpx) / analyze_fft_size;
-            else
-                temp_gains[i] = std::abs(cpx) / (analyze_fft_size / 2);
-            curr_phases[i] = std::arg(cpx);
+        std::ranges::sort(peaks, std::greater{}, &GainAndFreqPhase::gain_db);
+        std::vector<GainAndFreqPhase> filter_peaks;
+        for (auto peak : peaks) {
+            if (std::ranges::find_if(filter_peaks, [f = c2_freq, peak](GainAndFreqPhase p) -> bool {
+                return peak.freq > p.freq - f && peak.freq < p.freq + f;
+            }) == filter_peaks.cend()) {
+                filter_peaks.push_back(peak);
+            }
         }
+        std::ranges::sort(filter_peaks, std::less{}, &GainAndFreqPhase::freq);
 
         ResynthsisFrames::FftFrame new_frame;
-        if (audio_frames.frames.empty()) {
-            // startup frame
-            // use 抛物线 to find the best freq and gain partial
-            // https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
-            auto find_parabola_peak = [](double x1, double y1, double x2, double y2, double x3, double y3) {
-                struct R {
-                    float xv;
-                    float yv;
-                } r{};
+        for (int i = 0; i < kNumPartials; ++i) {
+            auto max_search_freq_diff = c2_freq * 0.5f;
+            auto res_partial_freq = c2_freq * (i + 1.0f);
+            auto min_freq = res_partial_freq - max_search_freq_diff;
+            auto max_freq = res_partial_freq + max_search_freq_diff;
+            auto begin_it = std::ranges::find_if(filter_peaks, [min_freq](auto d) {return d.freq >= min_freq; });
+            auto end_it = std::ranges::find_if(filter_peaks, [max_freq](auto d) {return d.freq > max_freq; });
+            auto max_one_it = std::max_element(begin_it, end_it, [](auto largest, auto curr) {
+                return curr.gain_db > largest.gain_db;
+            });
 
-                double alpha = y1;
-                double beta = y2;
-                double gama = y3;
-                auto up = alpha - gama;
-                auto down = alpha - 2.0 * beta + gama;
-                auto p = 0.5 * up / down;
-                r.xv = x2 + p * (x2 - x1);
-                r.yv = beta - 0.25 * p * (alpha - gama);
-                return r;
-            };
-
-            // convert to db scale
-            std::vector<float> temp_db_gains(num_bin);
-            for (int i = 0; auto gain : temp_gains) {
-                temp_db_gains[i++] = utli::GainToDb(gain);
+            if (max_one_it == end_it) {
+                new_frame.db_gains[i] = -300.0f;
+                new_frame.ratio_diffs[i] = 0.0f;
             }
-
-            // shit parabola only have num_bin - 2 data
-            struct GainAndFreqPhase {
-                float freq;
-                float db_gain;
-                float phase;
-            };
-            std::vector<GainAndFreqPhase> parabola_datas(num_bin - 1);
-            for (int i = 0; i < num_bin - 2; ++i) {
-                auto left_freq = i * source_sample_rate / analyze_fft_size;
-                auto center_freq = (i + 1) * source_sample_rate / analyze_fft_size;
-                auto right_freq = (i + 2) * source_sample_rate / analyze_fft_size;
-                if (temp_db_gains[i] < temp_db_gains[i + 1]
-                    && temp_db_gains[i + 1] > temp_db_gains[i + 2]) {
-                    auto [peak_freq, peak_db] = find_parabola_peak(left_freq, temp_db_gains[i],
-                                                                   center_freq, temp_db_gains[i + 1],
-                                                                   right_freq, temp_db_gains[i + 2]);
-                    parabola_datas[i].freq = peak_freq;
-                    parabola_datas[i].db_gain = peak_db;
-
-                    if (peak_freq < center_freq) { // interp phase with left and center
-                        auto nor_x = (peak_freq - left_freq) / (center_freq - left_freq);
-                        auto interp_cpx = nor_x * std::complex{ real[i], imag[i] } + (1.0f - nor_x) * std::complex{ real[i + 1],imag[i + 1] };
-                        parabola_datas[i].phase = std::arg(interp_cpx);
-                    }
-                    else if (peak_freq > center_freq) { // interp phase with right and center
-                        auto nor_x = (peak_freq - center_freq) / (right_freq - center_freq);
-                        auto interp_cpx = nor_x * std::complex{ real[i + 1], imag[i + 1] } + (1.0f - nor_x) * std::complex{ real[i + 2],imag[i + 2] };
-                        parabola_datas[i].phase = std::arg(interp_cpx);
-                    }
-                    else { // equal to center phase
-                        parabola_datas[i].phase = curr_phases[i + 1];
-                    }
-                }
-                else {
-                    parabola_datas[i].freq = center_freq;
-                    parabola_datas[i].db_gain = temp_db_gains[i + 1];
-                    parabola_datas[i].phase = curr_phases[i + 1];
-                }
-            }
-            // copy the last bin
-            auto& last_parabola_data = parabola_datas.back();
-            last_parabola_data.db_gain = temp_db_gains.back();
-            last_parabola_data.freq = (num_bin - 1) * source_sample_rate / analyze_fft_size;
-            last_parabola_data.phase = curr_phases.back();
-
-            // copy phase for next frame
-            for (int i = 0; auto & p : last_frame_phases) {
-                p = parabola_datas[i++].phase;
-            }
-            // trying to find the best partial
-            for (int i = 0; i < kNumPartials; ++i) {
-                auto res_partial_freq = c2_freq * (i + 1.0f);
-                auto min_freq = res_partial_freq - max_search_freq_diff;
-                auto max_freq = res_partial_freq + max_search_freq_diff;
-                auto begin_it = std::ranges::find_if(parabola_datas, [min_freq](auto d) {return d.freq >= min_freq; });
-                auto end_it = std::ranges::find_if(parabola_datas, [max_freq](auto d) {return d.freq > max_freq; });
-
-                auto max_gain_it = std::max_element(begin_it, end_it, [](GainAndFreqPhase max, GainAndFreqPhase ele) {
-                    return ele.db_gain > max.db_gain;
-                });
-                auto max_gain = *max_gain_it;
-
-                auto ratio_diff = (max_gain.freq - res_partial_freq) / c2_freq;
-                auto gain = utli::DbToGain(max_gain.db_gain);
-                new_frame.gains[i] = gain;
+            else {
+                auto max_one = *max_one_it;
+                auto ratio_diff = (max_one.freq - res_partial_freq) / c2_freq;
+                new_frame.db_gains[i] = max_one.gain_db;
                 new_frame.ratio_diffs[i] = ratio_diff;
             }
-        }
-        else { // todo: use phase lock
-            struct GainAndFreq {
-                float freq;
-                float gain;
-            };
-            std::vector<GainAndFreq> high_resolution_infos(num_bin - 1);
-            for (int i = 1; i < num_bin; ++i) {
-                // calculate instant frequency
-                const auto bin_frequency = static_cast<float>(i) * std::numbers::pi_v<float> *2.0f / static_cast<float>(analyze_fft_size);
-                const auto target_phase = bin_frequency * kFFtHop + last_frame_phases[i - 1];
-                const auto phase_diff = PhaseWrap(curr_phases[i] - target_phase);
-                const auto nor_instant_freq = phase_diff / (kFFtHop * std::numbers::pi_v<float> *2.0f) + static_cast<float>(i) / static_cast<float>(analyze_fft_size);
-                high_resolution_infos[i - 1].freq = nor_instant_freq * source_sample_rate;
-                high_resolution_infos[i - 1].gain = temp_gains[i];
-                last_frame_phases[i - 1] = curr_phases[i];
+
+            bool has_peak = max_one_it != end_it;
+            if (frame_idx != 0) {
+                if (!last_frame_peak_state[i] && has_peak) {
+                    transit_discontinue[i].push_back(frame_idx - 1);
+                }
+                if (last_frame_peak_state[i] && !has_peak) {
+                    silence_discontinue[i].push_back(frame_idx - 1);
+                }
             }
-
-            // trying to find the best partial
-            for (int i = 0; i < kNumPartials; ++i) {
-                auto res_partial_freq = c2_freq * (i + 1.0f);
-                auto min_freq = res_partial_freq - max_search_freq_diff;
-                auto max_freq = res_partial_freq + max_search_freq_diff;
-                auto begin_it = std::ranges::find_if(high_resolution_infos, [min_freq](auto d) {return d.freq >= min_freq; });
-                auto end_it = std::ranges::find_if(high_resolution_infos, [max_freq](auto d) {return d.freq > max_freq; });
-
-                auto max_gain_it = std::max_element(begin_it, end_it, [](GainAndFreq max, GainAndFreq ele) {
-                    return ele.gain > max.gain;
-                });
-                auto max_gain = *max_gain_it;
-
-                auto ratio_diff = (max_gain.freq - res_partial_freq) / c2_freq;
-                new_frame.gains[i] = max_gain.gain;
-                new_frame.ratio_diffs[i] = ratio_diff;
-            }
+            last_frame_peak_state[i] = has_peak;
         }
-        max_gain = std::max(max_gain, *std::ranges::max_element(new_frame.gains));
+
+        max_db = std::max(max_db, *std::ranges::max_element(new_frame.db_gains));
         audio_frames.frames.emplace_back(std::move(new_frame));
-        read_pos += kFFtHop;
+        ++frame_idx;
     }
 
-    if (max_gain == 0.0f) {
-        auto gain_level_up = 1.0f / max_gain; // maybe 0.0f?
-        for (auto& frame : audio_frames.frames) {
-            for (auto& level : frame.gains) {
-                level *= gain_level_up;
+    constexpr auto kFadeTime = 10; // ms
+    const auto fade_samples = sample_rate_ * kFadeTime / 1000.0f;
+    const auto fade_frames = static_cast<int>(std::ceil(fade_samples / kFFtHop));
+    const auto num_frames = static_cast<int>(audio_frames.frames.size());
+    const auto slope = 60.0f / (fade_frames + 1.0f);
+    for (int i = 0; i < kNumPartials; ++i) {
+        const auto& transit_dis = transit_discontinue[i];
+        const auto& silence_dis = silence_discontinue[i];
+        for (int idx : transit_dis) {
+            auto transit_gain = audio_frames.frames[idx + 1].db_gains[i];
+            auto transit_ratio = audio_frames.frames[idx + 1].ratio_diffs[i];
+            for (int j = 0; j < fade_frames; ++j) {
+                int fidx = idx - j;
+                if (fidx < 0) {
+                    break;
+                }
+                auto fade_gain = transit_gain - (j + 1.0f) * slope;
+                if (fade_gain > audio_frames.frames[fidx].db_gains[i]) {
+                    audio_frames.frames[fidx].db_gains[i] = fade_gain;
+                    audio_frames.frames[fidx].ratio_diffs[i] = transit_ratio;
+                }
+            }
+        }
+        for (int idx : silence_dis) {
+            auto silence_gain = audio_frames.frames[idx].db_gains[i];
+            auto silence_ratio = audio_frames.frames[idx].ratio_diffs[i];
+            for (int j = 0; j < fade_frames; ++j) {
+                int fidx = idx + j + 1;
+                if (fidx >= num_frames) {
+                    break;
+                }
+                auto fade_gain = silence_gain - (j + 1.0f) * slope;
+                if (fade_gain > audio_frames.frames[fidx].db_gains[i]) {
+                    audio_frames.frames[fidx].db_gains[i] = fade_gain;
+                    audio_frames.frames[fidx].ratio_diffs[i] = silence_ratio;
+                }
             }
         }
     }
 
+    auto gain_level_up = 0.0f - max_db;
+    for (auto& frame : audio_frames.frames) {
+        for (auto& level : frame.db_gains) {
+            level += gain_level_up;
+        }
+    }
+
+    audio_frames.num_frame = num_frames;
+    audio_frames.DuplicateExtraDataForLerp();
     return audio_frames;
 }
 
@@ -384,19 +511,26 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     /*
     * R nothing
     * G gain       [0,255] map to [-60,0]dB
-    * B ratio_diff [0,255] map to [-1, 1]
+    * B ratio_diff [0,255] map to [-0.5, 0.5]
     * simulate harmor's audio convert to image resynthsis mode
     */
     auto w = image_in->GetWidth();
     auto h = image_in->GetHeight();
     image_frame.frames.resize(w);
-    auto max_gain = 0.0f;
     image_frame.frame_interval_sample = 256; // equal to harmor
     const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f;
     image_frame.base_freq = c2_freq;
     image_frame.source_type = ResynthsisFrames::Type::kImage;
+    auto max_db = -999.0f;
 
-    // todo: when image height is smaller than num_partials, do not strech image
+    constexpr auto db6_level_down_table = []() {
+        std::array<float, kNumPartials> out{};
+        for (int i = 0; i < kNumPartials; ++i)
+            out[i] = utli::cp::GainToDb(1.0L / (i + 1.0L), -300.0L);
+        return out;
+    }();
+
+    // todo: keep align
     auto y_loop = kNumPartials;
     if (!stretch_image)
         y_loop = std::min(y_loop, h);
@@ -404,6 +538,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     for (int x = 0; x < w; ++x) {
         auto& frame = image_frame.frames[x];
 
+        std::ranges::fill(frame.db_gains, -300.0f);
         for (int y = 0; y < y_loop; ++y) {
             auto image_y_idx = y_loop - y - 1;
             if (stretch_image) {
@@ -413,25 +548,25 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
             auto pixel = image_in->GetPixel(x, image_y_idx);
 
             // map g to gain
-            auto gain = 0.0f;
-            auto db = std::lerp(-60.0f, 0.0f, static_cast<float>(pixel.g) / 255.0f);
-            gain = Db2Gain(db) / (y + 1.0f);
-            max_gain = std::max(gain, max_gain);
+            auto db = std::lerp(-60.0f, 0.0f, static_cast<float>(pixel.g) / 255.0f) + db6_level_down_table[y];
+            max_db = std::max(db, max_db);
 
             // map b to ratio diff
             auto ratio_diff = 2.0f * static_cast<float>(pixel.b) / 255.0f - 1.0f;
-            frame.gains[y] = gain;
-            frame.ratio_diffs[y] = ratio_diff;
+            frame.db_gains[y] = db;
+            frame.ratio_diffs[y] = ratio_diff * 0.5f;
         }
     }
 
-    auto gain_level_up = 1.0f / max_gain; // maybe 0.0f?
+    auto gain_level_db = 0.0f - max_db;
     for (auto& frame : image_frame.frames) {
-        for (auto& level : frame.gains) {
-            level *= gain_level_up;
+        for (auto& level : frame.db_gains) {
+            level += gain_level_db;
         }
     }
 
+    image_frame.num_frame = static_cast<int>(image_frame.frames.size());
+    image_frame.DuplicateExtraDataForLerp();
     return image_frame;
 }
 }
