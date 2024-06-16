@@ -218,9 +218,12 @@ public:
                 dwindow_[i] = std::cyl_bessel_i(1, beta * arg) * beta * (-t / arg) * down;
             }
         }
+        twindow_ = window_;
+        ApplyTimeRamp(twindow_);
 
         auto window_sum = std::accumulate(window_.cbegin(), window_.cend(), 0.0f);
         window_scale_ = 2.0f / window_sum;
+        twindow_scale_ = window_scale_;
         dwindow_scale_ = window_scale_ / (2 * std::numbers::pi);
 
         return n;
@@ -242,9 +245,12 @@ public:
             window_[i] = a0 - 0.5 * std::cos(std::numbers::pi * 2 * t) + a2 * std::cos(std::numbers::pi * 4 * t);
             dwindow_[i] = 0.5 * std::numbers::pi * 2 * std::sin(std::numbers::pi * 2 * t) - a2 * std::numbers::pi * 4 * std::sin(std::numbers::pi * 4 * t);
         }
+        twindow_ = window_;
+        ApplyTimeRamp(twindow_);
 
         auto window_sum = std::accumulate(window_.cbegin(), window_.cend(), 0.0f);
         window_scale_ = 2.0f / window_sum;
+        twindow_scale_ = window_scale_;
         dwindow_scale_ = window_scale_ / (2 * std::numbers::pi);
 
         return n;
@@ -254,35 +260,38 @@ public:
         assert(buffer.size() == WindowLen());
         xh_data_.resize(FftDataLen());
         xdh_data_.resize(FftDataLen());
+        xth_data_.resize(FftDataLen());
 
         std::vector<float> real(FftDataLen());
         std::vector<float> imag(FftDataLen());
         std::vector<float> sample(fft_size);
-        std::vector<float> dsample(fft_size);
+        audiofft::AudioFFT fft;
+        fft.init(fft_size);
 
-        // 加窗和零相补0
-        {
-            auto k = (WindowLen() - 1) / 2;
-            std::ranges::transform(buffer | std::views::take(k), window_ | std::views::take(k), sample.begin() + fft_size - k, std::multiplies{});
-            std::ranges::transform(buffer | std::views::drop(k), window_ | std::views::drop(k), sample.begin(), std::multiplies{});
-            std::ranges::transform(buffer | std::views::take(k), dwindow_ | std::views::take(k), dsample.begin() + fft_size - k, std::multiplies{});
-            std::ranges::transform(buffer | std::views::drop(k), dwindow_ | std::views::drop(k), dsample.begin(), std::multiplies{});
+        auto k = (WindowLen() - 1) / 2;
+        std::ranges::transform(buffer | std::views::take(k), window_ | std::views::take(k), sample.begin() + fft_size - k, std::multiplies{});
+        std::ranges::transform(buffer | std::views::drop(k), window_ | std::views::drop(k), sample.begin(), std::multiplies{});
+        fft.fft(sample.data(), real.data(), imag.data());
+        for (int i = 0; auto & cpx : xh_data_) {
+            cpx = std::complex{ real[i] ,imag[i] } *window_scale_;
+            ++i;
         }
 
-        {
-            audiofft::AudioFFT fft;
-            fft.init(fft_size);
-            fft.fft(sample.data(), real.data(), imag.data());
-            for (int i = 0; auto & cpx : xh_data_) {
-                cpx = std::complex{ real[i] ,imag[i] } *window_scale_;
-                ++i;
-            }
-            fft.fft(dsample.data(), real.data(), imag.data());
-            for (int i = 0; auto & cpx : xdh_data_) {
-                cpx = std::complex{ real[i],imag[i] } *dwindow_scale_;
-                ++i;
-            }
+        std::ranges::transform(buffer | std::views::take(k), dwindow_ | std::views::take(k), sample.begin() + fft_size - k, std::multiplies{});
+        std::ranges::transform(buffer | std::views::drop(k), dwindow_ | std::views::drop(k), sample.begin(), std::multiplies{});
+        fft.fft(sample.data(), real.data(), imag.data());
+        for (int i = 0; auto & cpx : xdh_data_) {
+            cpx = std::complex{ real[i],imag[i] } *dwindow_scale_;
+            ++i;
         }
+
+        //std::ranges::transform(buffer | std::views::take(k), twindow_ | std::views::take(k), sample.begin() + fft_size - k, std::multiplies{});
+        //std::ranges::transform(buffer | std::views::drop(k), twindow_ | std::views::drop(k), sample.begin(), std::multiplies{});
+        //fft.fft(sample.data(), real.data(), imag.data());
+        //for (int i = 0; auto & cpx : xth_data_) {
+        //    cpx = std::complex{ real[i],imag[i] } *twindow_scale_;
+        //    ++i;
+        //}
     }
 
     int WindowLen() const {
@@ -293,7 +302,7 @@ public:
         return fft_size / 2 + 1;
     }
 
-    float CorrectFreq(int i) const {
+    float CorrectFreqBin(int i) const {
         auto up = xdh_data_[i].imag() * xh_data_[i].real() - xdh_data_[i].real() * xh_data_[i].imag();
         auto down = std::norm(xh_data_[i]);
         float oversample = static_cast<float>(fft_size) / WindowLen();
@@ -302,23 +311,39 @@ public:
     }
 
     float CorrectNorFreq(int i) const {
-        return CorrectFreq(i) / fft_size;
+        return CorrectFreqBin(i) / fft_size;
     }
 
     float CorrectGain(int i) const {
         return std::abs(xh_data_[i]);
     }
 
+    float CorrectTimeInSamples(int i) const {
+        auto up = xth_data_[i].imag() * xh_data_[i].real() - xth_data_[i].real() * xh_data_[i].imag();
+        auto down = std::norm(xh_data_[i]);
+        return up / down;
+    }
+
     int FftSize() const { return fft_size; }
 private:
+    void ApplyTimeRamp(std::vector<float>& win) {
+        auto center = (win.size() - 1.0f) * 0.5f;
+        for (int i = 0; auto & s : win) {
+            s *= (i - center);
+        }
+    }
+
     float window_scale_{};
     float dwindow_scale_{};
+    float twindow_scale_{};
 
     int fft_size = 8192;
     std::vector<float> window_;
     std::vector<float> dwindow_;
+    std::vector<float> twindow_;
     std::vector<std::complex<float>> xh_data_;
     std::vector<std::complex<float>> xdh_data_;
+    std::vector<std::complex<float>> xth_data_;
 };
 
 ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float source_sample_rate) const {
@@ -328,12 +353,12 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
 
     FuriesTransform transform;
     //int win_len = transform.KaiserWindow(65.0f, c2_freq * 0.9f / source_sample_rate);
-    int win_len = transform.BlackManWin(c2_freq / source_sample_rate);
+    const int win_len = transform.BlackManWin(c2_freq * 1.8f / source_sample_rate);
+    const int num_frames = static_cast<int>(std::ceil((sample.size() - win_len) / static_cast<float>(kFFtHop)));
 
-    auto num_frame = static_cast<size_t>(sample.size() / static_cast<float>(kFFtHop));
     ResynthsisFrames audio_frames;
     audio_frames.source_type = ResynthsisFrames::Type::kAudio;
-    audio_frames.frames.reserve(num_frame);
+    audio_frames.frames.reserve(num_frames);
     audio_frames.frame_interval_sample = kFFtHop / (source_sample_rate / sample_rate_);
     audio_frames.base_freq = c2_freq;
 
@@ -347,13 +372,13 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     *           idx    curr
     */
     std::vector<std::vector<int>> silence_discontinue(kNumPartials);
-    std::array<bool, kNumPartials> last_frame_peak_state;
+    std::array<bool, kNumPartials> last_frame_peak_state{};
 
     auto read_pos = 0;
     auto max_db = -999.0f;
     int frame_idx = 0;
     std::vector<float> sample_buffer(win_len);
-    while (read_pos < sample.size()) {
+    for(int _frame=0;_frame<num_frames;++_frame) {
         std::ranges::fill(sample_buffer, 0.0f);
         if (read_pos + win_len <= sample.size()) {
             auto it = sample.begin() + read_pos;
@@ -374,21 +399,27 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         struct GainAndFreqPhase {
             float freq{};
             float gain_db{};
+            float gain{};
             float phase{};
         };
         std::vector<GainAndFreqPhase> high_resolution_infos(transform.FftDataLen());
         for (int i = 0; auto & s : high_resolution_infos) {
             s.freq = transform.CorrectNorFreq(i) * source_sample_rate;
             s.gain_db = utli::GainToDb<-300.0f>(transform.CorrectGain(i));
+            s.gain = transform.CorrectGain(i);
             s.phase = 0.0f;
             ++i;
         }
 
         std::vector<GainAndFreqPhase> peaks;
         for (int i = 0; i < high_resolution_infos.size() - 1; ++i) {
-            if (!(transform.CorrectFreq(i) > i && transform.CorrectFreq(i + 1) < i + 1)) {
+            if (!(transform.CorrectFreqBin(i) > i && transform.CorrectFreqBin(i + 1) < i + 1)) {
                 continue;
             }
+
+            //if (transform.CorrectTimeInSamples(i) < 0) {
+            //    continue;
+            //}
 
             if (transform.CorrectGain(i) > transform.CorrectGain(i + 1)) {
                 if (high_resolution_infos[i].gain_db > -60.0f) {
@@ -456,7 +487,6 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     constexpr auto kFadeTime = 10; // ms
     const auto fade_samples = sample_rate_ * kFadeTime / 1000.0f;
     const auto fade_frames = static_cast<int>(std::ceil(fade_samples / kFFtHop));
-    const auto num_frames = static_cast<int>(audio_frames.frames.size());
     const auto slope = 60.0f / (fade_frames + 1.0f);
     for (int i = 0; i < kNumPartials; ++i) {
         const auto& transit_dis = transit_discontinue[i];
@@ -464,6 +494,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         for (int idx : transit_dis) {
             auto transit_gain = audio_frames.frames[idx + 1].db_gains[i];
             auto transit_ratio = audio_frames.frames[idx + 1].ratio_diffs[i];
+
             for (int j = 0; j < fade_frames; ++j) {
                 int fidx = idx - j;
                 if (fidx < 0) {
@@ -511,7 +542,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     /*
     * R nothing
     * G gain       [0,255] map to [-60,0]dB
-    * B ratio_diff [0,255] map to [-0.5, 0.5]
+    * B ratio_diff [0,255] map to [-1, 1]
     * simulate harmor's audio convert to image resynthsis mode
     */
     auto w = image_in->GetWidth();
@@ -554,7 +585,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
             // map b to ratio diff
             auto ratio_diff = 2.0f * static_cast<float>(pixel.b) / 255.0f - 1.0f;
             frame.db_gains[y] = db;
-            frame.ratio_diffs[y] = ratio_diff * 0.5f;
+            frame.ratio_diffs[y] = ratio_diff;
         }
     }
 

@@ -24,12 +24,14 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
     update_skip_ = update_skip;
 
     constexpr auto pi = std::numbers::pi_v<float>;
+    constexpr auto hamming_main_lobe_width_bin = 2.736f;
     auto polyphase_fir_length = 2;
     auto fir_order = polyphase_fir_length * update_skip;
     auto fir_length = fir_order + 1;
+    auto passband_freqlen = hamming_main_lobe_width_bin / fir_length;
     auto fir_center = fir_order * 0.5f;
     std::vector<float> fir_org_lut(fir_length);
-    auto fir_cut_f = pi * update_rate * 0.75f / sample_rate;
+    auto fir_cut_f = pi * (update_rate * 0.5f / sample_rate + passband_freqlen * 0.5f);
 
     auto lowpass_sinc = [=](int n) {
         auto x = n - fir_center;
@@ -38,13 +40,13 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
         }
         return std::sin(fir_cut_f * x) / (pi * x);
     };
-    auto hann_window = [=](int n) {
-        return 0.5f * (1.0f - std::cos(pi * 2.0f * n / fir_order));
+    auto hamming_window = [=](int n) {
+        return 0.53836f - 0.46164f * std::cos(pi * 2.0f * n / fir_order);
     };
 
     auto gain_up = update_skip_ * polyphase_fir_length;
     for (int i = 0; i < fir_length; ++i) {
-        fir_org_lut.push_back(lowpass_sinc(i) * hann_window(i));
+        fir_org_lut.push_back(lowpass_sinc(i) * hamming_window(i));
     }
 
     // none fir polyphase into zero keep polyphase

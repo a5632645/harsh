@@ -239,8 +239,8 @@ juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
 
             // map ratio_diff to b
             auto fre_diff = draw_frame.ratio_diffs[y_idx];
-            auto bit_fre_diff = std::clamp(fre_diff, -0.5f, 0.5f);
-            auto nor_fre_diff = 0.5f + bit_fre_diff;
+            auto bit_fre_diff = std::clamp(fre_diff, -1.0f, 1.0f);
+            auto nor_fre_diff = 0.5f + 0.5f * bit_fre_diff;
             auto b = static_cast<unsigned char>(std::clamp(0xff * nor_fre_diff, 0.0f, 255.0f));
 
             resynthsis_img.setPixelAt(x, y, juce::Colour(0, g, b));

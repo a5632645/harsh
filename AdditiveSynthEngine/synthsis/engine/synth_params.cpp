@@ -125,7 +125,8 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         .name = "unison.pitch",
         .vmin = param::Unison_Pitch::kMin,
         .vmax = param::Unison_Pitch::kMax,
-        .vdefault = param::Unison_Pitch::kDefault }));
+        .vdefault = param::Unison_Pitch::kDefault,
+        .vblend=0.8f}));
     //param_bank_.AddParameter(param::Unison_Phase::CreateParam(kPoly, "unison.phase"));
     param_bank_.AddParameter(creator->CreateFloatParameter({
         .type = kPoly,
@@ -232,7 +233,8 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     .name = "resynthsis.speedx",
     .vmin = param::Resynthsis_FrameSpeedMulti::kMin,
     .vmax = param::Resynthsis_FrameSpeedMulti::kMax,
-    .vdefault = param::Resynthsis_FrameSpeedMulti::kDefault }));
+    .vdefault = param::Resynthsis_FrameSpeedMulti::kDefault,
+    .vblend = 0.3f }));
     param_bank_.AddParameter(creator->CreateFloatParameter({
     .type = kPoly,
     .id = "resynthsis.formant_mix",
