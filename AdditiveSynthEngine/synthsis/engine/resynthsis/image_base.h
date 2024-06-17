@@ -14,5 +14,6 @@ public:
     virtual int GetWidth() const = 0;
     virtual int GetHeight() const = 0;
     virtual SimplePixel GetPixel(int x, int y) const = 0;
+    virtual int GetMaxGreen() const = 0;
 };
 }

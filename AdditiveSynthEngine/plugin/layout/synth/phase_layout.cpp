@@ -39,7 +39,8 @@ void PhaseLayout::OnPhaseTypeChanged(int c) {
         break;
     case  kSpectralRandom:
         SetGuiKnobs(phase_arg_knobs_,
-                    param::PhaseSpRandom_Amount{});
+                    param::PhaseSpRandom_Amount{},
+                    param::PhaseSpRandom_Smooth{});
         break;
     case kPowDistribute:
         SetGuiKnobs(phase_arg_knobs_,

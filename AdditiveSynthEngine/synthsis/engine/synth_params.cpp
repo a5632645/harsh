@@ -102,7 +102,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         .name = "osc2_gain",
         .vmin = param::Timber_OscGain::kMin,
         .vmax = param::Timber_OscGain::kMax,
-        .vdefault = param::Timber_OscGain::kDefault }));
+        .vdefault = param::Timber_OscGain::kMin }));
     //param_bank_.AddParameter(param::Timber_OscGain::CreateParam(kPoly, "timber.osc2_gain"));
 
     //param_bank_.AddParameter(param::Unison_Type::CreateParam(kDisable, "unison.type"));
@@ -126,7 +126,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         .vmin = param::Unison_Pitch::kMin,
         .vmax = param::Unison_Pitch::kMax,
         .vdefault = param::Unison_Pitch::kDefault,
-        .vblend=0.8f}));
+        .vblend = 0.8f }));
     //param_bank_.AddParameter(param::Unison_Phase::CreateParam(kPoly, "unison.phase"));
     param_bank_.AddParameter(creator->CreateFloatParameter({
         .type = kPoly,

@@ -2,11 +2,6 @@
 
 #include "utli/convert.h"
 
-// ================================================================================
-// the smoothing fir filter
-// see the `smooth_compare.py` file
-// ================================================================================
-
 namespace mana {
 SineBank::SineBank() {
     phase_table_.resize(kNumPartials);
@@ -24,7 +19,8 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
     update_skip_ = update_skip;
 
     constexpr auto pi = std::numbers::pi_v<float>;
-    constexpr auto hamming_main_lobe_width_bin = 2.736f;
+    //constexpr auto hamming_main_lobe_width_bin = 2.736f;
+    constexpr auto hamming_main_lobe_width_bin = 3.0f;
     auto polyphase_fir_length = 2;
     auto fir_order = polyphase_fir_length * update_skip;
     auto fir_length = fir_order + 1;

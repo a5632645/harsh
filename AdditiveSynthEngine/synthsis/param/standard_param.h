@@ -69,11 +69,20 @@ struct PhaseSpRandom_Amount : FloatParam<PhaseSpRandom_Amount> {
     static constexpr int kTextPrecision = 2;
 };
 
+struct PhaseSpRandom_Smooth : FloatParam<PhaseSpRandom_Smooth> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "smooth"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 2;
+};
+
 struct PhasePowDist_Pow : FloatParam<PhasePowDist_Pow> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "pow"sv;
     static constexpr float kMin = 1.01f;
-    static constexpr float kMax = 2.99f;
+    static constexpr float kMax = 1.99f;
     static constexpr float kDefault = 1.3f;
     static constexpr int kTextPrecision = 2;
 };

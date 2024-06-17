@@ -144,7 +144,7 @@ void Unison::RandomRmProcess(Partials& partials) {
 }
 
 void Unison::RandomProcess(Partials& partials) {
-    auto max_freq_diff = (std::exp2(pitch_->GetValue() * 0.5f / 12.0f) - 1.0f) * partials.base_frequency;
+    auto max_freq_diff = (std::exp2(pitch_->GetValue() / 12.0f) - 1.0f) * partials.base_frequency;
     for (int i = 0; i < kNumPartials; ++i) {
         auto rand_p_inc = max_freq_diff * partials.ratios[i] * update_skip_;
         rand_phase_[i] += rand_p_inc;

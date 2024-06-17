@@ -350,10 +350,13 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     constexpr auto c2_freq = utli::cp::PitchToFreq(36.0f);
     constexpr auto analyze_fft_size = 8192;
     constexpr auto kFFtHop = 256;
+    constexpr auto kThreadshoud = -60.0f;
+    constexpr auto kCompressRange = 10.0f;
+    constexpr auto kCompressThreadShound = kThreadshoud + kCompressRange;
 
     FuriesTransform transform;
     //int win_len = transform.KaiserWindow(65.0f, c2_freq * 0.9f / source_sample_rate);
-    const int win_len = transform.BlackManWin(c2_freq * 1.8f / source_sample_rate);
+    const int win_len = transform.BlackManWin(c2_freq * 2.0f / source_sample_rate);
     const int num_frames = static_cast<int>(std::ceil((sample.size() - win_len) / static_cast<float>(kFFtHop)));
 
     ResynthsisFrames audio_frames;
@@ -378,7 +381,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     auto max_db = -999.0f;
     int frame_idx = 0;
     std::vector<float> sample_buffer(win_len);
-    for(int _frame=0;_frame<num_frames;++_frame) {
+    for (int _frame = 0; _frame < num_frames; ++_frame) {
         std::ranges::fill(sample_buffer, 0.0f);
         if (read_pos + win_len <= sample.size()) {
             auto it = sample.begin() + read_pos;
@@ -421,16 +424,15 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
             //    continue;
             //}
 
+            auto tmp = high_resolution_infos[i + 1];
             if (transform.CorrectGain(i) > transform.CorrectGain(i + 1)) {
-                if (high_resolution_infos[i].gain_db > -60.0f) {
-                    peaks.push_back(high_resolution_infos[i]);
-                }
+                tmp = high_resolution_infos[i];
             }
-            else {
-                if (high_resolution_infos[i + 1].gain_db > -60.0f) {
-                    peaks.push_back(high_resolution_infos[i + 1]);
-                }
+
+            if (tmp.gain_db < kThreadshoud) {
+                continue;
             }
+            peaks.push_back(tmp);
         }
 
         std::ranges::sort(peaks, std::greater{}, &GainAndFreqPhase::gain_db);
@@ -484,7 +486,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         ++frame_idx;
     }
 
-    constexpr auto kFadeTime = 10; // ms
+    constexpr auto kFadeTime = 20; // ms
     const auto fade_samples = sample_rate_ * kFadeTime / 1000.0f;
     const auto fade_frames = static_cast<int>(std::ceil(fade_samples / kFFtHop));
     const auto slope = 60.0f / (fade_frames + 1.0f);
@@ -532,6 +534,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     }
 
     audio_frames.num_frame = num_frames;
+    audio_frames.level_up_db = gain_level_up;
     audio_frames.DuplicateExtraDataForLerp();
     return audio_frames;
 }
@@ -545,11 +548,15 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     * B ratio_diff [0,255] map to [-1, 1]
     * simulate harmor's audio convert to image resynthsis mode
     */
-    auto w = image_in->GetWidth();
-    auto h = image_in->GetHeight();
+    const auto w = image_in->GetWidth();
+    const auto h = image_in->GetHeight();
+    const auto max_green = image_in->GetMaxGreen();
+    const auto valid_gain = max_green != 0;
     image_frame.frames.resize(w);
     image_frame.frame_interval_sample = 256; // equal to harmor
-    const auto c2_freq = std::exp2(36.0f / 12.0f) * 8.1758f;
+    constexpr auto c2_freq = utli::cp::PitchToFreq(36.0f);
+    constexpr auto kImgMaxDb = 0.0f;
+    constexpr auto kImgMinDb = -60.0f;
     image_frame.base_freq = c2_freq;
     image_frame.source_type = ResynthsisFrames::Type::kImage;
     auto max_db = -999.0f;
@@ -579,21 +586,40 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
             auto pixel = image_in->GetPixel(x, image_y_idx);
 
             // map g to gain
-            auto db = std::lerp(-60.0f, 0.0f, static_cast<float>(pixel.g) / 255.0f) + db6_level_down_table[y];
-            max_db = std::max(db, max_db);
+            if (valid_gain) {
+                if (pixel.g != 0) {
+                    auto g_div = static_cast<float>(pixel.g) / max_green;
+                    auto map_db = std::lerp(kImgMinDb, kImgMaxDb, g_div);
+                    //auto db = std::lerp(kImgMinDb, kImgMaxDb, static_cast<float>(pixel.g - 16.0f) / 256.0f) + db6_level_down_table[y];
+                    auto db = map_db + db6_level_down_table[y];
+                    frame.db_gains[y] = db;
+                    max_db = std::max(db, max_db);
+                }
+                else {
+                    frame.db_gains[y] = -300.0f;
+                }
+            }
 
             // map b to ratio diff
             auto ratio_diff = 2.0f * static_cast<float>(pixel.b) / 255.0f - 1.0f;
-            frame.db_gains[y] = db;
             frame.ratio_diffs[y] = ratio_diff;
         }
     }
 
-    auto gain_level_db = 0.0f - max_db;
-    for (auto& frame : image_frame.frames) {
-        for (auto& level : frame.db_gains) {
-            level += gain_level_db;
+    if (valid_gain) {
+        auto gain_level_db = 0.0f - max_db;
+        for (int i = 0; auto & frame : image_frame.frames) {
+            for (int j = 0; auto & level : frame.db_gains) {
+                level += gain_level_db;
+            }
         }
+        image_frame.level_up_db = gain_level_db;
+    }
+    else {
+        for (auto& f : image_frame.frames) {
+            std::ranges::copy(db6_level_down_table, f.db_gains.begin());
+        }
+        image_frame.level_up_db = 0.0f;
     }
 
     image_frame.num_frame = static_cast<int>(image_frame.frames.size());

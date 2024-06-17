@@ -45,6 +45,18 @@ public:
         auto color = img_.getPixelAt(x, y);
         return SimplePixel{ color.getRed(), color.getGreen(), color.getBlue() };
     }
+
+    int GetMaxGreen() const override {
+        auto max = 0;
+        const auto w = img_.getWidth();
+        const auto h = img_.getHeight();
+        for (int i = 0; i < w; ++i) {
+            for (int j = 0; j < h; ++j) {
+                max = std::max(max, static_cast<int>(img_.getPixelAt(i, j).getGreen()));
+            }
+        }
+        return max;
+    }
 private:
     const juce::Image img_;
 };
@@ -210,8 +222,8 @@ void ResynthsisLayout::CreateImageResynthsis(const juce::String& path, bool stre
 juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
     // turn audio data into img
     const auto& spectrum = frames.frames;
-    const auto display_height = kNumPartials;// hide half fft spectrum and image because it only used in formant stretch
-    const auto display_width = static_cast<int>(spectrum.size());// hide half fft spectrum and image because it only used in formant stretch
+    const auto display_height = kNumPartials;
+    const auto display_width = frames.num_frame;
     juce::Image resynthsis_img{ juce::Image::RGB, display_width, display_height,false };
     auto should_6dB_level_up = frames.source_type == ResynthsisFrames::Type::kImage;
 
@@ -232,8 +244,9 @@ juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
 
             // map gain to g
             auto db_g = draw_frame.db_gains[y_idx];
-            if (should_6dB_level_up)
-                db_g += db6up_table[y_idx];
+            if (should_6dB_level_up) {
+                db_g += (db6up_table[y_idx] - frames.level_up_db);
+            }
             auto nor_db_g = (db_g - min_db) / (max_db - min_db);
             auto g = static_cast<unsigned char>(std::clamp(0xff * nor_db_g, 0.0f, 255.0f));
 

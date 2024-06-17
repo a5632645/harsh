@@ -27,6 +27,7 @@ struct ResynthsisFrames {
     int num_frame{};
     float frame_interval_sample{};
     float base_freq{};
+    float level_up_db{};
     Type source_type{ Type::kUnknow };
 };
 }

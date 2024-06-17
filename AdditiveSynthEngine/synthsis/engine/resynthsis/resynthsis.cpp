@@ -101,15 +101,15 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
             auto formant_max_freq = (kNumPartials + 1.0f) * resynthsis_datas.base_freq;
             auto formant_data_max_freq = kNumPartials * resynthsis_datas.base_freq;
             if (remap_freq > formant_max_freq || remap_freq < 0.0f) {
-                output[i] = 0.0f;
+                output[i] = -300.0f;
             }
             else if (remap_freq < resynthsis_datas.base_freq) {
                 auto frac = remap_freq / resynthsis_datas.base_freq;
-                output[i] = GetFrameGain(i, 0).gain_db;
+                output[i] = GetFrameGain(i, 0).gain_db * frac;
             }
             else if (remap_freq > formant_data_max_freq) {
                 auto frac = 1.0f - (remap_freq - formant_data_max_freq) / resynthsis_datas.base_freq;
-                output[i] = GetFrameGain(i, kNumPartials - 1).gain_db;
+                output[i] = GetFrameGain(i, kNumPartials - 1).gain_db * frac;
             }
             else {
                 auto index_k = remap_freq / resynthsis_datas.base_freq - 1.0f;
@@ -137,15 +137,15 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
             auto formant_max_freq = (kNumPartials + 1.0f) * resynthsis_datas.base_freq;
             auto formant_data_max_freq = kNumPartials * resynthsis_datas.base_freq;
             if (remap_freq > formant_max_freq || remap_freq < 0.0f) {
-                output[i] = 0.0f;
+                output[i] = -300.0f;
             }
             else if (remap_freq < resynthsis_datas.base_freq) {
                 auto frac = remap_freq / resynthsis_datas.base_freq;
-                output[i] = GetFrameGain(i, 0).gain_db;
+                output[i] = GetFrameGain(i, 0).gain_db * frac;
             }
             else if (remap_freq > formant_data_max_freq) {
                 auto frac = 1.0f - (remap_freq - formant_data_max_freq) / resynthsis_datas.base_freq;
-                output[i] = GetFrameGain(i, kNumPartials - 1).gain_db;
+                output[i] = GetFrameGain(i, kNumPartials - 1).gain_db * frac;
             }
             else {
                 auto index_k = remap_freq / resynthsis_datas.base_freq - 1.0f;
