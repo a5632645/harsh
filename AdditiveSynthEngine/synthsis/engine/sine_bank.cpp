@@ -113,13 +113,6 @@ void SineBank::LoadPartials(Partials & partials) {
 float SineBank::SrTick() {
     #ifdef AD_ENABLE_SIMD
     for (size_t i = 0; i < num_phase_loop_; i += simd_size) {
-        auto vec_target_vol = xsimd::load_aligned(target_volume_table_.data() + i);
-        auto vec_old_vol = xsimd::load_aligned(volume_table_.data() + i);
-        auto vec_vol = amp_smooth_factor_ * vec_old_vol + amp_smooth_factor2_ * vec_target_vol;
-        xsimd::store_aligned(volume_table_.data() + i, vec_vol);
-    }
-
-    for (size_t i = 0; i < num_phase_loop_; i += simd_size) {
         auto vec_p = xsimd::load_aligned(phase_table_.data() + i);
         auto vec_pinc = xsimd::load_aligned(freq_table_.data() + i);
         auto vec_new_p = xsimd::mul(vec_p, vec_pinc);
@@ -127,9 +120,21 @@ float SineBank::SrTick() {
     }
 
     float output{};
-    for (size_t i = 0; i < num_volume_loop_; ++i) {
-        output += phase_table_[i].imag() * volume_table_[i];
+    auto fir_coef0 = fir_curr_lut_[sr_pos_];
+    auto fir_coef1 = fir_last1_lut_[sr_pos_];
+    auto fir_coef2 = fir_last2_lut_[sr_pos_];
+    for (size_t i = 0; i < num_volume_loop_; i+=simd_size) {
+        auto vec_curr = xsimd::load_aligned(current_volume_table_.data() + i);
+        auto vec_last1 = xsimd::load_aligned(sinc_last1_gain_.data() + i);
+        auto vec_last2 = xsimd::load_aligned(sinc_last2_gain_.data() + i);
+        auto gain = vec_curr * fir_coef0
+            + vec_last1 * fir_coef1
+            + vec_last2 * fir_coef2;
+        auto vec_phase = xsimd::load_aligned(phase_table_.data() + i);
+        auto f = vec_phase.imag() * gain;
+        output += xsimd::reduce_add(f);
     }
+    ++sr_pos_;
     return output;
     #else
     for (size_t i = 0; i < processed_partials_; ++i) {
