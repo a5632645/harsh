@@ -31,6 +31,7 @@ private:
 
     std::unique_ptr<juce::TextButton> audio_button_;
     std::unique_ptr<juce::TextButton> image_button_;
+    std::unique_ptr<juce::TextButton> image_export_button_;
     std::unique_ptr<juce::FileChooser> audio_file_chooser_;
     std::unique_ptr<juce::FileChooser> image_file_chooser_;
     std::unique_ptr<juce::AlertWindow> image_post_process_selector_;

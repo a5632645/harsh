@@ -91,6 +91,9 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
     image_button_ = std::make_unique<juce::TextButton>("image", "open image file");
     audio_button_->addListener(this);
     image_button_->addListener(this);
+    image_export_button_ = std::make_unique<juce::TextButton>("export image");
+    image_export_button_->addListener(this);
+    addAndMakeVisible(image_export_button_.get());
 
     audio_file_chooser_ = std::make_unique<juce::FileChooser>("open audio",
                                                               juce::File{},
@@ -141,6 +144,7 @@ void ResynthsisLayout::resized() {
     is_enable_->setBounds(0, 0, 100, 16);
     audio_button_->setBounds(200, 0, 100, 16);
     image_button_->setBounds(300, 0, 100, 16);
+    image_export_button_->setBounds(400, 0, 100, 16);
     for (int i = 0; auto & k : arg_knobs_) {
         k->setBounds(50 * i, 16, 50, 50);
         ++i;
@@ -256,15 +260,6 @@ juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
             resynthsis_img.setPixelAt(x, y, juce::Colour(0, g, b));
         }
     }
-
-    juce::PNGImageFormat f;
-    juce::File out_img{ R"(C:\Users\Kawai\Desktop\res_output.png)" };
-    if (out_img.exists()) {
-        out_img.deleteFile();
-    }
-    juce::FileOutputStream s{ out_img };
-    f.writeImageToStream(resynthsis_img, s);
-
     return resynthsis_img;
 }
 
@@ -299,6 +294,26 @@ void ResynthsisLayout::buttonClicked(juce::Button* ptr_button) {
                 image_post_process_selector_->setVisible(false);
                 CreateImageResynthsis(file.getFullPathName(), w == 0);
             }));
+        });
+    }
+    else if (ptr_button == image_export_button_.get()) {
+        if (!image_view_->getImage().isValid()) {
+            return;
+        }
+        auto popup = new juce::FileChooser("export image", juce::File{}, "*.png");
+        popup->launchAsync(juce::FileBrowserComponent::FileChooserFlags::saveMode,
+                           [popup, img = image_view_->getImage()](const juce::FileChooser& c) {
+            auto _ = std::unique_ptr<juce::FileChooser>(popup);
+            if (c.getResult() == juce::File{}) {
+                return;
+            }
+            auto ff = c.getResult();
+            juce::PNGImageFormat f;
+            if (ff.exists()) {
+                ff.deleteFile();
+            }
+            juce::FileOutputStream s{ ff };
+            f.writeImageToStream(img, s);
         });
     }
 }
