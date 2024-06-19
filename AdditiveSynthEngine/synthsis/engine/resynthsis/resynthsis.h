@@ -47,8 +47,6 @@ private:
     PolyModuFloatParameter* gain_mix_{};
 
     BoolParameter* is_enable_{};
-    BoolParameter* is_formant_remap_{};
-    CurveV2* formant_remap_curve_{};
     CurveV2* speed_curve_{};
     CurveV2* pos_offset_curve_{};
     Synth& synth_;

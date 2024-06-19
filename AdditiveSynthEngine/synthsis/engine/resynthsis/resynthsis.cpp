@@ -62,12 +62,10 @@ void Resynthesis::OnUpdateTick() {
 }
 
 void Resynthesis::PrepareParams(OscillorParams & params) {
-    formant_remap_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("resynthsis.formant_remap");
     pos_offset_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("resynthsis.rand_start_pos_mask");
     speed_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("resynthsis.speed");
 
     is_enable_ = params.GetParam<BoolParameter>("resynthsis.enable");
-    is_formant_remap_ = params.GetParam<BoolParameter>("resynthsis.formant_remap");
     freq_scale_ = params.GetPolyFloatParam("resynthsis.freq_scale");
     nor_start_pos_ = params.GetPolyFloatParam("resynthsis.start_offset");
     speed_ = params.GetPolyFloatParam("resynthsis.speed");

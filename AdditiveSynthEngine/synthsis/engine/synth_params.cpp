@@ -201,11 +201,6 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         .id = "resynthsis.enable",
         .name = "resynthsis.enable",
         .vdefault = false }));
-    //param_bank_.AddOrCreateIfNull<BoolParameter>(kDisable, kUnitRange, "", "resynthsis.formant_remap");
-    param_bank_.AddParameter(creator->CreateBoolParameter({
-        .id = "resynthsis.formant_remap",
-        .name = "resynthsis.formant_remap",
-        .vdefault = false }));
     param_bank_.AddParameter(creator->CreateFloatParameter({
     .type = kPoly,
     .id = "resynthsis.freq_scale",
@@ -365,8 +360,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
             .vdefault = param::Env_Release::kDefault }));
     }
     // custom curves
-    curve_bank_.AddCurve("resynthsis.formant_remap")
-        .AddCurve(CurveV2{ kNumPartials, CurveV2::CurveInitEnum::kFull }, "resynthsis.rand_start_pos_mask")
+    curve_bank_.AddCurve(CurveV2{ kNumPartials, CurveV2::CurveInitEnum::kFull }, "resynthsis.rand_start_pos_mask")
         .AddCurve(CurveV2{ kNumPartials, CurveV2::CurveInitEnum::kFull }, "effect.harmonic_delay.time")
         .AddCurve(CurveV2{ kNumPartials, CurveV2::CurveInitEnum::kFull }, "effect.harmonic_delay.feedback")
         .AddCurve(CurveV2{ kNumPartials, CurveV2::CurveInitEnum::kFull }, "resynthsis.speed")

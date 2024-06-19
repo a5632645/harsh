@@ -85,8 +85,6 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
     arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.gain_mix")));
     arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.start_range")));
 
-    is_formant_remap_ = std::make_unique<WrapCheckBox>(synth.GetParamBank().GetParamPtr<BoolParameter>("resynthsis.formant_remap"));
-
     image_view_ = std::make_unique<juce::ImageComponent>();
     image_view_->setImagePlacement(juce::RectanglePlacement::stretchToFit);
     audio_button_ = std::make_unique<juce::TextButton>("audio", "open audio file");
@@ -103,7 +101,6 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
 
     // add
     addAndMakeVisible(is_enable_.get());
-    addAndMakeVisible(is_formant_remap_.get());
     addAndMakeVisible(audio_button_.get());
     addAndMakeVisible(image_button_.get());
     for (auto & k : arg_knobs_) {
@@ -142,7 +139,6 @@ void ResynthsisLayout::paintOverChildren(juce::Graphics& g) {
 
 void ResynthsisLayout::resized() {
     is_enable_->setBounds(0, 0, 100, 16);
-    is_formant_remap_->setBounds(100, 0, 100, 16);
     audio_button_->setBounds(200, 0, 100, 16);
     image_button_->setBounds(300, 0, 100, 16);
     for (int i = 0; auto & k : arg_knobs_) {

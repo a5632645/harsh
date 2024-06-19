@@ -25,7 +25,6 @@ private:
 
     Synth& synth_;
     std::unique_ptr<WrapCheckBox> is_enable_;
-    std::unique_ptr<WrapCheckBox> is_formant_remap_;
     std::vector<std::unique_ptr<WrapSlider>> arg_knobs_;
     std::atomic<int> resynthsis_work_counter_;
     std::unique_ptr<juce::ImageComponent> image_view_;
