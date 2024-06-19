@@ -16,6 +16,7 @@ struct TimberType : IntChoiceParam<TimberType> {
         kNoise,
         kPwm,
         kImpulse,
+        kAdsrEnv,
         kNumEnums
     };
 
@@ -25,6 +26,7 @@ struct TimberType : IntChoiceParam<TimberType> {
         "noise"sv,
         "pwm"sv,
         "impulse"sv,
+        "adsr env"sv
     };
 };
 
@@ -184,5 +186,48 @@ struct Impulse_NumSines : FloatParam<Impulse_NumSines> {
     static constexpr float kMax = 1.0f;
     static constexpr float kDefault = kMax;
     static constexpr int kTextPrecision = 0;
+};
+
+// =========================================================
+// adsr multi env
+// =========================================================
+struct MultiEnv_PreDelayTime : FloatParam<MultiEnv_PreDelayTime> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "predelay"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 10.0f;
+    static constexpr float kDefault = 1.0f;
+    static constexpr int kTextPrecision = 3;
+    static constexpr auto kStuff = "s"sv;
+};
+
+struct MultiEnv_AttackTime : FloatParam<MultiEnv_AttackTime> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "attack"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 10.0f;
+    static constexpr float kDefault = 1.0f;
+    static constexpr int kTextPrecision = 3;
+    static constexpr auto kStuff = "s"sv;
+};
+
+struct MultiEnv_DecayTime : FloatParam<MultiEnv_DecayTime> {
+    static constexpr int kArgIdx = 2;
+    static constexpr auto kName = "decay"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 10.0f;
+    static constexpr float kDefault = 1.0f;
+    static constexpr int kTextPrecision = 3;
+    static constexpr auto kStuff = "s"sv;
+};
+
+struct MultiEnv_PeakLevel : FloatParam<MultiEnv_PeakLevel> {
+    static constexpr int kArgIdx = 3;
+    static constexpr auto kName = "peak"sv;
+    static constexpr float kMin = -60.0f;
+    static constexpr float kMax = 0.0f;
+    static constexpr float kDefault = kMax;
+    static constexpr int kTextPrecision = 1;
+    static constexpr auto kStuff = "dB"sv;
 };
 }

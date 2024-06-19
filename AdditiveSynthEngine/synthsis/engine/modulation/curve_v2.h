@@ -11,6 +11,12 @@ class CurveV2 {
 public:
     static constexpr auto kLineResolution = 1024;
 
+    enum class CurveInitEnum {
+        kRamp,
+        kNull,
+        kFull
+    };
+
     enum class PowerEnum {
         kKeep = 0,
         kExp,
@@ -38,7 +44,7 @@ public:
         virtual void OnReload(CurveV2* generator) = 0;
     };
 
-    CurveV2(int size = kLineResolution);
+    CurveV2(int size = kLineResolution, CurveInitEnum init = CurveInitEnum::kNull);
     CurveV2(const CurveV2&) = delete;
     CurveV2& operator=(const CurveV2&) = delete;
     CurveV2(CurveV2&&) = default;

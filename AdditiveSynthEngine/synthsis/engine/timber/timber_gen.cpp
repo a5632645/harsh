@@ -32,17 +32,21 @@ void TimberGen::Process(TimberFrame& frame) {
     case kImpulse:
         std::get<Impulse>(timber_gens_).Process(frame);
         break;
+    case kAdsrEnv:
+        std::get<MultiEnvelop>(timber_gens_).Process(frame);
+        break;
     default:
         assert("unkown timber type");
         break;
     }
 }
 
-void TimberGen::PrepareParams(OscillorParams & params) {
+void TimberGen::PrepareParams(OscillorParams& params) {
     timber_type_arg_ = params.GetParam<IntChoiceParameter>("timber.osc{}.type", idx_);
     for (int i = 0; auto & parg : osc_param_.args) {
         parg = params.GetPolyFloatParam("timber.osc{}.arg{}", idx_, i++);
     }
+    std::get<MultiEnvelop>(timber_gens_).PrepareParam(params);
 }
 
 void TimberGen::OnUpdateTick() {
@@ -50,16 +54,10 @@ void TimberGen::OnUpdateTick() {
 }
 
 void TimberGen::OnNoteOn(int note) {
-    //dual_saw_.OnNoteOn(note);
-    //sync_.OnNoteOn(note);
-    //noise_.OnNoteOn(note);
     std::apply([note](auto&... t) { int _[]{ (t.OnNoteOn(note), 0)... }; }, timber_gens_);
 }
 
 void TimberGen::OnNoteOff() {
-    //dual_saw_.OnNoteOff();
-    //sync_.OnNoteOff();
-    //noise_.OnNoteOff();
     std::apply([](auto&... t) { int _[]{ (t.OnNoteOff(),0)... }; }, timber_gens_);
 }
 }

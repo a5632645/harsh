@@ -121,6 +121,7 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
             }
         }).detach();
     }
+    is_enable_->onStateChange();
 }
 
 void ResynthsisLayout::paintOverChildren(juce::Graphics& g) {

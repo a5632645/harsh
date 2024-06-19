@@ -26,11 +26,25 @@ float CurveV2::GetPowerYValue(float nor_x, PowerEnum power_type, float power) {
 }
 
 namespace mana {
-CurveV2::CurveV2(int size) : num_data_(size) {
+CurveV2::CurveV2(int size, CurveInitEnum init) : num_data_(size) {
     datas_.resize(size + 2);
-    points_.clear();
-    points_.emplace_back(0.0f, 0.0f);
-    points_.emplace_back(1.0f, 1.0f);
+    switch (init) {
+    case CurveInitEnum::kRamp:
+        points_.emplace_back(0.0f, 0.0f);
+        points_.emplace_back(1.0f, 1.0f);
+        break;
+    case CurveInitEnum::kNull:
+        points_.emplace_back(0.0f, 0.0f);
+        points_.emplace_back(1.0f, 0.0f);
+        break;
+    case CurveInitEnum::kFull:
+        points_.emplace_back(0.0f, 1.0f);
+        points_.emplace_back(1.0f, 1.0f);
+        break;
+    default:
+        assert(false);
+        break;
+    }
     FullRender();
 }
 
