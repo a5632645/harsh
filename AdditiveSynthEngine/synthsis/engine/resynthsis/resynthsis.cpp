@@ -95,72 +95,81 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
     std::array<float, kNumPartials> output{};
 
     const auto& resynthsis_datas = synth_.GetResynthsisFrames();
-    if (!is_formant_remap_->GetBool()) { // disable remap
-        for (int i = 0; i < kNumPartials; ++i) {
-            auto remap_freq = partials.freqs[i] * 0.5f * sample_rate_ * formant_ratio;
-            auto formant_max_freq = (kNumPartials + 1.0f) * resynthsis_datas.base_freq;
-            auto formant_data_max_freq = kNumPartials * resynthsis_datas.base_freq;
-            if (remap_freq > formant_max_freq || remap_freq < 0.0f) {
-                output[i] = -300.0f;
-            }
-            else if (remap_freq < resynthsis_datas.base_freq) {
-                auto frac = remap_freq / resynthsis_datas.base_freq;
-                output[i] = GetFrameGain(i, 0).gain_db * frac;
-            }
-            else if (remap_freq > formant_data_max_freq) {
-                auto frac = 1.0f - (remap_freq - formant_data_max_freq) / resynthsis_datas.base_freq;
-                output[i] = GetFrameGain(i, kNumPartials - 1).gain_db * frac;
+    const auto inv_base_freq = 1.0f / resynthsis_datas.base_freq;
+    const auto max_freq = resynthsis_datas.base_freq * (kNumPartials + 1.0f);
+    constexpr auto min_db = -120.0f;
+    for (int i = 0; i < kNumPartials; ++i) {
+        auto remap_freq = partials.freqs[i] * 0.5f * sample_rate_ * formant_ratio;
+        auto first_freq = resynthsis_datas.base_freq * (GetFrameGain(i, 0).ratio_diff + 1.0f);
+        auto last_freq = resynthsis_datas.base_freq * (GetFrameGain(i, kNumPartials - 1).ratio_diff + kNumPartials);
+        if(remap_freq > max_freq || remap_freq < 0.0f) {
+            output[i] = 0.0f;
+            continue;
+        }
+        if (remap_freq < first_freq) {
+            auto ratio = remap_freq / first_freq;
+            output[i] = utli::DbToGain(std::lerp(min_db, GetFrameGain(i, 0).gain_db, std::abs(ratio)));
+            continue;
+        }
+        if (remap_freq > last_freq) {
+            auto ratio = (remap_freq - last_freq) / (max_freq - last_freq);
+            output[i] = utli::DbToGain(std::lerp(GetFrameGain(i, kNumPartials - 1).gain_db, min_db, std::abs(ratio)));
+            continue;
+        }
+
+        auto bin = remap_freq * inv_base_freq - 1.0f;
+        auto prev_bin = static_cast<int>(bin);
+        auto next_bin = prev_bin + 1;
+        if (prev_bin >= kNumPartials || next_bin <= 0) { // out of bound
+            output[i] = 0.0f;
+            continue;
+        }
+        if (next_bin == kNumPartials) { // reach end
+            auto ratio = (remap_freq - last_freq) / (max_freq - last_freq);
+            output[i] = utli::DbToGain(std::lerp(GetFrameGain(i, kNumPartials - 1).gain_db, min_db, std::abs(ratio)));
+            continue;
+        }
+
+        {
+            auto next_bin_freq = resynthsis_datas.base_freq * (GetFrameGain(i, next_bin).ratio_diff + next_bin + 1.0f);
+            if (remap_freq > next_bin_freq) {
+                ++prev_bin;
+                ++next_bin;
             }
             else {
-                auto index_k = remap_freq / resynthsis_datas.base_freq - 1.0f;
-                auto left_idx = static_cast<int>(std::floor(index_k));
-                auto right_idx = static_cast<int>(std::ceil(index_k)) & (kNumPartials - 1); // if idx euqal to 256 that is mirror to bin 0
-                auto frac = index_k - left_idx;
-                output[i] = std::lerp(GetFrameGain(i, left_idx).gain_db, GetFrameGain(i, right_idx).gain_db, frac);
+                auto prev_bin_freq = resynthsis_datas.base_freq * (GetFrameGain(i, prev_bin).ratio_diff + prev_bin + 1.0f);
+                if (remap_freq < prev_bin_freq) {
+                    --prev_bin;
+                    --next_bin;
+                }
             }
         }
-    }
-    else { // enable formant remap
-        for (int i = 0; i < kNumPartials; ++i) {
-            // remap frequency
-            auto org_freq = 0.5f * sample_rate_ * partials.freqs[i];
-            auto remap_freq = org_freq;
-            constexpr auto blend_min = 20.0f;
-            constexpr auto blend_max = 20000.0f;
-            if (org_freq >= blend_min && org_freq <= blend_max) {
-                auto map_input_x = (1.0f / 3.0f) * std::log10(org_freq / blend_min);
-                auto map_x = formant_remap_curve_->GetNormalize(map_input_x);
-                remap_freq = blend_min * std::exp(std::numbers::ln10_v<float> *map_x * 3.0f);
-            }
-
-            // do formant shift
-            auto formant_max_freq = (kNumPartials + 1.0f) * resynthsis_datas.base_freq;
-            auto formant_data_max_freq = kNumPartials * resynthsis_datas.base_freq;
-            if (remap_freq > formant_max_freq || remap_freq < 0.0f) {
-                output[i] = -300.0f;
-            }
-            else if (remap_freq < resynthsis_datas.base_freq) {
-                auto frac = remap_freq / resynthsis_datas.base_freq;
-                output[i] = GetFrameGain(i, 0).gain_db * frac;
-            }
-            else if (remap_freq > formant_data_max_freq) {
-                auto frac = 1.0f - (remap_freq - formant_data_max_freq) / resynthsis_datas.base_freq;
-                output[i] = GetFrameGain(i, kNumPartials - 1).gain_db * frac;
-            }
-            else {
-                auto index_k = remap_freq / resynthsis_datas.base_freq - 1.0f;
-                auto left_idx = static_cast<int>(std::floor(index_k));
-                auto right_idx = static_cast<int>(std::ceil(index_k)) & (kNumPartials - 1); // if idx euqal to 256 that is mirror to bin 0
-                auto frac = index_k - left_idx;
-                output[i] = std::lerp(GetFrameGain(i, left_idx).gain_db, GetFrameGain(i, right_idx).gain_db, frac);
-            }
+        if (next_bin == kNumPartials) { // reach end
+            auto ratio = (remap_freq - last_freq) / (max_freq - last_freq);
+            output[i] = utli::DbToGain(std::lerp(GetFrameGain(i, kNumPartials - 1).gain_db, min_db, std::abs(ratio)));
+            continue;
         }
-    }
+        if (next_bin == 0) {
+            auto ratio = remap_freq / first_freq;
+            output[i] = utli::DbToGain(std::lerp(min_db, GetFrameGain(i, 0).gain_db, std::abs(ratio)));
+            continue;
+        }
 
-    for (auto& g : output) {
-        g = utli::DbToGain(g);
+        auto prev_data = GetFrameGain(i, prev_bin);
+        auto next_data = GetFrameGain(i, next_bin);
+        auto prev_freq = resynthsis_datas.base_freq * (prev_data.ratio_diff + prev_bin + 1.0f);
+        auto next_freq = resynthsis_datas.base_freq * (next_data.ratio_diff + next_bin + 1.0f);
+        if (prev_freq > next_freq) {
+            std::swap(prev_data, next_data);
+            std::swap(prev_freq, next_freq);
+        }
+        if (next_freq - prev_freq < 1.0f) {
+            output[i] = utli::DbToGain(prev_data.gain_db);
+            continue;
+        }
+        auto ratio = (remap_freq - prev_freq) / (next_freq - prev_freq);
+        output[i] = utli::DbToGain(std::lerp(prev_data.gain_db, next_data.gain_db, std::abs(ratio)));
     }
-
     return output;
 }
 
