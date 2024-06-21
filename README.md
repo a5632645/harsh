@@ -7,7 +7,7 @@
   various frequency assignment dissonance processors  
   poly modulator  
   spectral effects  
-#todo
+# todo
   volume adsr envelope  
   wavetable oscillor  
   custom filter  
