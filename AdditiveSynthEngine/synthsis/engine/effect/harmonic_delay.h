@@ -11,10 +11,6 @@
 #include "engine/synth.h"
 
 namespace mana {
-/**
-* spectral delay are not available because additive synthesizer can not play
-* the whole spectrum.if use ifft that maybe possible.
- */
 class HarmonicDelay : public EffectBase {
 public:
     void Init(float sample_rate, float update_rate) override {
@@ -22,18 +18,12 @@ public:
         auto buffer_size = static_cast<int>(max_delay_seconds * update_rate);
         delay_buffer_.resize(buffer_size + 1);
         update_rate_ = update_rate;
+        inv_update_rate_ = 1.0f / update_rate;
     }
 
     void Process(Partials& partials) override {
-        //int buffer_size = static_cast<int>(delay_buffer_.size());
-        //int read_pos = write_pos_ - static_cast<int>(frame_offset_);
-        //read_pos = (read_pos + buffer_size) % buffer_size;
-        //auto& write_frame = delay_buffer_[write_pos_];
-        //const auto& read_frame = delay_buffer_.at(read_pos);
-
         int buffer_size = static_cast<int>(delay_buffer_.size());
         auto& write_frame = delay_buffer_[write_pos_];
-
         for (int i = 0; i < kNumPartials; ++i) {
             auto delay_time = delay_time_ * time_map_->Get(i);
             auto frame_offset = delay_time * update_rate_ / 1000.0f;
@@ -50,14 +40,14 @@ public:
                 feedback = feedback_;
             }
 
-            auto delay_in = partials.gains[i] * partials.phases[i] + last_write_.polar_vector[i] * feedback;
+            auto fb_vec = last_write_.polar_vector[i] * feedback * std::polar(1.0f, std::lerp(0.0f, urd_(random_), feedback_smear_));
+            auto delay_in = partials.gains[i] * partials.phases[i] + fb_vec;
             write_frame.polar_vector[i] = delay_in;
 
             auto delay_vector = read_frame.polar_vector[i];
             last_write_.polar_vector[i] = delay_vector;
             partials.gains[i] = std::abs(delay_vector);
         }
-
         write_pos_ = (write_pos_ + 1) % buffer_size;
     }
 
@@ -67,6 +57,7 @@ public:
         feedback_ = helper::GetAlterParamValue(args.args, param::Delay_Feedback{});
         enable_custom_time_ = helper::GetAlterParamValue(args.args, param::Delay_CustomTime{}) > 0.5f;
         enable_custom_feedback_ = helper::GetAlterParamValue(args.args, param::Delay_CustomFeedback{}) > 0.5f;
+        feedback_smear_ = helper::GetAlterParamValue(args.args, param::Delay_FeedbackSmear{});
     }
 
     void PrepareParams(OscillorParams& params) override {
@@ -87,11 +78,15 @@ private:
     float delay_time_{};
     float frame_offset_{};
     float update_rate_{};
+    float inv_update_rate_{};
     float feedback_{};
+    float feedback_smear_{};
     int write_pos_{};
     CurveV2* time_map_{};
     CurveV2* feedback_map_{};
     bool enable_custom_time_{};
     bool enable_custom_feedback_{};
+    std::default_random_engine random_;
+    std::uniform_real_distribution<float> urd_{ 0.0f, std::numbers::pi_v<float> };
 };
 }

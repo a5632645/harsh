@@ -300,6 +300,15 @@ struct Delay_Feedback : FloatParam<Delay_Feedback> {
     static constexpr auto kTextPrecision = 2;
 };
 
+struct Delay_FeedbackSmear : FloatParam<Delay_FeedbackSmear> {
+    static constexpr int kArgIdx = 2;
+    static constexpr auto kName = "smear"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 2;
+};
+
 struct Delay_CustomTime : FloatParam<Delay_CustomTime> {
     static constexpr int kArgIdx = 3;
     static constexpr auto kName = "cos.time"sv;

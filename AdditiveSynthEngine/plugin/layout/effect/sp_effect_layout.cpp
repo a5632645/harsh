@@ -89,7 +89,8 @@ void EffectLayout::OnEffectTypeChanged(int c) {
                     param::Delay_Feedback{},
                     param::Delay_Time{},
                     param::Delay_CustomFeedback{},
-                    param::Delay_CustomTime{});
+                    param::Delay_CustomTime{},
+                    param::Delay_FeedbackSmear{});
         break;
     case kSpectralGate:
         SetGuiKnobs(arg_knobs_,
