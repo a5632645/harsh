@@ -1,4 +1,15 @@
-# additive_synth
-
-  An additive synthesier baseed on raylib.Trying to implement function from existed additive synthesizers: `IL Harmor`,`NI Razor` 
-  and other spectral effects.
+# additive_synth  
+  256 harmonics additive synthesier.
+# feature  
+  various oscillor types  
+  mixing two oscillors  
+  spectral model synthesis based resynthsis  
+  various frequency assignment dissonance processors  
+  poly modulator  
+  spectral effects  
+# todo
+  volume adsr envelope  
+  wavetable oscillor  
+  custom filter  
+  synth parameters load/store  
+  ear-good dissonance processors  
