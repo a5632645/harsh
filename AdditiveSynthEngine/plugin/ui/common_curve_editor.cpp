@@ -41,7 +41,9 @@ void CurveXYPointComponent::mouseDown(const juce::MouseEvent& e) {
     auto curr_power_type = parent->curve_->GetPoint(idx_).power_type;
     popup_menu_->addItem("keep", true, curr_power_type == pe::kKeep, set_type(pe::kKeep));
     popup_menu_->addItem("exp", true, curr_power_type == pe::kExp, set_type(pe::kExp));
-    popup_menu_->addItem("sine", true, curr_power_type == pe::kSine, set_type(pe::kSine));
+    popup_menu_->addItem("wave_sine", true, curr_power_type == pe::kWaveSine, set_type(pe::kWaveSine));
+    popup_menu_->addItem("wave_tri", true, curr_power_type == pe::kWaveTri, set_type(pe::kWaveTri));
+    popup_menu_->addItem("wave_square", true, curr_power_type == pe::kWaveSquare, set_type(pe::kWaveSquare));
     popup_menu_->addSeparator();
     popup_menu_->addItem("delete", [idx = idx_, curve] {curve->Remove(idx); });
     popup_menu_->showMenuAsync(juce::PopupMenu::Options{});
@@ -93,7 +95,8 @@ CommonCurveEditor::~CommonCurveEditor() {
 }
 
 void CommonCurveEditor::paint(juce::Graphics& g) {
-    g.setColour(juce::Colours::darkgrey);
+    auto bg_color = juce::Colours::darkgrey;
+    g.setColour(bg_color);
     g.fillRect(GetComponentBounds());
 
     if (curve_ != nullptr) {
@@ -116,19 +119,22 @@ void CommonCurveEditor::paint(juce::Graphics& g) {
             auto [x, y] = convert_xy(0, curve_->Get(0));
             p.startNewSubPath(x, y);
         }
+        auto inv_range = 1.0f / (num_points - 1.0f);
         for (int i = 1; i < num_points; ++i) {
-            auto nor_x = static_cast<float>(i) / static_cast<float>(num_points);
+            auto nor_x = static_cast<float>(i) * inv_range;
             auto nor_y = curve_->GetNormalize(nor_x);
             auto [x, y] = convert_xy(nor_x, nor_y);
             p.lineTo(x, y);
         }
 
-        g.setColour(juce::Colours::green);
+        g.setColour(juce::Colours::darkgreen);
+        g.strokePath(p, juce::PathStrokeType{ 3.0f });
+        g.setColour(juce::Colours::lightgreen);
         g.strokePath(p, juce::PathStrokeType{ 1.0f });
     }
 
-    g.setColour(juce::Colours::white);
-    g.drawRect(GetComponentBounds());
+    g.setColour(bg_color.darker());
+    g.drawRect(GetComponentBounds().expanded(2.0f, 2.0f), 2.0f);
 }
 
 void CommonCurveEditor::resized() {

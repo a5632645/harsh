@@ -20,13 +20,31 @@ float CurveV2::GetPowerYValue(float nor_x, PowerEnum power_type, float power) {
         auto up = std::exp(mapped_exp_base * nor_x) - 1.0f;
         return up / down;
     }
-    case PowerEnum::kSine:
+    case PowerEnum::kWaveSine:
     {
         constexpr auto max_cycles = 64.0f;
         auto map_v = power * 0.5f + 0.5f;
         auto cycles = std::round(map_v * max_cycles) + 0.5f;
         auto cos_v = -std::cos(cycles * nor_x * std::numbers::pi_v<float> *2.0f);
         return cos_v * 0.5f + 0.5f;
+    }
+    case PowerEnum::kWaveTri:
+    {
+        constexpr auto max_cycles = 64.0f;
+        auto map_v = power * 0.5f + 0.5f;
+        auto cycles = std::round(map_v * max_cycles) + 0.5f;
+        float tmp{};
+        auto phase = std::modf(nor_x * cycles, &tmp);
+        return 1.0f - std::abs(1.0f - 2.0f * phase);
+    }
+    case PowerEnum::kWaveSquare:
+    {
+        constexpr auto max_cycles = 63.0f;
+        auto map_v = power * 0.5f + 0.5f;
+        auto cycles = std::round(map_v * max_cycles) + 1.0f;
+        float tmp{};
+        auto phase = std::modf(nor_x * cycles, &tmp);
+        return phase < 0.5f ? 0.0f : 1.0f;
     }
     default:
         assert(false);
@@ -107,15 +125,15 @@ void CurveV2::PartRender(int begin_point_idx, int end_point_idx) {
         auto next_y = next_point.y;
         auto x_range = end_idx - begin_idx;
         auto fx_range = static_cast<float>(x_range);
+        auto inv_range = 1.0f / x_range;
         for (int x = 0; x < x_range; ++x) {
-            auto nor_x = x / fx_range;
-            //datas_[x + begin_idx] = std::lerp(curr_y, next_y, nor_x);
+            auto nor_x = x * inv_range;
             auto map_x = CurveV2::GetPowerYValue(nor_x, curr_point.power_type, curr_point.power);
             datas_[x + begin_idx] = std::lerp(curr_y, next_y, map_x);
         }
     }
-    datas_[num_data_] = datas_[0];
-    datas_[num_data_ + 1] = datas_[0];
+    datas_[num_data_] = datas_[num_data_ - 1];
+    datas_[num_data_ + 1] = datas_[num_data_];
 }
 
 void CurveV2::SetXy(int idx, float new_x, float new_y) {
