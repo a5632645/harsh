@@ -16,6 +16,7 @@ public:
     void OnNoteOff();
 private:
     void DoPitchQuantize(Partials& partials);
+    void DoStringDiss(Partials& partials);
 
     BoolParameter* is_enable_param_{};
     IntChoiceParameter* diss_type_{};
@@ -23,10 +24,6 @@ private:
     QuantizeMap* pitch_quantize_map_{};
 
     bool is_enable_;
-
-    // string
-    float string_stretch_factor_;
-
     // harm stretch
     float harmonic_stretch_ratio_;
 

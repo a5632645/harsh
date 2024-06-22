@@ -40,7 +40,7 @@ void DissonanceLayout::OnDissonanceTypeChanged(int c) {
     case kString:
         SetGuiKnobs(arg_knobs_,
                     param::StringDissStretch{},
-                    param::StringMultiRatio{});
+                    param::String_Quantize{});
         break;
     case kHarmonicStretch:
         SetGuiKnobs(arg_knobs_,

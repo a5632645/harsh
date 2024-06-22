@@ -30,7 +30,9 @@ struct DissonanceType : IntChoiceParam<DissonanceType> {
     };
 };
 
-// harmonic stretch
+// =========================================================
+// harmonic strech
+// =========================================================
 struct HarmonicStrech : FloatParam<HarmonicStrech> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "stretch"sv;
@@ -61,24 +63,16 @@ struct StringDissStretch : FloatParam<StringDissStretch> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 1.0f;
     static constexpr float kDefault = 0.0f;
-    static constexpr int kTextPrecision = 5;
+    static constexpr int kTextPrecision = 3;
 };
 
-struct StringMultiRatio : FloatChoiceParam<StringMultiRatio> {
-    enum class ParamEnum {
-        k1 = 0,
-        k10,
-        k100,
-        k1000,
-        k10000,
-        kNumEnums
-    };
-
-    static constexpr std::array kNames = {
-        "1.0"sv, "0.1"sv, "0.01"sv, "0.001"sv, "0.0001"sv
-    };
-    static constexpr auto kName = "scale"sv;
+struct String_Quantize : FloatParam<String_Quantize> {
     static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "quantize"sv;
+    static constexpr float kMin = 0.0f;
+    static constexpr float kMax = 1.0f;
+    static constexpr float kDefault = 0.0f;
+    static constexpr int kTextPrecision = 2;
 };
 
 // =========================================================

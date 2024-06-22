@@ -1,9 +1,11 @@
 #include "dissonance.h"
 
+#include <numbers>
 #include "utli/warp.h"
 #include "engine/oscillor_param.h"
 #include "param/dissonance_param.h"
 #include "utli/convert.h"
+#include "param/param_helper.h"
 
 namespace mana {
 static void DoHarmonicStretch(Partials& partials, float stretch) {
@@ -40,8 +42,11 @@ static void DoSemitoneSpace(Partials& partials, float semitone) {
     }
 }
 
-static constexpr std::array kStringRatios{ 1.0f, 0.1f,0.01f,0.001f,0.0001f };
-static void DoStringDiss(Partials& partials, float string_val) {
+void Dissonance::DoStringDiss(Partials& partials) {
+    auto string_val = helper::GetAlterParamValue(args_, param::StringDissStretch{});
+    string_val = (std::exp(string_val * 10.0f) - 1.0f) / (gcem::exp(10.0f) - 1.0f);
+    auto string_quantize = helper::GetAlterParamValue(args_, param::String_Quantize{});
+
     auto first_ratio = partials.ratios[0] + 1.0f;
     partials.freqs[0] = first_ratio * partials.base_frequency;
     partials.pitches[0] = utli::RatioToPitch(first_ratio, partials.base_pitch);
@@ -49,7 +54,9 @@ static void DoStringDiss(Partials& partials, float string_val) {
 
     for (int i = 1; i < kNumPartials; ++i) {
         auto n = i + 1.0f + partials.ratios[i];
-        auto ratio = n * std::sqrt(1.0f + n * n * string_val);
+        auto str_ratio = n * std::sqrt(1.0f + n * n * string_val);
+        auto quantize_ratio = std::round(str_ratio);
+        auto ratio = std::lerp(str_ratio, quantize_ratio, string_quantize);
         partials.freqs[i] = partials.base_frequency * ratio;
         partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
         partials.ratios[i] = ratio;
@@ -200,7 +207,7 @@ void Dissonance::Process(Partials& partials) {
     auto diss_type = param::DissonanceType::GetEnum(diss_type_->GetInt());
     switch (diss_type) {
     case kString:
-        DoStringDiss(partials, string_stretch_factor_);
+        DoStringDiss(partials);
         break;
     case kHarmonicStretch:
         DoHarmonicStretch(partials, harmonic_stretch_ratio_);
@@ -230,12 +237,6 @@ void Dissonance::Process(Partials& partials) {
 
 void Dissonance::OnUpdateTick() {
     is_enable_ = is_enable_param_->GetBool();
-
-    {
-        auto raw_string = param::StringDissStretch::GetNumber(args_[param::StringDissStretch::kArgIdx]->Get01Value());
-        auto ratio_idx = param::StringMultiRatio::GetChoiceIndex(args_[param::StringMultiRatio::kArgIdx]->Get01Value());
-        string_stretch_factor_ = raw_string * kStringRatios[ratio_idx];
-    }
 
     harmonic_stretch_ratio_ = param::HarmonicStrech::GetNumber(args_[param::HarmonicStrech::kArgIdx]->Get01Value());
 
