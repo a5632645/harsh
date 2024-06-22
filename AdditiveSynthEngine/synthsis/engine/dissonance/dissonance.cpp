@@ -64,6 +64,44 @@ void Dissonance::DoStringDiss(Partials& partials) {
 }
 
 // =========================================================
+// prism
+//   prism from harmor, in harmor prism
+//   add mode:    partial's ratios will add +-4
+//   multi mode:  (n)th partial will shift from 1 to ratio=(2n+1), n=0,1,2...
+// =========================================================
+static constexpr auto kMaxPrismAddRatio = 4.0f;
+void Dissonance::DoPrism(Partials& partials) {
+    auto prism_amount = helper::GetAlterParamValue(args_, param::Prism_Amount{}); // -1..1
+    auto prism_morph = helper::GetAlterParamValue(args_, param::Prism_Morph{});
+    for (int i = 0; i < kNumPartials; ++i) {
+        auto org_ratio = partials.ratios[i] + 1.0f + i;
+        auto freq = partials.base_frequency * org_ratio;
+        if (freq > 0.0f && freq < Partials::kMaxFreq) {
+            auto multi_ratio1 = 2.0f * i + 1.0f + partials.ratios[i];
+            auto multi_ratio0 = 1.0f + partials.ratios[i];
+            // mel frequency transform
+            auto mel = 1127.0f * std::log(1.0f + freq / 700.0f);
+            constexpr auto max_mel = 1127.0f * gcem::log(1.0f + Partials::kMaxFreq / 700.0f);
+            constexpr auto inv_max_mel = 1.0f / max_mel;
+            auto prism_val = prism_map_->GetNormalize(inv_max_mel * mel); // 0..1
+            prism_val = prism_val * 2.0f - 1.0f; // -1..1
+            auto add_ratio = org_ratio + prism_val * prism_amount * kMaxPrismAddRatio;
+            auto bit_prism_val = prism_val * prism_amount * 0.5f + 0.5f; // 0..1
+            auto multi_ratio = std::lerp(multi_ratio0, multi_ratio1, bit_prism_val);
+            auto ratio = std::lerp(add_ratio, multi_ratio, prism_morph);
+            partials.freqs[i] = partials.base_frequency * ratio;
+            partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
+            partials.ratios[i] = ratio;
+        }
+        else {
+            partials.freqs[i] = freq;
+            partials.pitches[i] = utli::RatioToPitch(org_ratio, partials.base_pitch);
+            partials.ratios[i] = org_ratio;
+        }
+    }
+}
+
+// =========================================================
 // dispersion
 // =========================================================
 static void DoDispersion(Partials& partials, float amount, float warp) {
@@ -182,7 +220,9 @@ void Dissonance::Init(float sample_rate, float update_rate) {
 }
 
 void Dissonance::PrepareParams(OscillorParams& params) {
-    pitch_quantize_map_ = params.GetParentSynthParams().GetCurveBank().GetQuantizeMapPtr("dissonance.pitch_quantize");
+    auto& cb = params.GetParentSynthParams().GetCurveBank();
+    pitch_quantize_map_ = cb.GetQuantizeMapPtr("dissonance.pitch_quantize");
+    prism_map_ = cb.GetCurvePtr("dissonance.prism");
 
     is_enable_param_ = params.GetParam<BoolParameter>("dissonance.enable");
     diss_type_ = params.GetParam<IntChoiceParameter>("dissonance.type");
@@ -229,6 +269,9 @@ void Dissonance::Process(Partials& partials) {
         break;
     case kPitchQuantize:
         DoPitchQuantize(partials);
+        break;
+    case kPrism:
+        DoPrism(partials);
         break;
     default:
         break;

@@ -74,7 +74,7 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
 void SineBank::LoadPartials(Partials& partials) {
     size_t num_processed = count_process_particles(partials);
     processed_partials_ = std::max(processed_partials_, num_processed);
-    active_partials_ = std::min(processed_partials_, max_active_partials_);
+    active_partials_ = std::min(num_processed, max_active_partials_);
     sr_pos_ = 0;
 
     if (partials.update_phase) {
@@ -86,11 +86,12 @@ void SineBank::LoadPartials(Partials& partials) {
     std::ranges::copy(current_volume_table_, sinc_last1_gain_.begin());
 
     for (size_t i = 0; i < kNumPartials; ++i) {
-        const auto normalized_frequency = partials.freqs[i] * inv_sample_rate_;
+        auto freq = partials.freqs[i];
+        const auto normalized_frequency = freq * inv_sample_rate_;
         const float radix_frequency = normalized_frequency * std::numbers::pi_v<float>;
         freq_table_[i] = std::polar(1.0f, radix_frequency);
 
-        if (normalized_frequency < 0.0f || normalized_frequency > Partials::kMaxFreq) {
+        if (freq < 0.0f || freq > Partials::kMaxFreq) {
             current_volume_table_[i] = 0.0f;
         }
         else {

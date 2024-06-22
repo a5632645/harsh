@@ -447,6 +447,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         .AddCurve(CurveV2{ kNumPartials, CurveV2::CurveInitEnum::kFull }, "resynthsis.speed")
         .AddCurve(CurveV2{ kNumPartials, CurveV2::CurveInitEnum::kFull }, "effect.harmonic_delay.time")
         .AddCurve(CurveV2{ kNumPartials, CurveV2::CurveInitEnum::kFull }, "effect.harmonic_delay.feedback")
+        .AddCurve("dissonance.prism")
         .AddQuantizeMap({ 0.f,1.f,2.f,3.f,4.f,5.f,6.f,7.f,8.f,9.f,10.f,11.f },
                         "dissonance.pitch_quantize");
     for (int i = 0; i < 8; ++i) {

@@ -14,6 +14,7 @@ struct DissonanceType : IntChoiceParam<DissonanceType> {
         kFakeUnison2,
         kDispersion,
         kPitchQuantize,
+        kPrism,
         kNumEnums
     };
 
@@ -26,7 +27,8 @@ struct DissonanceType : IntChoiceParam<DissonanceType> {
         "fake unison"sv,
         "fake unison2"sv,
         "dispersion"sv,
-        "p.quantize"sv
+        "p.quantize"sv,
+        "prism"sv
     };
 };
 
@@ -158,6 +160,15 @@ struct PitchQuantize_Amount : FloatParam<PitchQuantize_Amount> {
 struct Prism_Amount : FloatParam<Prism_Amount> {
     static constexpr int kArgIdx = 0;
     static constexpr auto kName = "amount"sv;
+    static constexpr auto kMin = -1.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 2;
+};
+
+struct Prism_Morph : FloatParam<Prism_Morph> {
+    static constexpr int kArgIdx = 1;
+    static constexpr auto kName = "morph"sv;
     static constexpr auto kMin = 0.0f;
     static constexpr auto kMax = 1.0f;
     static constexpr auto kDefault = 0.0f;

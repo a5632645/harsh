@@ -17,11 +17,13 @@ public:
 private:
     void DoPitchQuantize(Partials& partials);
     void DoStringDiss(Partials& partials);
+    void DoPrism(Partials& partials);
 
     BoolParameter* is_enable_param_{};
     IntChoiceParameter* diss_type_{};
     std::array<PolyModuFloatParameter*, 2>args_{};
     QuantizeMap* pitch_quantize_map_{};
+    CurveV2* prism_map_{};
 
     bool is_enable_;
     // harm stretch

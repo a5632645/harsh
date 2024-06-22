@@ -70,6 +70,11 @@ void DissonanceLayout::OnDissonanceTypeChanged(int c) {
         SetGuiKnobs(arg_knobs_,
                     param::PitchQuantize_Amount{});
         break;
+    case kPrism:
+        SetGuiKnobs(arg_knobs_,
+                    param::Prism_Amount{},
+                    param::Prism_Morph{});
+        break;
     default:
         assert(false && "unkown type");
         break;
