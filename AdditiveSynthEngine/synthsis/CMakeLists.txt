@@ -54,7 +54,7 @@ set(ENGINE_HEADER
 "param/effect_param.h"
 "engine/effect/octaver.h"
 "engine/effect/reverb.h"
-"engine/effect/chrous.h"
+
 "engine/resynthsis/resynthsis.h"
 "engine/resynthsis/resynthsis_data.h"
 "engine/resynthsis/window.h"
@@ -96,7 +96,7 @@ set(ENGINE_HEADER
 "engine/modulation/quantize_map.h" 
 "engine/modulation/curve_v2.h" 
 "utli/listener_list.h"
-"engine/modulation/curve_bank.h" "engine/timber/multi_env.h")
+"engine/modulation/curve_bank.h" "engine/timber/multi_env.h" "param/multi_env_param.h")
 
 add_library(AdSynthLib STATIC ${ENGINE_SRC} ${ENGINE_HEADER})
 target_link_libraries(AdSynthLib PUBLIC AudioFFT)

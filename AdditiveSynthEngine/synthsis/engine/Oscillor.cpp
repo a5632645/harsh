@@ -32,6 +32,7 @@ Oscillor::Oscillor(Synth& synth)
     modulator_bank_.PrepareParams(*oscillor_param_);
     modulator_bank_.PrepareParams(*oscillor_param_);
     unison_.PrepareParams(*oscillor_param_);
+    vol_env_.PrepareParam(*oscillor_param_);
 }
 
 void Oscillor::Init(size_t bufferSize, float sampleRate, float update_rate, int update_skip) {
@@ -54,6 +55,7 @@ void Oscillor::Init(size_t bufferSize, float sampleRate, float update_rate, int 
     modulator_bank_.Init(sampleRate, update_rate);
     modulator_bank_.Init(sampleRate, update_rate);
     unison_.Init(sampleRate, update_rate);
+    vol_env_.Init(sampleRate, update_rate);
 }
 
 void Oscillor::NoteOn(int note_number, float velocity) {
@@ -77,6 +79,7 @@ void Oscillor::NoteOn(int note_number, float velocity) {
     modulator_bank_.OnNoteOn(note_number);
     modulator_bank_.OnNoteOn(note_number);
     unison_.OnNoteOn();
+    vol_env_.OnNoteOn(note_number);
 }
 
 void Oscillor::NoteOff() {
@@ -94,18 +97,16 @@ void Oscillor::NoteOff() {
     dissonance_.OnNoteOff();
     modulator_bank_.OnNoteOff();
     unison_.OnNoteOff();
+    vol_env_.OnNoteOff();
 }
 
 void Oscillor::update_state(int step) {
-    if (!IsPlaying()) return;
-
     modulator_bank_.OnUpdateTick();
     oscillor_param_->UpdateParams();
 
     // first copy phase from sinebank
     std::ranges::copy(sine_bank_.GetPhaseTable(), partials_.phases.begin());
-
-    // cr tick
+    vol_env_.OnUpdateTick();
     freq_.OnUpdateTick();
     phase_.OnUpdateTick();
     timber_.OnUpdateTick();
@@ -126,6 +127,7 @@ void Oscillor::update_state(int step) {
     dissonance_.Process(partials_);
     timber_.Process(partials_);
     resynthsis_.Process(partials_);
+    vol_env_.Process(partials_);
 
     filter_.Process(partials_);
     effec0_.Process(partials_);
@@ -137,6 +139,10 @@ void Oscillor::update_state(int step) {
     unison_.Process(partials_);
     // load into sinebank
     sine_bank_.LoadPartials(partials_);
+}
+
+void Oscillor::Reset() {
+    // todo: reset vol envelop and effect unit
 }
 
 void Oscillor::CreateModulation(std::string_view param_id, std::string_view modulator_id, ModulationConfig * pconfig) {

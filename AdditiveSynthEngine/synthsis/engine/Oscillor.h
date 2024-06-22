@@ -14,6 +14,7 @@
 #include "effect/effect.h"
 #include "dissonance/dissonance.h"
 #include "timber/timber.h"
+#include "timber/multi_env.h"
 #include "timber/unison.h"
 
 namespace mana {
@@ -31,16 +32,10 @@ public:
     Oscillor& operator=(Oscillor&&) noexcept = default;
 
     void Init(size_t bufferSize, float sampleRate, float update_rate, int update_skip);
-
     void NoteOn(int noteNumber, float v);
-
-    bool IsPlaying() const {
-        return note_on_;
-    }
-
-    int getMidiNote() const {
-        return midi_note_;
-    }
+    bool IsPlaying() const { return !vol_env_.IsAllMute(); }
+    void Reset();
+    int getMidiNote() const { return midi_note_; }
 
     void NoteOff();
 
@@ -69,6 +64,7 @@ private:
     float sample_rate_{};
     bool note_on_ = false;
 
+    MultiEnvelop vol_env_;
     FreqProcessor freq_;
     PhaseProcessor phase_;
     Timber timber_;

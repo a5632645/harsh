@@ -38,8 +38,8 @@ public:
 
     void mouseDown(const juce::MouseEvent& e) override;
     void mouseDrag(const juce::MouseEvent& e) override;
-    void mouseEnter(const juce::MouseEvent& e) override { repaint(); }
-    void mouseExit(const juce::MouseEvent& e) override { repaint(); }
+    void mouseEnter(const juce::MouseEvent& /*e*/) override { repaint(); }
+    void mouseExit(const juce::MouseEvent& /*e*/) override { repaint(); }
     void mouseDoubleClick(const juce::MouseEvent& e) override;
 private:
     friend class CommonCurveEditor;

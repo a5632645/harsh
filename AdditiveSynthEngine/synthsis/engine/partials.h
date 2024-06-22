@@ -6,15 +6,16 @@
 
 namespace mana {
 struct Partials {
-    bool update_phase{};
-    float base_frequency{};
-    float base_pitch{};
-    int stop_index{};
+    static constexpr auto kMaxFreq = 20'000.0f;
 
-    std::array<float, kNumPartials> gains{};
-    std::array<float, kNumPartials> freqs{};
-    std::array<float, kNumPartials> pitches{};
-    std::array<float, kNumPartials> ratios{};
-    std::array<std::complex<float>, kNumPartials> phases{};
+    bool update_phase{};   // should update sinebank current phase
+    float base_frequency{};// base frequency in hz
+    float base_pitch{};    // base pitch in semitones
+
+    std::array<float, kNumPartials> gains{};  // partial gain
+    std::array<float, kNumPartials> freqs{};  // partial frequency in hz
+    std::array<float, kNumPartials> pitches{};// partial pitch in semitones
+    std::array<float, kNumPartials> ratios{}; // partial frequency ratio
+    std::array<std::complex<float>, kNumPartials> phases{}; // partial phase
 };
 }

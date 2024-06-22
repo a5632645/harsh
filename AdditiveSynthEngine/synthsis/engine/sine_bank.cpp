@@ -13,8 +13,7 @@ SineBank::SineBank() {
 
 void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip) {
     sample_rate_ = sample_rate;
-    one_div_nyquist_rate = 2.0f / sample_rate;
-    nyquist_rate_ = sample_rate / 2.0f;
+    inv_sample_rate_ = 1.0f / sample_rate;
     update_rate_ = update_rate;
     update_skip_ = update_skip;
 
@@ -72,7 +71,7 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
     }
 }
 
-void SineBank::LoadPartials(Partials & partials) {
+void SineBank::LoadPartials(Partials& partials) {
     size_t num_processed = count_process_particles(partials);
     processed_partials_ = std::max(processed_partials_, num_processed);
     active_partials_ = std::min(processed_partials_, max_active_partials_);
@@ -86,16 +85,12 @@ void SineBank::LoadPartials(Partials & partials) {
     std::ranges::copy(sinc_last1_gain_, sinc_last2_gain_.begin());
     std::ranges::copy(current_volume_table_, sinc_last1_gain_.begin());
 
-    constexpr auto max_freq = 20000.0f;
-    auto nor_max_freq = max_freq * one_div_nyquist_rate;
-    constexpr auto min_freq = 20.0f;
-    auto nor_min_freq = min_freq * one_div_nyquist_rate;
     for (size_t i = 0; i < kNumPartials; ++i) {
-        const auto normalized_frequency = partials.freqs[i];
+        const auto normalized_frequency = partials.freqs[i] * inv_sample_rate_;
         const float radix_frequency = normalized_frequency * std::numbers::pi_v<float>;
         freq_table_[i] = std::polar(1.0f, radix_frequency);
 
-        if (normalized_frequency < nor_min_freq || normalized_frequency > nor_max_freq) {
+        if (normalized_frequency < 0.0f || normalized_frequency > Partials::kMaxFreq) {
             current_volume_table_[i] = 0.0f;
         }
         else {
@@ -123,7 +118,7 @@ float SineBank::SrTick() {
     auto fir_coef0 = fir_curr_lut_[sr_pos_];
     auto fir_coef1 = fir_last1_lut_[sr_pos_];
     auto fir_coef2 = fir_last2_lut_[sr_pos_];
-    for (size_t i = 0; i < num_volume_loop_; i+=simd_size) {
+    for (size_t i = 0; i < num_volume_loop_; i += simd_size) {
         auto vec_curr = xsimd::load_aligned(current_volume_table_.data() + i);
         auto vec_last1 = xsimd::load_aligned(sinc_last1_gain_.data() + i);
         auto vec_last2 = xsimd::load_aligned(sinc_last2_gain_.data() + i);
@@ -139,7 +134,7 @@ float SineBank::SrTick() {
     #else
     for (size_t i = 0; i < processed_partials_; ++i) {
         phase_table_[i] *= freq_table_[i];
-    }
+}
 
     float output{};
     auto fir_coef0 = fir_curr_lut_[sr_pos_];

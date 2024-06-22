@@ -32,7 +32,6 @@ private:
     std::unique_ptr<TimberGen> osc1_;
     std::unique_ptr<TimberGen> osc2_;
 
-    bool is_work_{};
     PolyModuFloatParameter* arg_osc2_timber_shift_{};
     PolyModuFloatParameter* arg_osc2_beating_{};
     PolyModuFloatParameter* arg_osc1_gain_{};

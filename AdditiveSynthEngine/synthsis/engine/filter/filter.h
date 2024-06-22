@@ -42,7 +42,7 @@ private:
     void DoBandStopFilter(Partials& partials);
     float cutoff_semitone_;
     float cutoff_knee_;
-    float normalized_cutoff_;
+    float cutoff_hz_;
     float filter_width_;
     float slope_;
 

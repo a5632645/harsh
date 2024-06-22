@@ -42,7 +42,7 @@ const std::vector<float>& Filter::Process(Partials& partials) {
         shound_reso = true;
         break;
     case kCombFilter:
-        SetCombCutoff(std::lerp(normalized_cutoff_, partials.base_frequency * std::exp2(cutoff_semitone_ / 12.0f), key_track_),
+        SetCombCutoff(std::lerp(cutoff_hz_, partials.base_frequency * std::exp2(cutoff_semitone_ / 12.0f), key_track_),
                       cutoff_semitone_);
         DoCombFilter(partials);
         break;
@@ -109,7 +109,7 @@ void Filter::PrepareParams(OscillorParams & params) {
 void Filter::OnUpdateTick() {
     // filter
     cutoff_semitone_ = helper::GetAlterParamValue(filter_args_, param::Filter_Cutoff{});
-    normalized_cutoff_ = std::exp2(cutoff_semitone_ / 12.0f) * 8.1758f * 2.0f / sample_rate_;
+    cutoff_hz_ = utli::PitchToFreq(cutoff_semitone_);
     slope_ = helper::GetAlterParamValue(filter_args_, param::Filter_Slope{}) / 12.0f; // make it db/oct
     key_track_ = helper::GetAlterParamValue(filter_args_, param::Filter_KeyTracking{});
     cutoff_knee_ = helper::GetAlterParamValue(filter_args_, param::Filter_Knee{});
@@ -120,7 +120,6 @@ void Filter::OnUpdateTick() {
     comb_phase_ = helper::GetAlterParamValue(filter_args_, param::Filter_CombPhase{}) * std::numbers::pi_v<float> *2.0f;
     comb_depth_ = helper::GetAlterParamValue(filter_args_, param::Filter_CombDepth{});
     comb_phaser_ = helper::GetAlterParamValue(filter_args_, param::Filter_CombPhaser{});
-
 
     // phaser
     phaser_width_ = helper::GetAlterParamValue(filter_args_, param::Filter_PhaserWidth{});
@@ -337,12 +336,7 @@ void Filter::DoCombFilter(Partials& partials) {
         auto comb_f = std::lerp(comb_val0, comb_val, morph);
         auto phaser_f = std::lerp(phaser_val0, phaser_val, morph);
         auto gain = std::lerp(comb_val, phaser_val, comb_phaser_);
-        //auto final_phase = std::lerp(comb_phase, phaser_phase, comb_phaser_);
-        //auto gain_0 = CombFunc(final_phase, 0.0f);
-        //auto gain_peak = CombFunc(final_phase, comb_shape_ * 0.9f);
-        //auto gain = std::lerp(gain_0, gain_peak, morph);
         auto excite = 1.0f + 2.0f * s * s + 0.1f * comb_depth_;
-
         auto final_gain = std::lerp(1.0f, gain * excite, comb_depth_);
 
         //partials.gains[i] *= final_gain;
@@ -356,28 +350,6 @@ void Filter::DoCombFilter(Partials& partials) {
 void Filter::DoPhaserFilter(Partials& partials) {
     for (int i = 0; i < kNumPartials; ++i) {
         if (partials.pitches[i] >= phaser_begin_pitch_ && partials.pitches[i] <= phaser_end_pitch_) {
-            //auto s = phaser_shape_ * phaser_shape_;
-            //auto pitch_offset = partials.pitches[i] - cutoff_semitone_;
-            //auto phaser_phase = pitch_offset * phaser_cycles_ + phaser_phase_;
-            //auto morph = s > 0.5f ? 1.0f : 2.0f * s;
-            //auto phaser_val = CombFunc(phaser_phase, phaser_shape_ * 0.9f);
-            //auto phaser_val0 = CombFunc(phaser_phase, 0.0f);
-            //auto phaser_f = std::lerp(phaser_val0, phaser_val, morph);
-            //auto excite = std::lerp(1.0f, 2.0f * s, s);
-            //auto decay = std::lerp(1.0f, 0.8f * s, s);
-
-            //auto phaser_total_width = phaser_end_pitch_ - phaser_begin_pitch_;
-            //auto window_pos = pitch_offset / phaser_total_width * 2.0f * std::numbers::pi_v<float>;
-            //auto up_window = excite * CombFunc(window_pos, -3.0f) + 1.0f;
-            //auto down_window = 1.0f - decay * CombFunc(window_pos, -3.0f);
-            //auto out_gain = std::lerp(down_window, up_window, phaser_f);
-            //auto gain = std::lerp(1.0f, out_gain, phaser_depth_);
-
-            //gain = up_window;
-            //auto add_gain = std::lerp(0.1f * (1.0f - s), 0.0f, phaser_f);
-            //auto final_gain = std::lerp(1.0f, phaser_f * excite + add_gain, comb_depth_);
-            //auto org_gain = 1.0f - PhaserFunc(pitch_offset * phaser_cycles_ + phaser_phase_, phaser_shape_);
-
             auto pitch_offset = partials.pitches[i] - cutoff_semitone_;
             auto org_cos_val = -std::cos(pitch_offset * phaser_cycles_ + phaser_phase_);
             auto cos_shape_val = std::lerp(0.2f, 0.9f, phaser_shape_);
@@ -395,7 +367,6 @@ void Filter::DoPhaserFilter(Partials& partials) {
             auto out_gain = std::lerp(down_window, up_window, shaped_cos_val01);
 
             auto gain = std::lerp(1.0f, out_gain, phaser_depth_);
-            //partials.gains[i] *= gain;
             filter_output_[i] = gain;
         }
     }

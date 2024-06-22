@@ -32,9 +32,10 @@ void Synth::NoteOn(int note, float velocity) {
     }
     // if not found
     // stop rr osciilor
-    m_oscillators.at(m_rrPosition).NoteOff();
+    m_oscillators[m_rrPosition].Reset();
+    m_oscillators[m_rrPosition].NoteOff();
     // set current note
-    m_oscillators.at(m_rrPosition).NoteOn(note, velocity);
+    m_oscillators[m_rrPosition].NoteOn(note, velocity);
     m_rrPosition = (m_rrPosition + 1) % num_oscillor_;
 }
 

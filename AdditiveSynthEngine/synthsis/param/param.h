@@ -7,6 +7,7 @@
 
 namespace mana::param {
 using namespace std::string_view_literals;
+using namespace std::string_literals;
 
 template<typename DetailParam>
 struct FloatParam {

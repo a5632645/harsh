@@ -2,7 +2,6 @@
 
 #include "octaver.h"
 #include "reverb.h"
-#include "chrous.h"
 #include "phaser.h"
 #include "scramble.h"
 #include "decay.h"
@@ -13,7 +12,6 @@ namespace mana {
 Effect::Effect(int idx) : effect_idx_(idx) {
     processers_[param::EffectType::ParamEnum::kOctaver] = std::make_unique<Octaver>();
     processers_[param::EffectType::ParamEnum::kReverb] = std::make_unique<Reverb>();
-    processers_[param::EffectType::ParamEnum::kChorus] = std::make_unique<Chorus>();
     processers_[param::EffectType::ParamEnum::kPhaser] = std::make_unique<Phaser>();
     processers_[param::EffectType::ParamEnum::kScramble] = std::make_unique<Scramble>();
     processers_[param::EffectType::ParamEnum::kDecay] = std::make_unique<Decay>();

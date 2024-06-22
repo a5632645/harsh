@@ -33,9 +33,9 @@ static void DoSemitoneSpace(Partials& partials, float semitone) {
         ratio *= ratio_mul;
     }
     for (; i < kNumPartials; ++i) {
-        partials.ratios[i] = 9999.0f;
-        partials.freqs[i] = 2.0f;
-        partials.pitches[i] = 9999.0f;
+        partials.ratios[i] = 0.0f;
+        partials.freqs[i] = -1.0f;
+        partials.pitches[i] = 0.0f;
         partials.gains[i] = 0.0f;
     }
 }

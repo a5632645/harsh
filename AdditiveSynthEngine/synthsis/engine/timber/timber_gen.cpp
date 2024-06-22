@@ -32,9 +32,6 @@ void TimberGen::Process(TimberFrame& frame) {
     case kImpulse:
         std::get<Impulse>(timber_gens_).Process(frame);
         break;
-    case kAdsrEnv:
-        std::get<MultiEnvelop>(timber_gens_).Process(frame);
-        break;
     default:
         assert("unkown timber type");
         break;
@@ -46,7 +43,6 @@ void TimberGen::PrepareParams(OscillorParams& params) {
     for (int i = 0; auto & parg : osc_param_.args) {
         parg = params.GetPolyFloatParam("timber.osc{}.arg{}", idx_, i++);
     }
-    std::get<MultiEnvelop>(timber_gens_).PrepareParam(params);
 }
 
 void TimberGen::OnUpdateTick() {

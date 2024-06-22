@@ -23,23 +23,10 @@ void Timber::Init(float sample_rate, float update_rate) {
 }
 
 void Timber::Process(Partials& partials) {
-    if (!is_work_) {
-        partials.gains.fill(float{});
-        return;
-    }
-
     osc1_->Process(osc1_timber_);
     std::ranges::transform(osc1_timber_.gains, osc1_timber_.gains.begin(),
                            [this](float v) {return v * osc1_gain_; });
     std::ranges::copy(osc1_timber_.gains, partials.gains.begin());
-    //auto phase_magic_val = std::numbers::pi_v<float> *beating_phase_;
-    /*for (int i = 0; i < kNumPartials; ++i) {
-        auto vector_angle = (i + 1.0f) * phase_magic_val;
-        auto power_add = osc1_timber_.gains[i] * osc1_timber_.gains[i]
-            + osc2_timber_.gains[i] * osc2_timber_.gains[i]
-            + 2.0f * osc1_timber_.gains[i] * osc2_timber_.gains[i] * std::cos(vector_angle);
-        partials.gains[i] = std::sqrt(power_add);
-    }*/
 
     if (osc2_gain_ != 0.0f) {
         osc2_->Process(osc2_timber_);
@@ -47,7 +34,7 @@ void Timber::Process(Partials& partials) {
                                [this](float v) {return v * osc2_gain_; });
         int proc_idx = 0;
         for (int i = osc2_timber_shift_ - 1; i < kNumPartials; i += osc2_timber_shift_) {
-            auto fade = std::cos(std::numbers::pi_v<float> *2.0f * (proc_idx + 1.0f) * beating_phase_);
+            auto fade = std::cos(std::numbers::pi_v<float> *2.0f * partials.ratios[i] * beating_phase_);
             auto fade01 = 0.5f + 0.5f * fade;
             partials.gains[i] = std::lerp(osc1_timber_.gains[i] - osc2_timber_.gains[proc_idx],
                                           osc1_timber_.gains[i] + osc2_timber_.gains[proc_idx],
@@ -85,7 +72,6 @@ void Timber::OnUpdateTick() {
 void Timber::OnNoteOn(int note) {
     osc1_->OnNoteOn(note);
     osc2_->OnNoteOn(note);
-    is_work_ = true;
 
     if (osc2_beating_ == 0.0f) {
         beating_phase_ = 0.0f;
@@ -95,6 +81,5 @@ void Timber::OnNoteOn(int note) {
 void Timber::OnNoteOff() {
     osc1_->OnNoteOff();
     osc2_->OnNoteOff();
-    is_work_ = false;
 }
 }

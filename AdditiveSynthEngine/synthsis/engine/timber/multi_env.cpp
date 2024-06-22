@@ -8,28 +8,158 @@ void MultiEnvelop::Init(float sample_rate, float update_rate) {
 }
 
 void MultiEnvelop::PrepareParam(OscillorParams& p) {
-    auto& cb = p.GetParentSynthParams().GetCurveBank();
-    pattack_map_ = cb.GetCurvePtr("timber.env.attack");
-    pdecay_map_ = cb.GetCurvePtr("timber.env.decay");
-    ppredelay_map_ = cb.GetCurvePtr("timber.env.predelay");
-    ppeak_map_ = cb.GetCurvePtr("timber.env.peak");
+    predelay_time_ = p.GetPolyFloatParam("vol_env.predelay");
+    attack_time_ = p.GetPolyFloatParam("vol_env.attack");
+    hold_time_ = p.GetPolyFloatParam("vol_env.hold");
+    decay_time_ = p.GetPolyFloatParam("vol_env.decay");
+    peak_level_ = p.GetPolyFloatParam("vol_env.peak");
+    sustain_level_ = p.GetPolyFloatParam("vol_env.sustain");
+    release_time_ = p.GetPolyFloatParam("vol_env.release");
+    high_scale_ = p.GetPolyFloatParam("vol_env.high_scale");
 }
 
-void MultiEnvelop::Process(TimberFrame& frame) {
-    constexpr auto min_db = -300.0f;
-    for (int i = 0; i < kNumPartials; ++i) {
-        auto peak = std::lerp(min_db, peak_level_, ppeak_map_->Get(i));
+void MultiEnvelop::Process(Partials& frame) {
+    constexpr auto min_db = -60.0f;
+    auto high_scale = high_scale_->GetValue();
+    auto predelay = predelay_time_->GetValue();
+    auto attack = attack_time_->GetValue();
+    auto hold = hold_time_->GetValue();
+    auto decay = decay_time_->GetValue();
+    auto peak = peak_level_->GetValue();
+    auto sustain = sustain_level_->GetValue();
+    auto release = release_time_->GetValue();
+    auto sustain_gain = utli::DbToGain(sustain);
+    auto peak_gain = utli::DbToGain(peak);
 
+    for (int i = 0; i < kNumPartials; ++i) {
+        constexpr auto inv_max_ratio = 1.0f / kNumPartials;
+        auto lerp = std::clamp(frame.ratios[i] * inv_max_ratio, 0.0f, 5.0f);
+        auto time_scale = std::max(0.0f, 1.0f + (high_scale - 1.0f) * lerp);
+        auto pre_time = predelay * time_scale;
+        auto att_time = attack * time_scale;
+        auto hold_time = hold * time_scale;
+        auto dec_time = decay * time_scale;
+        auto rel_time = release * time_scale;
+
+        switch (env_states_[i]) {
+        case EnvState::kInit:
+        case EnvState::kSustain:
+            break;
+        case EnvState::kPredelay:
+        {
+            if (pre_time != 0.0f) {
+                auto rate = 1.0f / (pre_time * update_rate_);
+                env_times_[i] += rate;
+                if (env_times_[i] <= 1.0f) {
+                    break;
+                }
+            }
+            if (att_time != 0.0f) {
+                env_states_[i] = EnvState::kAttack;
+                env_times_[i] = 0.0f;
+                break;
+            }
+            if (hold_time != 0.0f) {
+                env_states_[i] = EnvState::kHold;
+                env_times_[i] = 0.0f;
+                break;
+            }
+            if (dec_time != 0.0f) {
+                env_states_[i] = EnvState::kDecay;
+                env_times_[i] = 0.0f;
+                break;
+            }
+            env_states_[i] = EnvState::kSustain;
+        }
+        break;
+        case EnvState::kAttack:
+        {
+            if (att_time != 0.0f) {
+                auto rate = 1.0f / (att_time * update_rate_);
+                env_times_[i] += rate;
+                if (env_times_[i] <= 1.0f) {
+                    break;
+                }
+            }
+            if (hold_time != 0.0f) {
+                env_states_[i] = EnvState::kHold;
+                env_times_[i] = 0.0f;
+                break;
+            }
+            if (dec_time != 0.0f) {
+                env_states_[i] = EnvState::kDecay;
+                env_times_[i] = 0.0f;
+                break;
+            }
+            env_states_[i] = EnvState::kSustain;
+        }
+        break;
+        case EnvState::kHold:
+        {
+            if (hold_time != 0.0f) {
+                auto rate = 1.0f / (hold_time * update_rate_);
+                env_times_[i] += rate;
+                if (env_times_[i] <= 1.0f) {
+                    break;
+                }
+            }
+            if (dec_time != 0.0f) {
+                env_states_[i] = EnvState::kDecay;
+                env_times_[i] = 0.0f;
+                break;
+            }
+            env_states_[i] = EnvState::kSustain;
+        }
+        break;
+        case EnvState::kDecay:
+        {
+            if (dec_time != 0.0f) {
+                auto rate = 1.0f / (dec_time * update_rate_);
+                env_times_[i] += rate;
+                if (env_times_[i] <= 1.0f) {
+                    break;
+                }
+            }
+            env_states_[i] = EnvState::kSustain;
+        }
+        break;
+        case EnvState::kRelease:
+        {
+            if (rel_time != 0.0f) {
+                auto rate = 1.0f / (rel_time * update_rate_);
+                env_times_[i] += rate;
+                if (env_times_[i] <= 1.0f) {
+                    break;
+                }
+            }
+            env_states_[i] = EnvState::kInit;
+        }
+        break;
+        default:
+            break;
+        }
+    }
+
+    for (int i = 0; i < kNumPartials; ++i) {
         switch (env_states_[i]) {
         case EnvState::kInit:
         case EnvState::kPredelay:
             frame.gains[i] = 0.0f;
             break;
         case EnvState::kAttack:
-            frame.gains[i] = utli::DbToGain(std::lerp(min_db, peak, env_times_[i]));
+            frame.gains[i] *= utli::DbToGain(std::lerp(min_db, peak, env_times_[i]));
             break;
         case EnvState::kDecay:
-            frame.gains[i] = utli::DbToGain(std::lerp(peak, min_db, env_times_[i]));
+            frame.gains[i] *= utli::DbToGain(std::lerp(peak, min_db, env_times_[i]));
+            break;
+        case EnvState::kHold:
+            frame.gains[i] *= peak_gain;
+            break;
+        case EnvState::kSustain:
+            frame.gains[i] *= sustain_gain;
+            break;
+        case EnvState::kRelease:
+            frame.gains[i] *= utli::DbToGain(std::lerp(sustain, min_db, env_times_[i]));
             break;
         default:
             assert(false);
@@ -38,135 +168,43 @@ void MultiEnvelop::Process(TimberFrame& frame) {
     }
 }
 
-void MultiEnvelop::OnUpdateTick(OscParam& params) {
-    attack_time_ = param::MultiEnv_AttackTime::GetNumber(params.args[param::MultiEnv_AttackTime::kArgIdx]->GetValue());
-    decay_time_ = param::MultiEnv_DecayTime::GetNumber(params.args[param::MultiEnv_DecayTime::kArgIdx]->GetValue());
-    peak_level_ = param::MultiEnv_PeakLevel::GetNumber(params.args[param::MultiEnv_PeakLevel::kArgIdx]->GetValue());
-    predelay_time_ = param::MultiEnv_PreDelayTime::GetNumber(params.args[param::MultiEnv_PreDelayTime::kArgIdx]->GetValue());
-
-    for (int i = 0; i < kNumPartials; ++i) {
-        switch (env_states_[i]) {
-        case EnvState::kAttack:
-        {
-            auto att_time = attack_time_ * pattack_map_->Get(i);
-            auto dec_time = decay_time_ * pdecay_map_->Get(i);
-            if (att_time == 0.0f) {
-                if (dec_time == 0.0f) {
-                    env_states_[i] = EnvState::kInit;
-                }
-                else {
-                    env_states_[i] = EnvState::kDecay;
-                    env_times_[i] = 0.0f;
-                }
-            }
-            else {
-                auto att_rate = 1.0f / (att_time * update_rate_);
-                auto t = env_times_[i] + att_rate;
-                if (t > 1.0f) {
-                    if (dec_time == 0.0f) {
-                        env_states_[i] = EnvState::kInit;
-                    }
-                    else {
-                        env_states_[i] = EnvState::kDecay;
-                        t -= 1.0f;
-                    }
-                }
-                env_times_[i] = t;
-            }
-        }
-        break;
-        case EnvState::kDecay:
-        {
-            auto dec_time = decay_time_ * pdecay_map_->Get(i);
-            if (dec_time == 0.0f) {
-                env_states_[i] = EnvState::kInit;
-            }
-            else {
-                auto dec_rate = 1.0 / (dec_time * update_rate_);
-                auto t = env_times_[i] + dec_rate;
-                if (t > 1.0f) {
-                    env_states_[i] = EnvState::kInit;
-                }
-                env_times_[i] = t;
-            }
-        }
-        break;
-        case EnvState::kPredelay:
-        {
-            auto pd_time = predelay_time_ * ppredelay_map_->Get(i);
-            auto att_time = attack_time_ * pattack_map_->Get(i);
-            auto dec_time = decay_time_ * pdecay_map_->Get(i);
-            if (pd_time != 0.0f) {
-                auto pd_rate = 1.0f / (pd_time * update_rate_);
-                auto t = env_times_[i] + pd_rate;
-                if (t > 1.0f) {
-                    env_times_[i] = 0.0;
-                    if (att_time == 0.0f) {
-                        if (dec_time == 0.0f) {
-                            env_states_[i] = EnvState::kInit;
-                        }
-                        else {
-                            env_states_[i] = EnvState::kDecay;
-                        }
-                    }
-                    else {
-                        env_states_[i] = EnvState::kAttack;
-                    }
-                }
-                else {
-                    env_times_[i] = t;
-                }
-            }
-            else {
-                if (att_time != 0.0f) {
-                    env_states_[i] = EnvState::kAttack;
-                }
-                else {
-                    if (dec_time == 0.0f) {
-                        env_states_[i] = EnvState::kInit;
-                    }
-                    else {
-                        env_states_[i] = EnvState::kDecay;
-                    }
-                }
-            }
-        }
-        break;
-        default:
-            break;
-        }
-    }
+void MultiEnvelop::OnUpdateTick() {
 }
 
 void MultiEnvelop::OnNoteOn(int note) {
-    for (int i = 0; i < kNumPartials; ++i) {
-        auto pre_time = predelay_time_ * ppredelay_map_->Get(i);
-        auto att_time = attack_time_ * pattack_map_->Get(i);
-        auto dec_time = decay_time_ * pdecay_map_->Get(i);
-        env_times_[i] = 0.0f;
+    auto predelay = predelay_time_->GetValue();
+    auto attack = attack_time_->GetValue();
+    auto hold = hold_time_->GetValue();
+    auto decay = decay_time_->GetValue();
 
-        if (pre_time != 0.0f) {
-            env_states_[i] = EnvState::kPredelay;
-        }
-        else {
-            if (att_time != 0.0f) {
-                env_states_[i] = EnvState::kAttack;
-            }
-            else {
-                if (dec_time == 0.0f) {
-                    env_states_[i] = EnvState::kInit;
-                }
-                else {
-                    env_states_[i] = EnvState::kDecay;
-                }
-            }
-        }
+    std::ranges::fill(env_times_, 0.0f);
+    if (predelay != 0.0f) {
+        env_states_.fill(EnvState::kPredelay);
+        return;
     }
+    if (attack != 0.0f) {
+        env_states_.fill(EnvState::kAttack);
+        return;
+    }
+    if (hold != 0.0f) {
+        env_states_.fill(EnvState::kHold);
+        return;
+    }
+    if (decay != 0.0f) {
+        env_states_.fill(EnvState::kDecay);
+        return;
+    }
+    env_states_.fill(EnvState::kSustain);
 }
 
 void MultiEnvelop::OnNoteOff() {
-    for (int i = 0; i < kNumPartials; ++i) {
-        env_states_[i] = EnvState::kInit;
+    auto release = release_time_->GetValue();
+
+    if (release != 0.0f) {
+        env_states_.fill(EnvState::kRelease);
+        env_times_.fill(0.0f);
+        return;
     }
+    env_states_.fill(EnvState::kInit);
 }
 }

@@ -1,34 +1,38 @@
 #pragma once
 
-#include "engine/modulation/curve_v2.h"
-#include "timber_frame.h"
-#include "osc_param.h"
 #include "engine/oscillor_param.h"
+#include "engine/partials.h"
+#include "engine/poly_param.h"
 
 namespace mana {
 class MultiEnvelop {
 public:
     void Init(float sample_rate, float update_rate);
     void PrepareParam(OscillorParams& p);
-    void Process(TimberFrame& frame);
-    void OnUpdateTick(OscParam& params);
+    void OnUpdateTick();
+    void Process(Partials& frame);
     void OnNoteOn(int note);
     void OnNoteOff();
+
+    bool IsAllMute() const { return std::ranges::all_of(env_states_, [](auto v) { return v == EnvState::kInit; }); }
 private:
-    CurveV2* pattack_map_{};
-    CurveV2* pdecay_map_{};
-    CurveV2* ppeak_map_{};
-    CurveV2* ppredelay_map_{};
-    float attack_time_{};
-    float decay_time_{};
-    float peak_level_{};
-    float predelay_time_{};
+    PolyModuFloatParameter* predelay_time_{};
+    PolyModuFloatParameter* attack_time_{};
+    PolyModuFloatParameter* hold_time_{};
+    PolyModuFloatParameter* peak_level_{};
+    PolyModuFloatParameter* decay_time_{};
+    PolyModuFloatParameter* sustain_level_{};
+    PolyModuFloatParameter* release_time_{};
+    PolyModuFloatParameter* high_scale_{};
 
     enum class EnvState {
-        kInit,
+        kInit = 0,
         kPredelay,
         kAttack,
-        kDecay
+        kHold,
+        kDecay,
+        kSustain,
+        kRelease
     };
     std::array<float, kNumPartials> env_times_{};
     std::array<EnvState, kNumPartials> env_states_{};

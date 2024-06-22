@@ -58,13 +58,6 @@ void EffectLayout::OnEffectTypeChanged(int c) {
                     param::Reverb_Decay{},
                     param::Reverb_Speed{});
         break;
-    case kChorus:
-        SetGuiKnobs(arg_knobs_,
-                    param::Chorus_Amount{},
-                    param::Chorus_Depth{},
-                    param::Chorus_Offset{},
-                    param::Chorus_Speed{});
-        break;
     case kPhaser:
         SetGuiKnobs(arg_knobs_,
                     param::Phaser_BarberRate{},

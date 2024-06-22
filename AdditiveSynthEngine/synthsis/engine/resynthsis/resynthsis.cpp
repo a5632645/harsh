@@ -97,10 +97,10 @@ std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials)
     const auto max_freq = resynthsis_datas.base_freq * (kNumPartials + 1.0f);
     constexpr auto min_db = -120.0f;
     for (int i = 0; i < kNumPartials; ++i) {
-        auto remap_freq = partials.freqs[i] * 0.5f * sample_rate_ * formant_ratio;
+        auto remap_freq = partials.freqs[i] * formant_ratio;
         auto first_freq = resynthsis_datas.base_freq * (GetFrameGain(i, 0).ratio_diff + 1.0f);
         auto last_freq = resynthsis_datas.base_freq * (GetFrameGain(i, kNumPartials - 1).ratio_diff + kNumPartials);
-        if(remap_freq > max_freq || remap_freq < 0.0f) {
+        if (remap_freq > max_freq || remap_freq < 0.0f) {
             output[i] = 0.0f;
             continue;
         }

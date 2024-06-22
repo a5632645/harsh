@@ -8,7 +8,6 @@
 #include "noise.h"
 #include "my_pwm.h"
 #include "impluse.h"
-#include "multi_env.h"
 #include <tuple>
 
 namespace mana {
@@ -30,7 +29,6 @@ private:
         Sync,
         Noise,
         PWM,
-        Impulse,
-        MultiEnvelop> timber_gens_;
+        Impulse> timber_gens_;
 };
 }

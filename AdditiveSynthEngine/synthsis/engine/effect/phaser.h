@@ -89,6 +89,7 @@ class Phaser : public EffectBase {
 public:
     void Init(float sample_rate, float update_rate) override {
         sample_rate_ = sample_rate;
+        inv_sample_rate_ = 1.0f / sample_rate;
         inv_update_rate_ = 1.0f / update_rate;
     }
 
@@ -141,7 +142,7 @@ private:
             nor_phase = std::modf(std::abs(pitch / 140.0f) * phaser_cycles_, &temp);
             break;
         case mana::param::Phaser_Mode::ParamEnum::kHz:
-            nor_phase = std::modf(std::abs(freq) * flanger_cycles_, &temp);
+            nor_phase = std::modf(std::abs(freq * inv_sample_rate_) * flanger_cycles_, &temp);
             break;
         case mana::param::Phaser_Mode::ParamEnum::kHarmonic:
             nor_phase = std::modf(harmonic_no * harmonic_cycles_ / static_cast<float>(kNumPartials), &temp);
@@ -175,6 +176,7 @@ private:
     float mode_fraction_;
 
     float sample_rate_;
+    float inv_sample_rate_;
     float inv_update_rate_;
     float lfo_phase_;
 };

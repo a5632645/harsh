@@ -60,13 +60,6 @@ void OscLayout::OnTimberTypeChanged(int c) {
         SetGuiKnobs(arg_knobs_,
                     param::Impulse_NumSines{});
         break;
-    case kAdsrEnv:
-        SetGuiKnobs(arg_knobs_,
-                    param::MultiEnv_AttackTime{},
-                    param::MultiEnv_DecayTime{},
-                    param::MultiEnv_PeakLevel{},
-                    param::MultiEnv_PreDelayTime{});
-        break;
     default:
         SetGuiKnobs(arg_knobs_);
         jassert(false);

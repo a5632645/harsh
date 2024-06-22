@@ -40,6 +40,7 @@ def SyncTable(arr, max_sync_ratio, table_interval):
     table_interval = 1.0 / num_interval
 
     for ratio_begin in range(1, max_sync_ratio):
+        print(f"{ratio_begin} / {max_sync_ratio}")
         for i in range(0, num_interval):
             ratio = ratio_begin + table_interval * i
             out.append(SyncConvolution(arr, ratio))
@@ -50,6 +51,7 @@ def SyncTable(arr, max_sync_ratio, table_interval):
 
 
 def OutputFile(table_name, sync_table, file_handle):
+        print(table_name+": done!")
         file_handle.write(f'static constexpr auto {table_name} = std::array{{\n')
 
         for single_spectrum in sync_table:
@@ -81,7 +83,7 @@ def SingleTri(idx):
     return 8.0 * sign / idx / idx / pi2
 
 # parameter
-num_bins = 512
+num_bins = 256
 max_octave = 6
 table_interval = 0.1
 

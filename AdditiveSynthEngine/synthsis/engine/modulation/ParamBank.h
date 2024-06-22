@@ -14,8 +14,13 @@ namespace mana {
 template<IsParamter... PT>
 class TempParamBank {
 public:
+    template<IsParamter... Type> requires (sizeof...(Type) > 1)
+        void AddParameter(std::unique_ptr<Type>... param) {
+        (AddParameter<Type>(std::move(param)), ...);
+    }
+
     template<IsParamter Type>
-    Type& AddParameter(std::unique_ptr<Type> param) {
+    void AddParameter(std::unique_ptr<Type> param) {
         auto& storer = GetParamMap<Type>();
 
         assert(param != nullptr);
@@ -23,11 +28,10 @@ public:
         assert(!storer.contains(str_id));
         auto& v = *param;
         storer[str_id] = std::move(param);
-        return v;
     }
 
     template<IsParamter Type = FloatParameter, class... T> requires (sizeof...(T) >= 1)
-    Type* GetParamPtr(std::format_string<T...> format_text, T&&...args) const {
+        Type* GetParamPtr(std::format_string<T...> format_text, T&&...args) const {
         return GetParamPtr<Type>(std::format(format_text, std::forward<T>(args)...));
     }
 

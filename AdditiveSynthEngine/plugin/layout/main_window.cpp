@@ -34,7 +34,7 @@ void MainWindow::resized() {
     auto bottom_bound = bound.removeFromBottom(180);
     tabbed_->setBounds(bound);
 
-    constexpr auto kModulatorWidth = 400.0f;
+    constexpr auto kModulatorWidth = 400;
     auto modulator_bound = bottom_bound.removeFromLeft(kModulatorWidth);
     modulators_layout_->setBounds(modulator_bound);
     curve_layout_->setBounds(bottom_bound);

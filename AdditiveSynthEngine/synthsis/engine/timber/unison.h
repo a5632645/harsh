@@ -23,7 +23,7 @@ private:
 
     std::default_random_engine random_;
     std::uniform_real_distribution<float> urd_{ -1.0f,1.0f };
-    float update_skip_{};
+    float inv_update_rate_{};
 
     std::array<float, 9> random_voice_ratios_{};
     std::array<float, 9> voice_phases_{};

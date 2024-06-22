@@ -31,7 +31,7 @@ public:
             }
 
             // noise
-            auto f = partials.freqs[i] * sample_rate_ * 0.5f * dp_ff_ + 0.333f;
+            auto f = partials.freqs[i] * 0.5f * dp_ff_ + 0.333f;
             auto inc = f * inv_system_rate_;
             noise_phase_[i] += inc;
             if (noise_phase_[i] > 1.0f) {

@@ -44,7 +44,7 @@ private:
     size_t count_process_particles(const Partials& particles) {
         // find last not aliasing partial idx
         for (size_t i = kNumPartials - 1; i > 0; --i) {
-            if (particles.freqs[i] >= 0.0f && particles.freqs[i] <= 1.0f) {
+            if (particles.freqs[i] > 0.0f && particles.freqs[i] < Partials::kMaxFreq) {
                 return i + 1;
             }
         }
@@ -69,9 +69,8 @@ private:
     size_t active_partials_{};
     size_t num_volume_loop_{};
     float sample_rate_{};
-    float one_div_nyquist_rate{};
+    float inv_sample_rate_{};
     float update_rate_{};
     int update_skip_{};
-    float nyquist_rate_{};
 };
 }

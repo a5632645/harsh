@@ -14,7 +14,6 @@ public:
     void Process(Partials& partials);
 private:
     PolyModuFloatParameter* pitch_bend_;
-    float reciprocal_nyquist_rate_{};
     float note_pitch_{};
     float base_frequency_{};
     float base_pitch_{};

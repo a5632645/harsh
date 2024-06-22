@@ -16,7 +16,6 @@ struct TimberType : IntChoiceParam<TimberType> {
         kNoise,
         kPwm,
         kImpulse,
-        kAdsrEnv,
         kNumEnums
     };
 
@@ -26,7 +25,6 @@ struct TimberType : IntChoiceParam<TimberType> {
         "noise"sv,
         "pwm"sv,
         "impulse"sv,
-        "adsr env"sv
     };
 };
 
