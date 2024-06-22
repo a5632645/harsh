@@ -53,8 +53,8 @@ void Dissonance::DoStringDiss(Partials& partials) {
     partials.ratios[0] = first_ratio;
 
     for (int i = 1; i < kNumPartials; ++i) {
-        auto n = i + 1.0f + partials.ratios[i];
-        auto str_ratio = n * std::sqrt(1.0f + n * n * string_val);
+        auto n = i + 1.0f;
+        auto str_ratio = n * std::sqrt(1.0f + n * n * string_val) + partials.ratios[i];
         auto quantize_ratio = std::round(str_ratio);
         auto ratio = std::lerp(str_ratio, quantize_ratio, string_quantize);
         partials.freqs[i] = partials.base_frequency * ratio;
@@ -114,7 +114,7 @@ static void DoDispersion(Partials& partials, float amount, float warp) {
         for (int i = 1; i < kNumPartials; ++i) {
             auto idx01 = static_cast<float>(i) / static_cast<float>(kNumPartials);
             auto spread = 1.0f + utli::warp::ParabolaWarp(idx01, warp) * std::abs(amount);
-            auto ratio = (i + 1.0f + partials.ratios[i]) / spread;
+            auto ratio = (i + 1.0f) / spread + partials.ratios[i];
             partials.freqs[i] = partials.base_frequency * ratio;
             partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
             partials.ratios[i] = ratio;
@@ -124,7 +124,7 @@ static void DoDispersion(Partials& partials, float amount, float warp) {
         for (int i = 1; i < kNumPartials; ++i) {
             auto idx01 = static_cast<float>(i) / static_cast<float>(kNumPartials);
             auto spread = 1.0f + utli::warp::ParabolaWarp(idx01, warp) * std::abs(amount);
-            auto ratio = (i + 1.0f + partials.ratios[i]) * spread;
+            auto ratio = (i + 1.0f) * spread + partials.ratios[i];
             partials.freqs[i] = partials.base_frequency * ratio;
             partials.pitches[i] = utli::RatioToPitch(ratio, partials.base_pitch);
             partials.ratios[i] = ratio;
