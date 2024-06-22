@@ -20,6 +20,7 @@ public:
     enum class PowerEnum {
         kKeep = 0,
         kExp,
+        kSine,
         kNumPowerEnums
     };
     static float GetPowerYValue(float nor_x, PowerEnum power_type, float power);

@@ -151,4 +151,16 @@ struct PitchQuantize_Amount : FloatParam<PitchQuantize_Amount> {
     static constexpr auto kDefault = 0.0f;
     static constexpr auto kTextPrecision = 2;
 };
+
+// =========================================================
+// prism
+// =========================================================
+struct Prism_Amount : FloatParam<Prism_Amount> {
+    static constexpr int kArgIdx = 0;
+    static constexpr auto kName = "amount"sv;
+    static constexpr auto kMin = 0.0f;
+    static constexpr auto kMax = 1.0f;
+    static constexpr auto kDefault = 0.0f;
+    static constexpr auto kTextPrecision = 2;
+};
 }

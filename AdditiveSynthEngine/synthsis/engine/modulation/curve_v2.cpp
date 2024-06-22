@@ -1,6 +1,8 @@
 #include "curve_v2.h"
 
 #include <cassert>
+#include <cmath>
+#include <numbers>
 
 namespace mana {
 float CurveV2::GetPowerYValue(float nor_x, PowerEnum power_type, float power) {
@@ -17,6 +19,14 @@ float CurveV2::GetPowerYValue(float nor_x, PowerEnum power_type, float power) {
         auto down = std::exp(mapped_exp_base) - 1.0f;
         auto up = std::exp(mapped_exp_base * nor_x) - 1.0f;
         return up / down;
+    }
+    case PowerEnum::kSine:
+    {
+        constexpr auto max_cycles = 64.0f;
+        auto map_v = power * 0.5f + 0.5f;
+        auto cycles = std::round(map_v * max_cycles) + 0.5f;
+        auto cos_v = -std::cos(cycles * nor_x * std::numbers::pi_v<float> *2.0f);
+        return cos_v * 0.5f + 0.5f;
     }
     default:
         assert(false);
