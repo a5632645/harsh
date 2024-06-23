@@ -18,6 +18,7 @@ Synth::Synth(std::shared_ptr<ParamCreator> creator, size_t num_osc)
     }
 
     output_gain_ = synth_params_.GetParamBank().GetParamPtr("output_gain");
+    synth_params_.AddModulationListener(this);
 }
 
 void Synth::NoteOn(int note, float velocity) {

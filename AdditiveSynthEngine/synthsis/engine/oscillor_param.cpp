@@ -36,7 +36,7 @@ void OscillorParams::UpdateParams() {
 }
 
 void OscillorParams::CreateModulation(Modulator* pmodulator, std::shared_ptr<ModulationConfig> pconfig) {
-    auto* pparam = oscillor_param_table_[pconfig->modulator_id];
+    auto* pparam = oscillor_param_table_[pconfig->param_id];
     assert(pparam != nullptr);
     oscillor_modulations_.emplace_back(pparam, pmodulator, pconfig);
 }
