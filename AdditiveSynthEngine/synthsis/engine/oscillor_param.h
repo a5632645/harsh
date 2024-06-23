@@ -22,8 +22,9 @@ public:
     OscillorParams& operator=(const OscillorParams&) = delete;
 
     void UpdateParams();
-    void CreateModulation(std::string_view param_id, Modulator* pmodulator, ModulationConfig* pconfig);
-    void RemoveModulation(ModulationConfig& config);
+    void CreateModulation(Modulator* pmodulator, std::shared_ptr<ModulationConfig> pconfig);
+    void RemoveModulation(std::string_view modulator_id, std::string_view param_id);
+    void ClearModulations();
     std::vector<std::string_view> GetParamIds() const;
 
     template<IsParamter P, class...T> requires (sizeof...(T) >= 1)
@@ -39,7 +40,7 @@ private:
     struct SingleOscillorParamModulation {
         PolyModuFloatParameter* target{};
         Modulator* modulator{};
-        ModulationConfig* config{};
+        std::shared_ptr<ModulationConfig> config{};
     };
 
     SynthParams& parent_synth_param_;

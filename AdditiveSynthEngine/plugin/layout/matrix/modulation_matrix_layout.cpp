@@ -367,7 +367,6 @@ void ModulationMatrixLayout::buttonClicked(juce::Button* ptr_button) {
         std::scoped_lock lock{ synth_.GetSynthLock() };
         synth_.RemoveModulation(*config);
     }
-    //table_->updateContent();
 }
 
 void ModulationMatrixLayout::OnModulationAdded(std::shared_ptr<ModulationConfig> config) {
@@ -375,6 +374,10 @@ void ModulationMatrixLayout::OnModulationAdded(std::shared_ptr<ModulationConfig>
 }
 
 void ModulationMatrixLayout::OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) {
+    table_->updateContent();
+}
+
+void ModulationMatrixLayout::OnModulationCleared() {
     table_->updateContent();
 }
 }

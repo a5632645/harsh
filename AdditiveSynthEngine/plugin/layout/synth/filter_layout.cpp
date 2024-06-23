@@ -21,8 +21,8 @@ mana::FilterLayout::FilterLayout(Synth& synth, int idx) {
     }
 
     // init
-    OnFilterTypeChanged(0);
-    OnResonanceTypeChanged(0);
+    comboBoxChanged(filter_type_.get());
+    sliderValueChanged(arg_filter_knobs_[param::Filter_Resonance::kArgIdx].get());
 }
 
 void FilterLayout::resized() {

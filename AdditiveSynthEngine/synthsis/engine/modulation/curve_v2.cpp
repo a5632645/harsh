@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cmath>
 #include <numbers>
+#include <nlohmann/json.hpp>
 
 namespace mana {
 float CurveV2::GetPowerYValue(float nor_x, PowerEnum power_type, float power) {
@@ -182,5 +183,53 @@ void CurveV2::SetPowerType(int idx, PowerEnum new_type) {
         PartRender(idx, idx + 1);
         listeners_.CallListener(&Listener::OnPointPowerChanged, this, idx);
     }
+}
+
+static constexpr std::array kPowerTypeNames{
+    "keep",
+    "exp",
+    "wave_sine",
+    "wave_tri",
+    "wave_square"
+};
+static_assert(kPowerTypeNames.size() == static_cast<size_t>(CurveV2::PowerEnum::kNumPowerEnums));
+inline static constexpr std::string GetPowerTypeName(CurveV2::PowerEnum type) {
+    return kPowerTypeNames[static_cast<size_t>(type)];
+}
+nlohmann::json CurveV2::SaveState() const {
+    nlohmann::json out;
+    for (const auto& p : points_) {
+        out.push_back({
+            {"x", p.x},
+            {"y",p.y},
+            {"power",p.power},
+            {"type",GetPowerTypeName(p.power_type)} });
+    }
+    return out;
+}
+
+void CurveV2::LoadState(const nlohmann::json& json) {
+    static const auto kNameToEnumMap = []() {
+        std::unordered_map<std::string, PowerEnum> out;
+        out[kPowerTypeNames[0]] = PowerEnum::kKeep;
+        out[kPowerTypeNames[1]] = PowerEnum::kExp;
+        out[kPowerTypeNames[2]] = PowerEnum::kWaveSine;
+        out[kPowerTypeNames[3]] = PowerEnum::kWaveTri;
+        out[kPowerTypeNames[4]] = PowerEnum::kWaveSquare;
+        return out;
+    }();
+
+    decltype(points_) new_points;
+    for (const auto& p : json) {
+        auto x = p["x"].get<float>();
+        auto y = p["y"].get<float>();
+        auto power = p["power"].get<float>();
+        auto type = kNameToEnumMap.at(p["type"].get<std::string>());
+        new_points.push_back(Point{ x, y, power, type });
+    }
+    std::ranges::sort(new_points, std::less{}, &Point::x);
+    points_ = std::move(new_points);
+    FullRender();
+    listeners_.CallListener(&Listener::OnReload, this);
 }
 }

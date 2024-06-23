@@ -14,12 +14,13 @@ OscLayout::OscLayout(Synth& synth, int idx)
     for (int i = 0; auto & k : arg_knobs_) {
         k = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr(std::format("timber.osc{}.arg{}", idx, i++)));
     }
-    OnTimberTypeChanged(0);
 
     addAndMakeVisible(timber_type_.get());
     for (const auto& k : arg_knobs_) {
         addAndMakeVisible(*k);
     }
+
+    comboBoxChanged(timber_type_.get());
 }
 
 void OscLayout::resized() {

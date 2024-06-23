@@ -50,5 +50,6 @@ private:
     // 通过 ModulationListener 继承
     void OnModulationAdded(std::shared_ptr<ModulationConfig> config) override;
     void OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) override;
+    void OnModulationCleared() override;
 };
 }

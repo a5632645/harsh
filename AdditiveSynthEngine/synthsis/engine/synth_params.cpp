@@ -1,5 +1,6 @@
 #include "synth_params.h"
 
+#include <nlohmann/json.hpp>
 #include "param/standard_param.h"
 #include "param/timber_param.h"
 #include "param/dissonance_param.h"
@@ -470,10 +471,7 @@ std::shared_ptr<ModulationConfig> SynthParams::FindModulation(std::string_view m
 
 void SynthParams::AddModulation(std::shared_ptr<ModulationConfig> config) {
     modulation_configs_.emplace_back(config);
-
-    for (auto* l : modulation_listeners_) {
-        l->OnModulationAdded(config);
-    }
+    modulation_listeners_.CallListener(&ModulationListener::OnModulationAdded, config);
 }
 
 void SynthParams::RemoveModulation(ModulationConfig& config) {
@@ -485,9 +483,62 @@ void SynthParams::RemoveModulation(ModulationConfig& config) {
             && cfg->param_id == config.param_id;
     });
     modulation_configs_.erase(it);
+    modulation_listeners_.CallListener(&ModulationListener::OnModulationRemoved, modulator_id, param_id);
+}
 
-    for (auto* l : modulation_listeners_) {
-        l->OnModulationRemoved(modulator_id, param_id);
+nlohmann::json SynthParams::SaveState() const {
+    auto cb = curve_bank_.SaveState();
+    auto pb = param_bank_.SaveState();
+    auto mc = SaveModulationConfigs();
+    auto rf = SaveResynthsisFrames();
+    return nlohmann::json{
+        {"curves", cb},
+        {"params", pb},
+        {"modulations", mc},
+        {"resynthsis", rf}
+    };
+}
+
+void SynthParams::LoadState(const nlohmann::json& json) {
+    curve_bank_.LoadState(json["curves"]);
+    param_bank_.LoadState(json["params"]);
+    LoadModulationConfigs(json["modulations"]);
+    LoadResynthsisFrames(json["resynthsis"]);
+}
+
+nlohmann::json SynthParams::SaveModulationConfigs() const {
+    nlohmann::json out;
+    for (const auto& pconfig : modulation_configs_) {
+        out.push_back(nlohmann::json{
+            {"modulator", pconfig->modulator_id},
+            {"param", pconfig->param_id},
+            {"amount", pconfig->amount},
+            {"bipolar", pconfig->bipolar},
+            {"enable", pconfig->enable},
+                      });
     }
+    return out;
+}
+
+void SynthParams::LoadModulationConfigs(const nlohmann::json& json) {
+    modulation_configs_.clear();
+    modulation_listeners_.CallListener(&ModulationListener::OnModulationCleared);
+    for (const auto& pconfig : json) {
+        AddModulation(std::make_shared<ModulationConfig>(
+            pconfig["modulator"].get<std::string>(),
+            pconfig["param"].get<std::string>(),
+            pconfig["amount"].get<float>(),
+            pconfig["bipolar"].get<bool>(),
+            pconfig["enable"].get<bool>()));
+    }
+}
+
+nlohmann::json SynthParams::SaveResynthsisFrames() const {
+    // todo: complete
+    return {};
+}
+
+void SynthParams::LoadResynthsisFrames(const nlohmann::json& json) {
+    // todo: complete
 }
 }

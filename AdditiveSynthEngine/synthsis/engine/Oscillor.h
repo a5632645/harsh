@@ -51,8 +51,10 @@ public:
 
     std::vector<std::string_view> GetModulatorIds() const { return modulator_bank_.GetModulatorsIds(); }
     std::vector<std::string_view> GetModulableParamIds() const { return oscillor_param_->GetParamIds(); }
-    void CreateModulation(std::string_view param_id, std::string_view modulator_id, ModulationConfig* pconfig);
+    void CreateModulation(std::shared_ptr<ModulationConfig> config);
     void RemoveModulation(ModulationConfig& config);
+    void RemoveModulation(std::string_view modulator, std::string_view param_id);
+    void ClearModulations();
 private:
     SineBank sine_bank_;
     std::unique_ptr<OscillorParams> oscillor_param_;

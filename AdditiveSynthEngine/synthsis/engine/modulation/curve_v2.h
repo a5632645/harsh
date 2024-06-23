@@ -4,6 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <cmath>
+#include <nlohmann/json_fwd.hpp>
 #include "utli/listener_list.h"
 
 namespace mana {
@@ -28,8 +29,8 @@ public:
     static float GetPowerYValue(float nor_x, PowerEnum power_type, float power);
 
     struct Point {
-        constexpr Point(float x, float y, float power = 0.0f)
-            : x(x), y(y), power(power) {}
+        constexpr Point(float x, float y, float power = 0.0f, PowerEnum power_type = PowerEnum::kExp)
+            : x(x), y(y), power(power), power_type(power_type) {}
 
         float x;
         float y;
@@ -81,6 +82,9 @@ public:
 
     void AddListener(Listener* l) { listeners_.AddListener(l); }
     void RemoveListener(Listener* l) { listeners_.RemoveListener(l); }
+
+    nlohmann::json SaveState() const;
+    void LoadState(const nlohmann::json& j);
 private:
     int num_data_;
     std::vector<Point> points_;

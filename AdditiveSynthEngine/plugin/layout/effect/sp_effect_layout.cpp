@@ -24,7 +24,7 @@ EffectLayout::EffectLayout(Synth& synth, int effect_idx)
     addAndMakeVisible(effect_type_.get());
 
     // init
-    OnEffectTypeChanged(0);
+    comboBoxChanged(effect_type_.get());
 }
 
 void EffectLayout::resized() {

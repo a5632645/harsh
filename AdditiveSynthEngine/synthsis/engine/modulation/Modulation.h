@@ -49,6 +49,18 @@ struct ModulationConfig {
         }
     }
 
+    ModulationConfig() = default;
+    ModulationConfig(std::string modulator,
+                     std::string param,
+                     float amount,
+                     bool bipolar,
+                     bool enable)
+        : modulator_id(std::move(modulator))
+        , param_id(std::move(param))
+        , amount(amount)
+        , bipolar(bipolar)
+        , enable(enable) {}
+
     std::string modulator_id;
     std::string param_id;
     float amount{};

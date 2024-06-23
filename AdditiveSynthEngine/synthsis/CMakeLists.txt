@@ -35,7 +35,7 @@ set(ENGINE_SRC
     "engine/sine_bank.cpp"
     "engine/effect/effect.cpp"
     "engine/modulation/curve_v2.cpp"
-    "engine/timber/multi_env.cpp")
+    "engine/timber/multi_env.cpp" "engine/modulation/curve_bank.cpp" "engine/modulation/quantize_map.cpp")
 set(ENGINE_HEADER
     "engine/timber/sync.h"
     "engine/Oscillor.h"

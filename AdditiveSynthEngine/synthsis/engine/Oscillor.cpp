@@ -145,13 +145,21 @@ void Oscillor::Reset() {
     // todo: reset vol envelop and effect unit
 }
 
-void Oscillor::CreateModulation(std::string_view param_id, std::string_view modulator_id, ModulationConfig * pconfig) {
-    auto* pmodulator = modulator_bank_.GetModulatorPtr(modulator_id);
+void Oscillor::CreateModulation(std::shared_ptr<ModulationConfig> config) {
+    auto* pmodulator = modulator_bank_.GetModulatorPtr(config->modulator_id);
     assert(pmodulator != nullptr);
-    oscillor_param_->CreateModulation(param_id, pmodulator, pconfig);
+    oscillor_param_->CreateModulation(pmodulator, config);
 }
 
 void Oscillor::RemoveModulation(ModulationConfig& config) {
-    oscillor_param_->RemoveModulation(config);
+    RemoveModulation(config.modulator_id, config.param_id);
+}
+
+void Oscillor::RemoveModulation(std::string_view modulator_id, std::string_view param_id) {
+    oscillor_param_->RemoveModulation(modulator_id, param_id);
+}
+
+void Oscillor::ClearModulations() {
+    oscillor_param_->ClearModulations();
 }
 }

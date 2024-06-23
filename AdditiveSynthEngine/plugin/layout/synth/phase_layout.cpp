@@ -17,7 +17,7 @@ PhaseLayout::PhaseLayout(Synth& synth) {
         addAndMakeVisible(*k);
     }
 
-    OnPhaseTypeChanged(0);
+    comboBoxChanged(phase_type_.get());
 }
 
 void PhaseLayout::resized() {

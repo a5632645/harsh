@@ -15,12 +15,12 @@ DissonanceLayout::DissonanceLayout(Synth& synth) {
     arg_knobs_[0] = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr("dissonance.arg0"));
     arg_knobs_[1] = std::make_unique<WrapSlider>(synth.GetParamBank().GetParamPtr("dissonance.arg1"));
 
-    OnDissonanceTypeChanged(0);
-
     addAndMakeVisible(is_enable_.get());
     addAndMakeVisible(type_.get());
     addAndMakeVisible(arg_knobs_[0].get());
     addAndMakeVisible(arg_knobs_[1].get());
+
+    OnDissonanceTypeChanged(type_->getSelectedItemIndex());
 }
 
 void DissonanceLayout::resized() {

@@ -158,19 +158,10 @@ std::pair<bool, ModulationConfig*> Synth::CreateModulation(std::string_view modu
     new_modulation_cfg->modulator_id = modulator;
     new_modulation_cfg->param_id = param;
     synth_params_.AddModulation(new_modulation_cfg);
-
-    for (auto& osc : m_oscillators) {
-        osc.CreateModulation(param, modulator, new_modulation_cfg.get());
-    }
-
     return { true, new_modulation_cfg.get() };
 }
 
 void Synth::RemoveModulation(ModulationConfig& config) {
-    for (auto& osc : m_oscillators) {
-        osc.RemoveModulation(config);
-    }
-
     synth_params_.RemoveModulation(config);
 }
 
@@ -626,5 +617,32 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     image_frame.num_frame = static_cast<int>(image_frame.frames.size());
     image_frame.DuplicateExtraDataForLerp();
     return image_frame;
+}
+
+nlohmann::json Synth::SaveState() const {
+    return synth_params_.SaveState();
+}
+
+void Synth::LoadState(const nlohmann::json& json) {
+    synth_params_.LoadState(json);
+    // todo: add modulation to oscillor params
+}
+
+void Synth::OnModulationAdded(std::shared_ptr<ModulationConfig> config) {
+    for (auto& osc : m_oscillators) {
+        osc.CreateModulation(config);
+    }
+}
+
+void Synth::OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) {
+    for (auto& osc : m_oscillators) {
+        osc.RemoveModulation(modulator_id, param_id);
+    }
+}
+
+void Synth::OnModulationCleared() {
+    for (auto& osc : m_oscillators) {
+        osc.ClearModulations();
+    }
 }
 }

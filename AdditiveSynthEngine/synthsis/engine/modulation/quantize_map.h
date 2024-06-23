@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <nlohmann/json_fwd.hpp>
 
 namespace mana {
 class QuantizeMap {
@@ -40,6 +41,8 @@ public:
         return data_[idx];
     }
 
+    nlohmann::json SaveState() const;
+    void LoadState(const nlohmann::json& j);
 private:
     std::vector<Listener*> listeners_;
     std::vector<float> data_;

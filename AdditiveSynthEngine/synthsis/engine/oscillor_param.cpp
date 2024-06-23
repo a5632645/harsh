@@ -35,18 +35,22 @@ void OscillorParams::UpdateParams() {
     }
 }
 
-void OscillorParams::CreateModulation(std::string_view param_id, Modulator * pmodulator, ModulationConfig * pconfig) {
-    auto* pparam = oscillor_param_table_[param_id];
+void OscillorParams::CreateModulation(Modulator* pmodulator, std::shared_ptr<ModulationConfig> pconfig) {
+    auto* pparam = oscillor_param_table_[pconfig->modulator_id];
     assert(pparam != nullptr);
     oscillor_modulations_.emplace_back(pparam, pmodulator, pconfig);
 }
 
-void OscillorParams::RemoveModulation(ModulationConfig& config) {
-    auto it = std::ranges::find_if(oscillor_modulations_, [config](SingleOscillorParamModulation& m) {
-        return m.config->modulator_id == config.modulator_id
-            && m.config->param_id == config.param_id;
+void OscillorParams::RemoveModulation(std::string_view modulator_id, std::string_view param_id) {
+    auto it = std::ranges::find_if(oscillor_modulations_, [modulator_id, param_id](SingleOscillorParamModulation& m) {
+        return m.config->modulator_id == modulator_id
+            && m.config->param_id == param_id;
     });
     oscillor_modulations_.erase(it);
+}
+
+void OscillorParams::ClearModulations() {
+    oscillor_modulations_.clear();
 }
 
 std::vector<std::string_view> OscillorParams::GetParamIds() const {

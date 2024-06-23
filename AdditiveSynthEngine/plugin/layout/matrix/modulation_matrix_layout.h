@@ -27,7 +27,6 @@ private:
     std::unique_ptr<juce::TableListBox> table_;
 
     void OnAddClick();
-    void CheckAndRemoveLayout();
     std::vector<std::string_view> modulator_ids_;
     std::vector<std::string_view> sections_;
 
@@ -52,5 +51,6 @@ private:
     // 通过 ModulationListener 继承
     void OnModulationAdded(std::shared_ptr<ModulationConfig> config) override;
     void OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) override;
+    void OnModulationCleared() override;
 };
 }

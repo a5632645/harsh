@@ -244,14 +244,18 @@ void AudioPluginAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    juce::ignoreUnused(destData);
+    auto json = synth_->SaveState();
+    auto str = json.dump();
+    juce::MemoryOutputStream os(destData, false);
+    os.write(str.data(), str.size());
 }
 
 void AudioPluginAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-    juce::ignoreUnused(data, sizeInBytes);
+    auto json = nlohmann::json::parse(std::string_view((char*)data, sizeInBytes));
+    synth_->LoadState(json);
 }
 
 //==============================================================================

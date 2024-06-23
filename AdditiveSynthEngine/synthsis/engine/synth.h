@@ -7,9 +7,10 @@
 #include "resynthsis/resynthsis_data.h"
 #include "resynthsis/image_base.h"
 #include <mutex>
+#include <nlohmann/json.hpp>
 
 namespace mana {
-class Synth {
+class Synth : private SynthParams::ModulationListener {
 public:
     Synth(std::shared_ptr<ParamCreator> creator, size_t num_osc);
 
@@ -28,6 +29,9 @@ public:
     decltype(auto) getBuffer() const {
         return (audio_buffer_);
     }
+
+    nlohmann::json SaveState() const;
+    void LoadState(const nlohmann::json& json);
 
     const Oscillor& GetDisplayOscillor() const;
     const Oscillor& GetOscillor(int idx) const { return m_oscillators[idx]; }
@@ -49,6 +53,10 @@ public:
     int GetModulatorCount() const { return synth_params_.GetModulationCount(); }
     std::shared_ptr<ModulationConfig> GetModulationConfig(int index) { return synth_params_.GetModulation(index); }
 private:
+    void OnModulationAdded(std::shared_ptr<ModulationConfig> config);
+    void OnModulationRemoved(std::string_view modulator_id, std::string_view param_id);
+    void OnModulationCleared();
+
     std::mutex synth_lock_;
     ResynthsisFrames resynthsis_frames_;
     SynthParams synth_params_;

@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <format>
 #include <ranges>
+#include <nlohmann/json_fwd.hpp>
 #include "quantize_map.h"
 #include "curve_v2.h"
 
@@ -12,8 +13,6 @@ class CurveBank {
 public:
     template<class... T>
     CurveBank& AddCurve(std::format_string<T...> format_text, T&&... args) {
-        /*curves_[std::format(format_text, std::forward<T>(args)...)] = CurveV2{};
-        return *this;*/
         return AddCurve(CurveV2{}, format_text, std::forward<T>(args)...);
     }
     template<class... T>
@@ -40,6 +39,9 @@ public:
 
     auto GetCurveIds() const { return curves_ | std::ranges::views::keys; }
     auto GetQuantizeMapIds() const { return quantize_maps_ | std::ranges::views::keys; }
+
+    nlohmann::json SaveState() const;
+    void LoadState(const nlohmann::json& json);
 private:
     std::unordered_map<std::string, QuantizeMap> quantize_maps_;
     std::unordered_map<std::string, CurveV2> curves_;

@@ -164,10 +164,13 @@ private:
 namespace mana {
 class ModulationTab : public juce::Component, public juce::Timer {
 public:
-    ModulationTab(Synth& synth, WrapSlider& parent)
+    ModulationTab(Synth& synth, WrapSlider& parent, std::string_view param_id)
         : synth_(synth)
         , parent_(parent) {
         startTimer(1000);
+        for (const auto& p : synth.GetSynthParams().FindModulation(param_id)) {
+            AddModulation(p);
+        }
     }
 
     void resized() override {
@@ -196,6 +199,13 @@ public:
 
             ReCalcSize();
         }
+    }
+
+    void ClearModulations() {
+        for (const auto& pc : circles_) {
+            removeChildComponent(pc.get());
+        }
+        circles_.clear();
     }
 
     void MarkHide() {
@@ -265,6 +275,10 @@ void WrapSlider::paint(juce::Graphics& g) {
 void WrapSlider::resized() {
     juce::Slider::resized();
 
+    if (!ref_store_->IsModulatable()) {
+        return;
+    }
+
     auto* main_window = findParentComponentOfClass<MainWindow>();
     if (main_window == nullptr)
         return;
@@ -274,7 +288,7 @@ void WrapSlider::resized() {
         synth_->GetSynthParams().AddModulationListener(this);
         main_window->AddModulationActionListener(this);
 
-        modulation_tab_ = std::make_unique<ModulationTab>(*synth_, *this);
+        modulation_tab_ = std::make_unique<ModulationTab>(*synth_, *this, ref_store_->GetId());
         main_window->addChildComponent(modulation_tab_.get());
     }
 
@@ -325,7 +339,7 @@ bool WrapSlider::CanBeModulateBy(std::string_view modulator_id) {
         return false;
 
     if (synth_ == nullptr)
-        return true;
+        return false;
 
     auto& storer = ref_store_->As<FloatParamRefStore>();
     auto id = storer.param_.GetId();
@@ -355,5 +369,9 @@ void WrapSlider::OnModulationAdded(std::shared_ptr<ModulationConfig> config) {
 void WrapSlider::OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) {
     if (param_id == ref_store_->GetId())
         modulation_tab_->RemoveModulation(modulator_id);
+}
+
+void WrapSlider::OnModulationCleared() {
+    modulation_tab_->ClearModulations();
 }
 }
