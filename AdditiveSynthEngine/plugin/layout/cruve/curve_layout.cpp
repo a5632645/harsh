@@ -18,10 +18,13 @@ CurveLayout::CurveLayout(CurveBank& bank)
         selector_->addItem(juce::String{ id }, kQuantizeMapBeginId + i);
         ++i;
     }
+
+    juce::StringArray sa;
     for (int i = 1; const auto & id : curve_ids) {
-        selector_->addItem(juce::String{ id }, i);
-        ++i;
+        sa.add(juce::String{ id });
     }
+    sa.sort(true);
+    selector_->addItemList(sa, 1);
 
     addAndMakeVisible(quantize_map_editor_.get());
     addChildComponent(curve_editor_.get());
