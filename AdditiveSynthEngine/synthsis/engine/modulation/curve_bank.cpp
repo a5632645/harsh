@@ -29,10 +29,14 @@ void CurveBank::LoadState(const nlohmann::json& json) {
         auto type = j["type"].get<std::string>();
         auto id = j["id"].get<std::string>();
         if (type == "quantize_map"s) {
-            quantize_maps_[id].LoadState(j["value"]);
+            if(auto it = quantize_maps_.find(id); it != quantize_maps_.end()) {
+                it->second.LoadState(j["value"]);
+            }
         }
         else if (type == "curve"s) {
-            curves_[id].LoadState(j["value"]);
+            if(auto it = curves_.find(id); it != curves_.end()) {
+                it->second.LoadState(j["value"]);
+            }
         }
     }
 }

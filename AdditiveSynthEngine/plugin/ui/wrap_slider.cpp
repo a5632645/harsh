@@ -85,6 +85,7 @@ public:
         slider_->setLookAndFeel(&kModuLookAndFeel);
         slider_->addListener(this);
         slider_->setRange(-1.0f, 1.0f);
+        slider_->setValue(config->amount);
         slider_->setPopupDisplayEnabled(true, true, nullptr);
         slider_->textFromValueFunction = [this](double v) -> juce::String {
             auto range = parent_.getNormalisableRange();
@@ -100,7 +101,6 @@ public:
         addAndMakeVisible(slider_.get());
 
         popup_menu_ = std::make_unique<juce::PopupMenu>();
-        ReCreatePopMenuItems();
 
         config_->AddListener(this);
     }
@@ -120,6 +120,7 @@ public:
 
     void mouseDown(const juce::MouseEvent& event) override {
         if (event.mods.isPopupMenu()) {
+            ReCreatePopMenuItems();
             popup_menu_->showMenuAsync(juce::PopupMenu::Options{});
         }
     }
@@ -130,11 +131,9 @@ private:
         popup_menu_->clear();
         popup_menu_->addItem(config_->bipolar ? "unmake bipolar" : "make bipolar", [this]() {
             config_->SetBipolar(!config_->bipolar);
-            ReCreatePopMenuItems();
         });
         popup_menu_->addItem(config_->enable ? "disable" : "enable", [this]() {
             config_->SetEnable(!config_->enable);
-            ReCreatePopMenuItems();
         });
         popup_menu_->addItem("remove", [this]() {
             synth_.RemoveModulation(*config_);
@@ -151,7 +150,6 @@ private:
     void OnConfigChanged(ModulationConfig* config) override {
         if (config != config_.get()) return;
         slider_->setValue(config->amount);
-        ReCreatePopMenuItems();
     }
 
     // 通过 Listener 继承

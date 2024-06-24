@@ -8,16 +8,10 @@
 
 namespace mana {
 ModulatorBank::ModulatorBank() {
-    modulators_.emplace_back(std::make_shared<LFO>("lfo0", 0));
-    modulators_.emplace_back(std::make_shared<LFO>("lfo1", 1));
-    modulators_.emplace_back(std::make_shared<LFO>("lfo2", 2));
-    modulators_.emplace_back(std::make_shared<LFO>("lfo3", 3));
-    modulators_.emplace_back(std::make_shared<LFO>("lfo4", 4));
-    modulators_.emplace_back(std::make_shared<LFO>("lfo5", 5));
-    modulators_.emplace_back(std::make_shared<LFO>("lfo6", 6));
-    modulators_.emplace_back(std::make_shared<LFO>("lfo7", 7));
-
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 5; ++i) {
+        modulators_.emplace_back(std::make_shared<LFO>(std::format("lfo{}", i), i));
+    }
+    for (int i = 0; i < 3; ++i) {
         modulators_.emplace_back(std::make_shared<Envelop>(std::format("env{}", i), i));
     }
 }

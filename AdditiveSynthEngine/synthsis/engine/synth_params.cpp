@@ -373,7 +373,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     // ================================================================================
     // lfo
     // ================================================================================
-    for (int lfo_idx = 0; lfo_idx < 8; ++lfo_idx) {
+    for (int lfo_idx = 0; lfo_idx < 5; ++lfo_idx) {
         param_bank_.AddParameter(creator->CreateBoolParameter({
             .id = std::format("lfo{}.restart", lfo_idx),
             .name = std::format("lfo{}.restart", lfo_idx),
@@ -410,7 +410,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     // ================================================================================
     // envelop
     // ================================================================================
-    for (int env_idx = 0; env_idx < 8; ++env_idx) {
+    for (int env_idx = 0; env_idx < 3; ++env_idx) {
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
             .id = std::format("envelop{}.attack", env_idx),
