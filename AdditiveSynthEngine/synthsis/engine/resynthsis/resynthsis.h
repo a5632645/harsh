@@ -2,7 +2,6 @@
 
 #include <random>
 #include "engine/oscillor_param.h"
-#include "resynthsis_data.h"
 #include "engine/partials.h"
 #include "engine/modulation/curve_v2.h"
 

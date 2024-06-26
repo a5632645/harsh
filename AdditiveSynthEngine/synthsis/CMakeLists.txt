@@ -35,7 +35,9 @@ set(ENGINE_SRC
     "engine/sine_bank.cpp"
     "engine/effect/effect.cpp"
     "engine/modulation/curve_v2.cpp"
-    "engine/timber/multi_env.cpp" "engine/modulation/curve_bank.cpp" "engine/modulation/quantize_map.cpp")
+    "engine/timber/multi_env.cpp"
+    "engine/modulation/curve_bank.cpp"
+    "engine/modulation/quantize_map.cpp" )
 set(ENGINE_HEADER
     "engine/timber/sync.h"
     "engine/Oscillor.h"
@@ -98,7 +100,7 @@ set(ENGINE_HEADER
     "utli/listener_list.h"
     "engine/modulation/curve_bank.h"
     "engine/timber/multi_env.h"
-    "param/multi_env_param.h")
+    "param/multi_env_param.h"  )
 
 add_library(AdSynthLib STATIC ${ENGINE_SRC} ${ENGINE_HEADER})
 target_link_libraries(AdSynthLib PUBLIC AudioFFT)

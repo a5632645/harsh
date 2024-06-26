@@ -5,9 +5,9 @@
 #include "timber/timber.h"
 #include "dissonance/dissonance.h"
 #include "resynthsis/resynthsis.h"
-#include "filter/filter.h"
 #include "effect/effect.h"
 #include "engine/synth.h"
+#include "utli/convert.h"
 
 namespace mana {
 Oscillor::Oscillor(Synth& synth)

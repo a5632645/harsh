@@ -1,5 +1,6 @@
 #include "resynthsis.h"
 
+#include "resynthsis_data.h"
 #include "engine/synth.h"
 #include "param/resynthsis_param.h"
 #include "utli/warp.h"
