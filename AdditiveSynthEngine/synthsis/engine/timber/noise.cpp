@@ -8,10 +8,10 @@
 
 namespace mana {
 constexpr std::array kDeltaPitch = []() {
-    constexpr auto kFirstPitch = utli::cp::FreqToPitch(1.0f);
+    constexpr auto kFirstPitch = utli::FreqToPitch(1.0f);
     std::array<float, kNumPartials> out{};
     for (int i = 0; i < kNumPartials; ++i) {
-        out[i] = (utli::cp::FreqToPitch(1.0f + i) - kFirstPitch) / 12.0f;
+        out[i] = (utli::FreqToPitch(1.0f + i) - kFirstPitch) / 12.0f;
     }
     return out;
 }();

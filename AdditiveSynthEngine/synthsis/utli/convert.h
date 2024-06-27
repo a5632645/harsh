@@ -4,87 +4,96 @@
 #include <cmath>
 
 namespace mana::utli {
-namespace cp {
-static constexpr float DbToGain(float db) {
-    return gcem::exp(0.11512925464970228420089957273422f * db);
+template<std::floating_point T>
+inline static constexpr T Exp2(T x) {
+    if constexpr (std::is_constant_evaluated()) {
+        return gcem::exp(0.69314718055994530941723212145818f * x);
+    }
+    else {
+        return std::exp2(x);
+    }
 }
 
-static constexpr float DbToGain(float db, float min_db) {
+template<std::floating_point T>
+inline static constexpr T DbToGain(T db) {
+    if constexpr (std::is_constant_evaluated()) {
+        return gcem::exp(0.11512925464970228420089957273422f * db);
+    }
+    else {
+        return std::exp(0.11512925464970228420089957273422f * db);
+    }
+}
+
+template<std::floating_point T>
+inline static constexpr T DbToGain(T db, T min_db) {
     if (db <= min_db) {
         return 0.0f;
     }
-    return gcem::exp(0.11512925464970228420089957273422f * db);
+    return DbToGain(db);
 }
 
-static constexpr float PitchToFreq(float pitch) {
-    return gcem::exp(pitch * 0.05776226504666210911810267678818f) * 8.1758f;
-}
-
-static constexpr float FreqToPitch(float freq) {
-    return gcem::log(freq / 8.1758f) / 0.05776226504666210911810267678818f;
-}
-
-static constexpr float Exp2(float x) {
-    return gcem::exp(0.69314718055994530941723212145818f * x);
-}
-
-static constexpr float Calc1stSmoothFilterCoeff(float time_second, float update_rate) {
-    if (time_second < 1.0f / 1000.0f) {
-        return 0.0f;
-    }
-    return gcem::exp(-1.0f / (update_rate * time_second));
-}
-
-static constexpr auto GainToDb(std::floating_point auto gain, std::floating_point auto min_db) {
-    auto min_gain = DbToGain(min_db);
-    if (gain <= min_gain) {
-        return min_db;
-    }
-    return 20.0f * gcem::log10(gain);
-}
-} // complite time
-
-static float DbToGain(float db) {
-    return std::exp(0.11512925464970228420089957273422f * db);
-}
-
-static float DbToGain(float db, float min_db) {
-    if (db <= min_db) {
-        return 0.0f;
-    }
-    return std::exp(0.11512925464970228420089957273422f * db);
-}
-
-template<float kMinDb = -300.0f>
-static float GainToDb(float gain) {
-    constexpr auto min_gain = cp::DbToGain(kMinDb);
-    if (gain <= min_gain) {
+template<float kMinDb = -300.0f, std::floating_point T>
+inline static constexpr T GainToDb(T gain) {
+    constexpr auto min_gain = DbToGain(kMinDb);
+    if (gain < min_gain) {
         return kMinDb;
     }
-    return 20.0f * log10(gain);
-}
-
-static float PitchToFreq(float pitch) {
-    return std::exp2(pitch / 12.0f) * 8.1758f;
-}
-
-static float FreqToPitch(float freq) {
-    return std::log(freq / 8.1758f) / 0.05776226504666210911810267678818f;
-}
-
-static float Calc1stSmoothFilterCoeff(float time_second, float update_rate) {
-    if (time_second < 1.0f / 1000.0f) {
-        return 0.0f;
+    if constexpr (std::is_constant_evaluated()) {
+        return 20.0f * gcem::log10(gain);
     }
-    return std::exp(-1.0f / (update_rate * time_second));
+    else {
+        return 20.0f * std::log10(gain);
+    }
 }
 
-static float Calc1stSmoothFilterCoeffByDecayRate(float db_per_second, float update_rate) {
-    return std::exp(-0.11512925464970228420089957273422f * db_per_second / update_rate);
+template<std::floating_point T>
+inline static constexpr T PitchToFreq(T pitch) {
+    if constexpr (std::is_constant_evaluated()) {
+        return gcem::exp(pitch * 0.05776226504666210911810267678818f) * 8.1758f;
+    }
+    else {
+        return std::exp2(pitch / 12.0f) * 8.1758f;
+    }
 }
 
-static float RatioToPitch(float ratio, float base_pitch) {
+template<std::floating_point T>
+inline static constexpr T FreqToPitch(T freq) {
+    if constexpr (std::is_constant_evaluated()) {
+        return gcem::log(freq / 8.1758f) / 0.05776226504666210911810267678818f;
+    }
+    else {
+        return std::log(freq / 8.1758f) / 0.05776226504666210911810267678818f;
+    }
+}
+
+template<std::floating_point T>
+inline static constexpr T Calc1stSmoothFilterCoeff(T time_second, T update_rate) {
+    if constexpr (std::is_constant_evaluated()) {
+        return gcem::exp(-1.0f / (update_rate * time_second));
+    }
+    else {
+        return std::exp(-1.0f / (update_rate * time_second));
+    }
+}
+
+template<std::floating_point T>
+inline static constexpr T Calc1stSmoothFilterCoeffByDecayRate(T db_per_second, T update_rate) {
+    if constexpr (std::is_constant_evaluated()) {
+        return gcem::exp(-0.11512925464970228420089957273422f * db_per_second / update_rate);
+    }
+    else {
+        return std::exp(-0.11512925464970228420089957273422f * db_per_second / update_rate);
+    }
+}
+
+template<std::floating_point T>
+inline static constexpr T RatioToPitch(T ratio, T base_pitch) {
     ratio = std::max(ratio, 0.0001f);
-    return base_pitch + 12.0f * std::log2(ratio);
+    if constexpr (std::is_constant_evaluated()) {
+        return base_pitch + 12.0f * gcem::log2(ratio);
+    }
+    else {
+        return base_pitch + 12.0f * std::log2(ratio);
+    }
 }
 }

@@ -35,7 +35,7 @@ static constexpr auto kLogSineTable = MakeNormalizeTable<kNumPartials>(
     auto up_db = 0.0f;
     auto down_db = -60.0f;
     auto map_db = std::lerp(down_db, up_db, vv);
-    return utli::cp::DbToGain(map_db) * 1.2f;
+    return utli::DbToGain(map_db) * 1.2f;
 });
 
 static constexpr auto kLogTriTable = MakeNormalizeTable<kNumPartials>(
@@ -47,7 +47,7 @@ static constexpr auto kLogTriTable = MakeNormalizeTable<kNumPartials>(
     auto up_db = 0.0f;
     auto down_db = -60.0f;
     auto map_db = std::lerp(up_db, down_db, v);
-    return utli::cp::DbToGain(map_db) * 1.5f;
+    return utli::DbToGain(map_db) * 1.5f;
 });
 
 static constexpr auto kLogNarrowTable = MakeNormalizeTable<kNumPartials>(
@@ -59,7 +59,7 @@ static constexpr auto kLogNarrowTable = MakeNormalizeTable<kNumPartials>(
     auto up_db = 0.0f;
     auto down_db = -60.0f;
     auto map_db = std::lerp(down_db, up_db, cos_val);
-    return utli::cp::DbToGain(map_db) * 1.3f;
+    return utli::DbToGain(map_db) * 1.3f;
 });
 
 static float PhaserShapeVal(param::Phaser_Shape::ParamEnum s, float nor_x) {

@@ -340,7 +340,7 @@ private:
 };
 
 ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float source_sample_rate) const {
-    constexpr auto c2_freq = utli::cp::PitchToFreq(36.0f);
+    constexpr auto c2_freq = utli::PitchToFreq(36.0f);
     constexpr auto analyze_fft_size = 8192;
     constexpr auto kFFtHop = 256;
     constexpr auto kThreadshoud = -60.0f;
@@ -401,7 +401,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         std::vector<GainAndFreqPhase> high_resolution_infos(transform.FftDataLen());
         for (int i = 0; auto & s : high_resolution_infos) {
             s.freq = transform.CorrectNorFreq(i) * source_sample_rate;
-            s.gain_db = utli::GainToDb<-300.0f>(transform.CorrectGain(i));
+            s.gain_db = utli::GainToDb(transform.CorrectGain(i));
             s.gain = transform.CorrectGain(i);
             s.phase = 0.0f;
             ++i;
@@ -547,7 +547,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     const auto valid_gain = max_green != 0;
     image_frame.frames.resize(w);
     image_frame.frame_interval_sample = 256; // equal to harmor
-    constexpr auto c2_freq = utli::cp::PitchToFreq(36.0f);
+    constexpr auto c2_freq = utli::PitchToFreq(36.0f);
     constexpr auto kImgMaxDb = 0.0f;
     constexpr auto kImgMinDb = -60.0f;
     image_frame.base_freq = c2_freq;
@@ -557,7 +557,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
     constexpr auto db6_level_down_table = []() {
         std::array<float, kNumPartials> out{};
         for (int i = 0; i < kNumPartials; ++i)
-            out[i] = utli::cp::GainToDb(1.0L / (i + 1.0L), -300.0L);
+            out[i] = utli::GainToDb(1.0L / (i + 1.0L));
         return out;
     }();
 

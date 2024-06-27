@@ -16,9 +16,9 @@ static constexpr auto ConvertToPitchTable(const std::array<VowelInfo, N>& table)
     std::array<FormantFilter::ConvertVowlInfo, N> out{};
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < 5; ++j) {
-            out[i].cut_pitch[j] = utli::cp::FreqToPitch(table[i].freqs[j]);
-            out[i].p_begin[j] = utli::cp::FreqToPitch(table[i].freqs[j] - table[i].bws[j] / 2.0f);
-            out[i].p_end[j] = utli::cp::FreqToPitch(table[i].freqs[j] + table[i].bws[j] / 2.0f);
+            out[i].cut_pitch[j] = utli::FreqToPitch(table[i].freqs[j]);
+            out[i].p_begin[j] = utli::FreqToPitch(table[i].freqs[j] - table[i].bws[j] / 2.0f);
+            out[i].p_end[j] = utli::FreqToPitch(table[i].freqs[j] + table[i].bws[j] / 2.0f);
             out[i].amps[j] = table[i].amps[j];
             out[i].magic_coef[j] = 1.0f / std::min(-0.01f, out[i].p_begin[j] - out[i].p_end[j]);
         }

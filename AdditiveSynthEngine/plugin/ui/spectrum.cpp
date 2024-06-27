@@ -16,8 +16,8 @@ void Spectrum::paint(juce::Graphics& g) {
 
     constexpr auto min_freq = 20.0f;
     constexpr auto max_freq = 20000.0f;
-    constexpr auto min_pitch = utli::cp::FreqToPitch(min_freq);
-    constexpr auto max_pitch = utli::cp::FreqToPitch(max_freq);
+    constexpr auto min_pitch = utli::FreqToPitch(min_freq);
+    constexpr auto max_pitch = utli::FreqToPitch(max_freq);
     constexpr auto min_db = -60.0f;
     constexpr auto max_db = 20.0f;
 

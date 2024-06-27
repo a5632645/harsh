@@ -231,7 +231,7 @@ juce::Image ResynthsisLayout::GenerateResynsisImage(ResynthsisFrames& frames) {
     constexpr auto db6up_table = []() {
         std::array<float, kNumPartials> out{};
         for (int i = 0; i < kNumPartials; ++i)
-            out[i] = utli::cp::GainToDb(i + 1.0L, -300.0L);
+            out[i] = utli::GainToDb(i + 1.0L);
         return out;
     }();
     constexpr auto min_db = -60.0f;
