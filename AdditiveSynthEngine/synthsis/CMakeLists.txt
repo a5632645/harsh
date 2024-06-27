@@ -69,7 +69,7 @@ set(ENGINE_HEADER
     "utli/warp.h"
     "engine/timber/timber_frame.h"
     "engine/timber/timber_gen.h"
-    "utli/NoiseGenerator.h"
+    
     "engine/effect/decay.h"
     "engine/effect/harmonic_delay.h"
     "engine/modulation/lfo.h"
