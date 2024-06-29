@@ -20,8 +20,8 @@ void FreqProcessor::OnNoteOn(int note) {
 void FreqProcessor::OnNoteOff() {
 }
 
-void FreqProcessor::PrepareParams(OscillorParams & params) {
-    pitch_bend_ = params.GetPolyFloatParam("pitch_bend");
+void FreqProcessor::PrepareParams(ModulableParams & params) {
+    pitch_bend_ = params.GetModuFloatParam("pitch_bend");
 }
 
 void FreqProcessor::Process(Partials& partials) {

@@ -12,7 +12,7 @@ void FilterWrap::Init(float sample_rate, float update_rate) {
     filter2_.Init(sample_rate, update_rate);
 }
 
-void FilterWrap::PrepareParams(OscillorParams& params) {
+void FilterWrap::PrepareParams(ModulableParams& params) {
     filter1_.PrepareParams(params);
     filter2_.PrepareParams(params);
 

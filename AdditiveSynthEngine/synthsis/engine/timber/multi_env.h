@@ -8,7 +8,7 @@ namespace mana {
 class MultiEnvelop {
 public:
     void Init(float sample_rate, float update_rate);
-    void PrepareParam(OscillorParams& p);
+    void PrepareParam(ModulableParams& p);
     void OnUpdateTick();
     void Process(Partials& frame);
     void OnNoteOn(int note);
@@ -16,14 +16,14 @@ public:
 
     bool IsAllMute() const { return std::ranges::all_of(env_states_, [](auto v) { return v == EnvState::kInit; }); }
 private:
-    PolyModuFloatParameter* predelay_time_{};
-    PolyModuFloatParameter* attack_time_{};
-    PolyModuFloatParameter* hold_time_{};
-    PolyModuFloatParameter* peak_level_{};
-    PolyModuFloatParameter* decay_time_{};
-    PolyModuFloatParameter* sustain_level_{};
-    PolyModuFloatParameter* release_time_{};
-    PolyModuFloatParameter* high_scale_{};
+    ModuFloatParameter* predelay_time_{};
+    ModuFloatParameter* attack_time_{};
+    ModuFloatParameter* hold_time_{};
+    ModuFloatParameter* peak_level_{};
+    ModuFloatParameter* decay_time_{};
+    ModuFloatParameter* sustain_level_{};
+    ModuFloatParameter* release_time_{};
+    ModuFloatParameter* high_scale_{};
 
     enum class EnvState {
         kInit = 0,

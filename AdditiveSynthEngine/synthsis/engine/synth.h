@@ -3,11 +3,13 @@
 #include <array>
 #include <cstdlib>
 #include "Oscillor.h"
-#include "modulation/ParamBank.h"
-#include "resynthsis/resynthsis_data.h"
-#include "resynthsis/image_base.h"
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include "modulation/ParamBank.h"
+#include "modulation/modulator_bank.h"
+#include "resynthsis/resynthsis_data.h"
+#include "resynthsis/image_base.h"
+#include "oscillor_param.h"
 
 namespace mana {
 class Synth : private SynthParams::ModulationListener {
@@ -44,8 +46,8 @@ public:
     bool IsResynthsisAvailable() const { return !resynthsis_frames_.frames.empty(); }
     ResynthsisFrames CreateResynthsisFramesFromAudio(const std::vector<float>& audio_in, float sample_rate) const;
     ResynthsisFrames CreateResynthsisFramesFromImage(std::unique_ptr<ImageBase> image_in, bool stretch_image);
-    std::vector<std::string_view> GetModulatorIds() const { return m_oscillators.front().GetModulatorIds(); }
-    std::vector<std::string_view> GetModulableParamIds() const { return m_oscillators.front().GetModulableParamIds(); }
+    std::vector<std::string_view> GetModulatorIds() const { return mono_modulator_bank_.GetModulatorsIds(); }
+    std::vector<std::string_view> GetModulableParamIds() const { return mono_modu_params_->GetParamIds(); }
     decltype(auto) GetSynthLock() { return (synth_lock_); }
 
     std::pair<bool, ModulationConfig*> CreateModulation(std::string_view modulator, std::string_view param);
@@ -60,6 +62,8 @@ private:
     std::mutex synth_lock_;
     ResynthsisFrames resynthsis_frames_;
     SynthParams synth_params_;
+    ModulatorBank mono_modulator_bank_;
+    std::unique_ptr<ModulableParams> mono_modu_params_;
     std::vector<float> audio_buffer_;
     std::vector<Oscillor> m_oscillators;
     size_t m_rrPosition{};
@@ -69,6 +73,6 @@ private:
     float update_rate_{};
     int update_skip_{};
     int update_counter_{};
-    FloatParameter* output_gain_{};
+    ModuFloatParameter* output_gain_{};
 };
 }

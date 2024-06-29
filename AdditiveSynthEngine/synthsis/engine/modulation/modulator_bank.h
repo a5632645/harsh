@@ -11,7 +11,7 @@ public:
     std::vector<std::string_view> GetModulatorsIds() const;
 
     void Init(float sample_rate, float update_rate);
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void OnUpdateTick();
     void OnNoteOn(int note);
     void OnNoteOff();

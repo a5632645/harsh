@@ -22,7 +22,7 @@ public:
 
     void Init(float sample_rate, float update_rate);
     void Process(Partials& partials);
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void OnUpdateTick();
     void OnNoteOn(int note);
     void OnNoteOff();
@@ -32,10 +32,10 @@ private:
     std::unique_ptr<TimberGen> osc1_;
     std::unique_ptr<TimberGen> osc2_;
 
-    PolyModuFloatParameter* arg_osc2_timber_shift_{};
-    PolyModuFloatParameter* arg_osc2_beating_{};
-    PolyModuFloatParameter* arg_osc1_gain_{};
-    PolyModuFloatParameter* arg_osc2_gain_{};
+    ModuFloatParameter* arg_osc2_timber_shift_{};
+    ModuFloatParameter* arg_osc2_beating_{};
+    ModuFloatParameter* arg_osc1_gain_{};
+    ModuFloatParameter* arg_osc2_gain_{};
     float osc2_timber_shift_{};
     float osc2_beating_{};
     float osc1_gain_{};

@@ -10,10 +10,10 @@ public:
     void OnUpdateTick();
     void OnNoteOn(int note);
     void OnNoteOff();
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void Process(Partials& partials);
 private:
-    PolyModuFloatParameter* pitch_bend_;
+    ModuFloatParameter* pitch_bend_;
     float note_pitch_{};
     float base_frequency_{};
     float base_pitch_{};

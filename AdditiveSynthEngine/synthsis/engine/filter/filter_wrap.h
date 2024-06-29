@@ -9,7 +9,7 @@ public:
     FilterWrap();
 
     void Init(float sample_rate, float update_rate);
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void Process(Partials& partials);
     void OnUpdateTick();
     void OnNoteOn(int note);

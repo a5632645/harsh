@@ -21,7 +21,7 @@ struct FloatParamRefStore : public WrapSlider::ParamRefStore {
     FloatParameter& param_;
     FloatParamRefStore(FloatParameter& param) : param_(param) {}
 
-    bool IsModulatable() override { return param_.GetModulationType() == ModulationType::kPoly; }
+    bool IsModulatable() override { return param_.GetModulationType() != ModulationType::kDisable; }
 
     // 通过 ParamRefStore 继承
     std::string_view GetId() override { return param_.GetId(); }

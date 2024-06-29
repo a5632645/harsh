@@ -17,7 +17,7 @@ Oscillor::Oscillor(Synth& synth)
     , effec2_(2)
     , effec3_(3)
     , effec4_(4)
-    , oscillor_param_(std::make_unique<OscillorParams>(synth.GetSynthParams())) {
+    , oscillor_param_(std::make_unique<ModulableParams>(synth.GetSynthParams(), std::vector{ ModulationType::kPoly })) {
     freq_.PrepareParams(*oscillor_param_);
     phase_.PrepareParams(*oscillor_param_);
     timber_.PrepareParams(*oscillor_param_);

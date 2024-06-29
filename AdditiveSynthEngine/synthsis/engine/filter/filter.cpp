@@ -98,10 +98,10 @@ const std::vector<float>& Filter::Process(Partials& partials) {
     return filter_output_;
 }
 
-void Filter::PrepareParams(OscillorParams & params) {
+void Filter::PrepareParams(ModulableParams & params) {
     filter_type_arg_ = params.GetParam<IntChoiceParameter>("filter{}.type", idx_);
     for (int i = 0; auto & parg : filter_args_) {
-        parg = params.GetPolyFloatParam("filter{}.arg{}", idx_, i++);
+        parg = params.GetModuFloatParam("filter{}.arg{}", idx_, i++);
     }
     formant_filter_.PrepareParams(params);
 }

@@ -12,7 +12,7 @@ public:
     Envelop(std::string_view id, int idx) : Modulator(id), idx_(idx) {}
 
     void Init(float sample_rate, float update_rate) override;
-    void PrepareParams(OscillorParams& params) override;
+    void PrepareParams(ModulableParams& params) override;
     void OnUpdateTick() override;
     void OnNoteOn(int note) override;
     void OnNoteOff() override;
@@ -32,15 +32,15 @@ private:
     float env_time_{};
     float update_rate_{};
 
-    PolyModuFloatParameter* predelay_time_{};
-    PolyModuFloatParameter* attack_time_{};
-    PolyModuFloatParameter* hold_time_{};
-    PolyModuFloatParameter* peak_level_{};
-    PolyModuFloatParameter* decay_time_{};
-    PolyModuFloatParameter* sustain_level_{};
-    PolyModuFloatParameter* release_time_{};
-    PolyModuFloatParameter* att_exp_{};
-    PolyModuFloatParameter* dec_exp_{};
-    PolyModuFloatParameter* rel_exp_{};
+    ModuFloatParameter* predelay_time_{};
+    ModuFloatParameter* attack_time_{};
+    ModuFloatParameter* hold_time_{};
+    ModuFloatParameter* peak_level_{};
+    ModuFloatParameter* decay_time_{};
+    ModuFloatParameter* sustain_level_{};
+    ModuFloatParameter* release_time_{};
+    ModuFloatParameter* att_exp_{};
+    ModuFloatParameter* dec_exp_{};
+    ModuFloatParameter* rel_exp_{};
 };
 }

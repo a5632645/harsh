@@ -10,7 +10,7 @@ class PhaseProcessor {
 public:
     void Init(float sample_rate, float update_rate);
     void OnUpdateTick();
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void OnNoteOn(int note);
     void OnNoteOff();
     void Process(Partials& partials);
@@ -26,8 +26,8 @@ private:
     std::array<float, kNumPartials> random_phases_{};
     IntChoiceParameter* type_;
     param::PhaseType::ParamEnum process_type_{};
-    PolyModuFloatParameter* arg0_{};
-    PolyModuFloatParameter* arg1_{};
+    ModuFloatParameter* arg0_{};
+    ModuFloatParameter* arg1_{};
     float process_arg0_{};
     float process_arg1_{};
 };

@@ -10,7 +10,7 @@ public:
     FormantFilter(int idx) : idx_(idx) {}
 
     void Init(float sample_rate, float update_rate);
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void Process(Partials& partials, std::vector<float>& out);
     void OnUpdateTick();
     void OnNoteOff() {}
@@ -29,10 +29,10 @@ private:
     float inv_sample_rate_{};
     ConvertVowlInfo vowel_info_{};
 
-    PolyModuFloatParameter* arg_formant_shift_{};
-    PolyModuFloatParameter* arg_singer_{};
-    PolyModuFloatParameter* arg_slope_{};
-    PolyModuFloatParameter* arg_resonance_{};
-    PolyModuFloatParameter* arg_select_{};
+    ModuFloatParameter* arg_formant_shift_{};
+    ModuFloatParameter* arg_singer_{};
+    ModuFloatParameter* arg_slope_{};
+    ModuFloatParameter* arg_resonance_{};
+    ModuFloatParameter* arg_select_{};
 };
 }

@@ -57,7 +57,7 @@ public:
     void ClearModulations();
 private:
     SineBank sine_bank_;
-    std::unique_ptr<OscillorParams> oscillor_param_;
+    std::unique_ptr<ModulableParams> oscillor_param_;
     ModulatorBank modulator_bank_;
     Partials partials_;
 

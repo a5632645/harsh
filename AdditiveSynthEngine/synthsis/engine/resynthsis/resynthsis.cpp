@@ -62,18 +62,18 @@ void Resynthesis::OnUpdateTick() {
     }
 }
 
-void Resynthesis::PrepareParams(OscillorParams & params) {
+void Resynthesis::PrepareParams(ModulableParams & params) {
     pos_offset_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("resynthsis.rand_start_pos_mask");
     speed_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("resynthsis.speed");
 
     is_enable_ = params.GetParam<BoolParameter>("resynthsis.enable");
-    freq_scale_ = params.GetPolyFloatParam("resynthsis.freq_scale");
-    nor_start_pos_ = params.GetPolyFloatParam("resynthsis.start_offset");
-    speed_ = params.GetPolyFloatParam("resynthsis.speed");
-    speedx_ = params.GetPolyFloatParam("resynthsis.speedx");
-    formant_mix_ = params.GetPolyFloatParam("resynthsis.formant_mix");
-    formant_shift_ = params.GetPolyFloatParam("resynthsis.formant_shift");
-    gain_mix_ = params.GetPolyFloatParam("resynthsis.gain_mix");
+    freq_scale_ = params.GetModuFloatParam("resynthsis.freq_scale");
+    nor_start_pos_ = params.GetModuFloatParam("resynthsis.start_offset");
+    speed_ = params.GetModuFloatParam("resynthsis.speed");
+    speedx_ = params.GetModuFloatParam("resynthsis.speedx");
+    formant_mix_ = params.GetModuFloatParam("resynthsis.formant_mix");
+    formant_shift_ = params.GetModuFloatParam("resynthsis.formant_shift");
+    gain_mix_ = params.GetModuFloatParam("resynthsis.gain_mix");
     partial_start_range_second_ = params.GetParam<FloatParameter>("resynthsis.start_range");
 }
 

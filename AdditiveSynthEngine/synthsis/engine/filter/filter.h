@@ -12,7 +12,7 @@ public:
 
     void Init(float sample_rate, float update_rate);
     const std::vector<float>& Process(Partials& partials);
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void OnUpdateTick();
     void OnNoteOn(int note);
     void OnNoteOff();
@@ -20,7 +20,7 @@ private:
     const int idx_;
     std::vector<float> filter_output_;
 
-    std::array<PolyModuFloatParameter*, 8> filter_args_;
+    std::array<ModuFloatParameter*, 8> filter_args_;
     IntChoiceParameter* filter_type_arg_;
     float sample_rate_;
 

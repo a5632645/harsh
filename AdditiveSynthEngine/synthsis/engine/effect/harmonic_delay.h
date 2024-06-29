@@ -60,7 +60,7 @@ public:
         feedback_smear_ = helper::GetAlterParamValue(args.args, param::Delay_FeedbackSmear{});
     }
 
-    void PrepareParams(OscillorParams& params) override {
+    void PrepareParams(ModulableParams& params) override {
         time_map_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("effect.harmonic_delay.time");
         feedback_map_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("effect.harmonic_delay.feedback");
     }

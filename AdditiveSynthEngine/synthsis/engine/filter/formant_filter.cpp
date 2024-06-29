@@ -191,12 +191,12 @@ void FormantFilter::Init(float sample_rate, float update_rate) {
     inv_sample_rate_ = 1.0f / sample_rate;
 }
 
-void FormantFilter::PrepareParams(OscillorParams & params) {
-    arg_formant_shift_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Formant::kArgIdx);
-    arg_resonance_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Resonance::kArgIdx);
-    arg_singer_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Singer::kArgIdx);
-    arg_slope_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Slope::kArgIdx);
-    arg_select_ = params.GetPolyFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Select::kArgIdx);
+void FormantFilter::PrepareParams(ModulableParams & params) {
+    arg_formant_shift_ = params.GetModuFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Formant::kArgIdx);
+    arg_resonance_ = params.GetModuFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Resonance::kArgIdx);
+    arg_singer_ = params.GetModuFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Singer::kArgIdx);
+    arg_slope_ = params.GetModuFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Slope::kArgIdx);
+    arg_select_ = params.GetModuFloatParam("filter{}.arg{}", idx_, param::VowelFilter_Select::kArgIdx);
 }
 
 void FormantFilter::Process(Partials& partials, std::vector<float>& out) {

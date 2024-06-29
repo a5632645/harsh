@@ -7,15 +7,15 @@ void MultiEnvelop::Init(float sample_rate, float update_rate) {
     update_rate_ = update_rate;
 }
 
-void MultiEnvelop::PrepareParam(OscillorParams& p) {
-    predelay_time_ = p.GetPolyFloatParam("vol_env.predelay");
-    attack_time_ = p.GetPolyFloatParam("vol_env.attack");
-    hold_time_ = p.GetPolyFloatParam("vol_env.hold");
-    decay_time_ = p.GetPolyFloatParam("vol_env.decay");
-    peak_level_ = p.GetPolyFloatParam("vol_env.peak");
-    sustain_level_ = p.GetPolyFloatParam("vol_env.sustain");
-    release_time_ = p.GetPolyFloatParam("vol_env.release");
-    high_scale_ = p.GetPolyFloatParam("vol_env.high_scale");
+void MultiEnvelop::PrepareParam(ModulableParams& p) {
+    predelay_time_ = p.GetModuFloatParam("vol_env.predelay");
+    attack_time_ = p.GetModuFloatParam("vol_env.attack");
+    hold_time_ = p.GetModuFloatParam("vol_env.hold");
+    decay_time_ = p.GetModuFloatParam("vol_env.decay");
+    peak_level_ = p.GetModuFloatParam("vol_env.peak");
+    sustain_level_ = p.GetModuFloatParam("vol_env.sustain");
+    release_time_ = p.GetModuFloatParam("vol_env.release");
+    high_scale_ = p.GetModuFloatParam("vol_env.high_scale");
 }
 
 void MultiEnvelop::Process(Partials& frame) {

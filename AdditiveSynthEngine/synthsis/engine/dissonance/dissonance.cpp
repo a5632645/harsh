@@ -219,7 +219,7 @@ static void DoFakeUnison2(Partials& partials, float ratio0, float ratio1) {
 void Dissonance::Init(float sample_rate, float update_rate) {
 }
 
-void Dissonance::PrepareParams(OscillorParams& params) {
+void Dissonance::PrepareParams(ModulableParams& params) {
     auto& cb = params.GetParentSynthParams().GetCurveBank();
     pitch_quantize_map_ = cb.GetQuantizeMapPtr("dissonance.pitch_quantize");
     prism_map_ = cb.GetCurvePtr("dissonance.prism");
@@ -228,7 +228,7 @@ void Dissonance::PrepareParams(OscillorParams& params) {
     diss_type_ = params.GetParam<IntChoiceParameter>("dissonance.type");
 
     for (int i = 0; auto & arg : args_) {
-        arg = params.GetPolyFloatParam("dissonance.arg{}", i++);
+        arg = params.GetModuFloatParam("dissonance.arg{}", i++);
     }
 }
 

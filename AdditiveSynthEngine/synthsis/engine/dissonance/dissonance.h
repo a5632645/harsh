@@ -9,7 +9,7 @@ namespace mana {
 class Dissonance {
 public:
     void Init(float sample_rate, float update_rate);
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void Process(Partials & partials);
     void OnUpdateTick();
     void OnNoteOn(int note);
@@ -21,7 +21,7 @@ private:
 
     BoolParameter* is_enable_param_{};
     IntChoiceParameter* diss_type_{};
-    std::array<PolyModuFloatParameter*, 2>args_{};
+    std::array<ModuFloatParameter*, 2>args_{};
     QuantizeMap* pitch_quantize_map_{};
     CurveV2* prism_map_{};
 

@@ -10,7 +10,7 @@ namespace mana {
 class Unison {
 public:
     void Init(float sample_rate, float update_rate);
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void Process(Partials& partials);
     void OnUpdateTick();
     void OnNoteOn();
@@ -36,8 +36,8 @@ private:
     IntChoiceParameter* unison_type_{};
     IntParameter* arg_num_voice_{};
     int num_voice_{};
-    PolyModuFloatParameter* pitch_{};
-    PolyModuFloatParameter* phase_{};
-    PolyModuFloatParameter* pan_{};
+    ModuFloatParameter* pitch_{};
+    ModuFloatParameter* phase_{};
+    ModuFloatParameter* pan_{};
 };
 }

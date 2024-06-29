@@ -10,7 +10,7 @@ public:
     Modulator(std::string_view id) : id_(id) {}
 
     virtual void Init(float sample_rate, float update_rate) = 0;
-    virtual void PrepareParams(OscillorParams& params) = 0;
+    virtual void PrepareParams(ModulableParams& params) = 0;
     virtual void OnUpdateTick() = 0;
     virtual void OnNoteOn(int note) = 0;
     virtual void OnNoteOff() = 0;

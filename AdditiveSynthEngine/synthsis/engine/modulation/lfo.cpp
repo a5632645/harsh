@@ -24,13 +24,13 @@ void LFO::Init(float sample_rate, float update_rate) {
     inv_update_rate_ = 1.0f / update_rate;
 }
 
-void LFO::PrepareParams(OscillorParams& params) {
+void LFO::PrepareParams(ModulableParams& params) {
     lfo_mode_ = params.GetParam<IntChoiceParameter>(param::LFO_Mode::kIdFormater, idx_);
     lfo_rate_mode_ = params.GetParam<IntChoiceParameter>(param::LFO_TimeType::kIdFormater, idx_);
     wave_type_ = params.GetParam<IntChoiceParameter>(param::LFO_WaveType::kIdFormater, idx_);
     bpm_ = params.GetParam<FloatParameter>("bpm");
-    lfo_rate_ = params.GetPolyFloatParam("lfo{}.rate", idx_);
-    start_phase_ = params.GetPolyFloatParam(param::LFO_Phase::kIdFormater, idx_);
+    lfo_rate_ = params.GetModuFloatParam("lfo{}.rate", idx_);
+    start_phase_ = params.GetModuFloatParam(param::LFO_Phase::kIdFormater, idx_);
     wave_curve_ = params.GetParentSynthParams().GetCurveBank().GetCurvePtr("lfo{}.wave", idx_);
 }
 

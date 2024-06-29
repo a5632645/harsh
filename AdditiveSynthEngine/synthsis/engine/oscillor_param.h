@@ -14,12 +14,12 @@ class Modulator;
 }
 
 namespace mana {
-class OscillorParams {
+class ModulableParams {
 public:
-    OscillorParams(SynthParams& synth_param);
+    ModulableParams(SynthParams& synth_param, std::vector<ModulationType> collect_type);
 
-    OscillorParams(const OscillorParams&) = delete;
-    OscillorParams& operator=(const OscillorParams&) = delete;
+    ModulableParams(const ModulableParams&) = delete;
+    ModulableParams& operator=(const ModulableParams&) = delete;
 
     void UpdateParams();
     void CreateModulation(Modulator* pmodulator, std::shared_ptr<ModulationConfig> pconfig);
@@ -33,19 +33,19 @@ public:
     P* GetParam(std::string_view id) { return parent_synth_param_.GetParamBank().GetParamPtr<P>(id); }
 
     template<class...T>
-    PolyModuFloatParameter* GetPolyFloatParam(std::format_string<T...> format_text, T&&... args) { return oscillor_param_table_.at(std::format(format_text, std::forward<T>(args)...)); }
+    ModuFloatParameter* GetModuFloatParam(std::format_string<T...> format_text, T&&... args) { return oscillor_param_table_.at(std::format(format_text, std::forward<T>(args)...)); }
     SynthParams& GetParentSynthParams() { return parent_synth_param_; }
 
 private:
     struct SingleOscillorParamModulation {
-        PolyModuFloatParameter* target{};
+        ModuFloatParameter* target{};
         Modulator* modulator{};
         std::shared_ptr<ModulationConfig> config{};
     };
 
     SynthParams& parent_synth_param_;
-    std::unordered_map<std::string_view, PolyModuFloatParameter*> oscillor_param_table_;
+    std::unordered_map<std::string_view, ModuFloatParameter*> oscillor_param_table_;
     std::vector<SingleOscillorParamModulation> oscillor_modulations_;
-    std::vector<std::unique_ptr<PolyModuFloatParameter>> poly_modu_params_;
+    std::vector<std::unique_ptr<ModuFloatParameter>> poly_modu_params_;
 };
 }

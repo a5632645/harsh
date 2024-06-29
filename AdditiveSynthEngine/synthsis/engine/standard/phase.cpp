@@ -16,10 +16,10 @@ void PhaseProcessor::OnUpdateTick() {
     process_arg1_ = arg1_->GetValue();
 }
 
-void PhaseProcessor::PrepareParams(OscillorParams & params) {
+void PhaseProcessor::PrepareParams(ModulableParams & params) {
     type_ = params.GetParam<IntChoiceParameter>("phase.type");
-    arg0_ = params.GetPolyFloatParam("phase.arg0");
-    arg1_ = params.GetPolyFloatParam("phase.arg1");
+    arg0_ = params.GetModuFloatParam("phase.arg0");
+    arg1_ = params.GetModuFloatParam("phase.arg1");
 }
 
 void PhaseProcessor::OnNoteOn(int note) {

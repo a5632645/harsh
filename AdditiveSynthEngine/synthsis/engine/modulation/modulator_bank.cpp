@@ -39,7 +39,7 @@ void ModulatorBank::Init(float sample_rate, float update_rate) {
     }
 }
 
-void ModulatorBank::PrepareParams(OscillorParams & params) {
+void ModulatorBank::PrepareParams(ModulableParams & params) {
     for (auto& m : modulators_) {
         m->PrepareParams(params);
     }

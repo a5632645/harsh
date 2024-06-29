@@ -12,7 +12,7 @@ public:
     LFO(std::string_view id, int idx) : Modulator(id), idx_(idx) {}
 
     void Init(float sample_rate, float update_rate) override;
-    void PrepareParams(OscillorParams& params) override;
+    void PrepareParams(ModulableParams& params) override;
     void OnUpdateTick() override;
     void OnNoteOn(int note) override;
     void OnNoteOff() override {}
@@ -21,8 +21,8 @@ private:
     IntChoiceParameter* lfo_rate_mode_{};
     IntChoiceParameter* wave_type_{};
     FloatParameter* bpm_{};
-    PolyModuFloatParameter* lfo_rate_{};
-    PolyModuFloatParameter* start_phase_{};
+    ModuFloatParameter* lfo_rate_{};
+    ModuFloatParameter* start_phase_{};
     CurveV2* wave_curve_{};
 
     const int idx_{};

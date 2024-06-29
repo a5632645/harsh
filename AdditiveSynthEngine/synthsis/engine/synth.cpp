@@ -12,16 +12,21 @@ namespace mana {
 Synth::Synth(std::shared_ptr<ParamCreator> creator, size_t num_osc)
     : synth_params_(creator)
     , num_oscillor_(num_osc) {
+    mono_modu_params_ = std::make_unique<ModulableParams>(synth_params_,
+                                                          std::vector{ ModulationType::kModulable, ModulationType::kPoly });
+    mono_modulator_bank_.PrepareParams(*mono_modu_params_);
+
     m_oscillators.reserve(num_oscillor_);
     for (int i = 0; i < num_oscillor_; ++i) {
         m_oscillators.emplace_back(*this);
     }
 
-    output_gain_ = synth_params_.GetParamBank().GetParamPtr("output_gain");
+    output_gain_ = mono_modu_params_->GetModuFloatParam("output_gain");
     synth_params_.AddModulationListener(this);
 }
 
 void Synth::NoteOn(int note, float velocity) {
+    mono_modulator_bank_.OnNoteOn(note);
     // rr one time
     for (size_t i = 0; i < num_oscillor_; ++i) {
         if (!m_oscillators[m_rrPosition].IsPlaying()) {
@@ -109,12 +114,15 @@ void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {
     update_rate_ = sample_rate / static_cast<float>(update_skip_);
 
     audio_buffer_.resize(buffer_size);
+    mono_modulator_bank_.Init(sample_rate, update_rate_);
     for (Oscillor& o : m_oscillators) {
         o.Init(buffer_size, sample_rate, update_rate_, update_skip_);
     }
 }
 
 void Synth::update_state(int step) {
+    mono_modu_params_->UpdateParams();
+    mono_modulator_bank_.OnUpdateTick();
     for (Oscillor& o : m_oscillators) {
         o.update_state(step);
     }
@@ -158,6 +166,7 @@ std::pair<bool, ModulationConfig*> Synth::CreateModulation(std::string_view modu
     auto new_modulation_cfg = std::make_shared<ModulationConfig>();
     new_modulation_cfg->modulator_id = modulator;
     new_modulation_cfg->param_id = param;
+    new_modulation_cfg->enable = true;
     synth_params_.AddModulation(new_modulation_cfg);
     return { true, new_modulation_cfg.get() };
 }
@@ -626,22 +635,44 @@ nlohmann::json Synth::SaveState() const {
 
 void Synth::LoadState(const nlohmann::json& json) {
     synth_params_.LoadState(json);
-    // todo: add modulation to oscillor params
 }
 
 void Synth::OnModulationAdded(std::shared_ptr<ModulationConfig> config) {
+    auto* p = synth_params_.GetParamBank().GetParamPtr(config->param_id);
+    assert(p != nullptr);
+    assert(p->GetModulationType() != ModulationType::kDisable);
+
+    // mono
+    mono_modu_params_->CreateModulation(mono_modulator_bank_.GetModulatorPtr(config->modulator_id), config);
+    if (p->GetModulationType() == ModulationType::kModulable) {
+        return;
+    }
+
+    // poly
     for (auto& osc : m_oscillators) {
         osc.CreateModulation(config);
     }
 }
 
 void Synth::OnModulationRemoved(std::string_view modulator_id, std::string_view param_id) {
+    auto* p = synth_params_.GetParamBank().GetParamPtr(param_id);
+    assert(p != nullptr);
+    assert(p->GetModulationType() != ModulationType::kDisable);
+
+    // mono
+    mono_modu_params_->RemoveModulation(modulator_id, param_id);
+    if (p->GetModulationType() == ModulationType::kModulable) {
+        return;
+    }
+
+    // poly
     for (auto& osc : m_oscillators) {
         osc.RemoveModulation(modulator_id, param_id);
     }
 }
 
 void Synth::OnModulationCleared() {
+    mono_modu_params_->ClearModulations();
     for (auto& osc : m_oscillators) {
         osc.ClearModulations();
     }

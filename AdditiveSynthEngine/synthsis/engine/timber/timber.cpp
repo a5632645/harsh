@@ -44,11 +44,11 @@ void Timber::Process(Partials& partials) {
     }
 }
 
-void Timber::PrepareParams(OscillorParams & params) {
-    arg_osc2_timber_shift_ = params.GetPolyFloatParam("timber.osc2_shift");
-    arg_osc2_beating_ = params.GetPolyFloatParam("timber.osc2_beating");
-    arg_osc1_gain_ = params.GetPolyFloatParam("timber.osc1_gain");
-    arg_osc2_gain_ = params.GetPolyFloatParam("timber.osc2_gain");
+void Timber::PrepareParams(ModulableParams & params) {
+    arg_osc2_timber_shift_ = params.GetModuFloatParam("timber.osc2_shift");
+    arg_osc2_beating_ = params.GetModuFloatParam("timber.osc2_beating");
+    arg_osc1_gain_ = params.GetModuFloatParam("timber.osc1_gain");
+    arg_osc2_gain_ = params.GetModuFloatParam("timber.osc2_gain");
     osc1_->PrepareParams(params);
     osc2_->PrepareParams(params);
 }

@@ -8,17 +8,17 @@ void Envelop::Init(float sample_rate, float update_rate) {
     update_rate_ = update_rate;
 }
 
-void Envelop::PrepareParams(OscillorParams& p) {
-    predelay_time_ = p.GetPolyFloatParam("envelop{}.predelay", idx_);
-    attack_time_ = p.GetPolyFloatParam("envelop{}.attack", idx_);
-    hold_time_ = p.GetPolyFloatParam("envelop{}.hold", idx_);
-    decay_time_ = p.GetPolyFloatParam("envelop{}.decay", idx_);
-    peak_level_ = p.GetPolyFloatParam("envelop{}.peak", idx_);
-    sustain_level_ = p.GetPolyFloatParam("envelop{}.sustain", idx_);
-    release_time_ = p.GetPolyFloatParam("envelop{}.release", idx_);
-    att_exp_ = p.GetPolyFloatParam("envelop{}.att_exp", idx_);
-    dec_exp_ = p.GetPolyFloatParam("envelop{}.dec_exp", idx_);
-    rel_exp_ = p.GetPolyFloatParam("envelop{}.rel_exp", idx_);
+void Envelop::PrepareParams(ModulableParams& p) {
+    predelay_time_ = p.GetModuFloatParam("envelop{}.predelay", idx_);
+    attack_time_ = p.GetModuFloatParam("envelop{}.attack", idx_);
+    hold_time_ = p.GetModuFloatParam("envelop{}.hold", idx_);
+    decay_time_ = p.GetModuFloatParam("envelop{}.decay", idx_);
+    peak_level_ = p.GetModuFloatParam("envelop{}.peak", idx_);
+    sustain_level_ = p.GetModuFloatParam("envelop{}.sustain", idx_);
+    release_time_ = p.GetModuFloatParam("envelop{}.release", idx_);
+    att_exp_ = p.GetModuFloatParam("envelop{}.att_exp", idx_);
+    dec_exp_ = p.GetModuFloatParam("envelop{}.dec_exp", idx_);
+    rel_exp_ = p.GetModuFloatParam("envelop{}.rel_exp", idx_);
 }
 
 void Envelop::OnUpdateTick() {
@@ -144,7 +144,7 @@ void Envelop::OnUpdateTick() {
         auto x = utli::warp::ExpWarp(env_time_, dec_exp_->GetValue());
         SetOutput(std::lerp(peak, sustain, x));
     }
-        break;
+    break;
     case mana::Envelop::EnvState::kSustain:
         SetOutput(sustain);
         break;

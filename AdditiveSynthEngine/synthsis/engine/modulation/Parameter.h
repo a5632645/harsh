@@ -11,7 +11,7 @@
 namespace mana {
 enum class ModulationType {
     kDisable,
-    kMono,
+    kModulable,
     kPoly
 };
 
@@ -43,7 +43,7 @@ public:
     ModulationType GetModulationType() const { return modulation_type_; }
 
     template<typename T>
-    requires std::derived_from<T, FloatParameter>
+        requires std::derived_from<T, FloatParameter>
     T& As() { return static_cast<T&>(*this); }
 protected:
     ModulationType modulation_type_;
@@ -74,7 +74,7 @@ public:
     virtual std::string FormantValue(int v) = 0;
 
     template<typename T>
-    requires std::derived_from<T, IntParameter>
+        requires std::derived_from<T, IntParameter>
     T& As() { return static_cast<T&>(*this); }
 };
 
@@ -103,7 +103,7 @@ public:
     virtual std::string FormantValue(int v) = 0;
 
     template<typename T>
-    requires std::derived_from<T, IntChoiceParameter>
+        requires std::derived_from<T, IntChoiceParameter>
     T& As() { return static_cast<T&>(*this); }
 };
 
@@ -126,7 +126,7 @@ public:
     virtual std::string FormantValue(bool v) = 0;
 
     template<typename T>
-    requires std::derived_from<T, BoolParameter>
+        requires std::derived_from<T, BoolParameter>
     T& As() { return static_cast<T&>(*this); }
 };
 

@@ -5,8 +5,8 @@
 #include "modulation/Parameter.h"
 
 namespace mana {
-struct PolyModuFloatParameter {
-    PolyModuFloatParameter(FloatParameter* ref) : synth_param_ref(ref) { assert(ref != nullptr); }
+struct ModuFloatParameter {
+    ModuFloatParameter(FloatParameter* ref) : synth_param_ref(ref) { assert(ref != nullptr); }
 
     // synth param ref
     FloatParameter* synth_param_ref;

@@ -91,7 +91,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         .vmax = param::PitchBend::kMax,
         .vdefault = param::PitchBend::kDefault }));
     param_bank_.AddParameter(creator->CreateFloatParameter({
-        .type = kDisable,
+        .type = kModulable,
         .id = "output_gain",
         .name = "output_gain",
         .vmin = param::OutputGain::kMin,

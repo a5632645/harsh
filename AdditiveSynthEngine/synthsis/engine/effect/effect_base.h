@@ -6,7 +6,7 @@
 
 namespace mana {
 struct EffectParams {
-    std::array<PolyModuFloatParameter*, 6> args;
+    std::array<ModuFloatParameter*, 6> args;
 };
 }
 
@@ -26,6 +26,6 @@ public:
     virtual void OnUpdateTick(EffectParams& args) = 0;
     virtual void OnNoteOn(int note) = 0;
     virtual void OnNoteOff() = 0;
-    virtual void PrepareParams(OscillorParams& params) {}
+    virtual void PrepareParams(ModulableParams& params) {}
 };
 }

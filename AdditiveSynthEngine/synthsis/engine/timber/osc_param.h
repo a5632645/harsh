@@ -5,6 +5,6 @@
 
 namespace mana {
 struct OscParam {
-    std::array<PolyModuFloatParameter*, 4> args;
+    std::array<ModuFloatParameter*, 4> args;
 };
 }

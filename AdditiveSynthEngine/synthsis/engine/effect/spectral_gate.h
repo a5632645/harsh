@@ -26,7 +26,7 @@ public:
     void OnNoteOn(int note) override {}
     void OnNoteOff() override {}
 private:
-    PolyModuFloatParameter* arg_gate_level_{};
+    ModuFloatParameter* arg_gate_level_{};
     float gate_level_{};
 };
 }

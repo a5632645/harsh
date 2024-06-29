@@ -6,6 +6,6 @@ class Synth;
 class CurveManager;
 struct ResynthsisFrames;
 class Oscillor;
-class OscillorParams;
+class ModulableParams;
 class Filter;
 }

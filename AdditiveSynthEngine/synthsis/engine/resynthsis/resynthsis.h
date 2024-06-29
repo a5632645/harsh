@@ -17,7 +17,7 @@ public:
     void Init(float sample_rate, float update_rate);
     void Process(Partials& partials);
     void OnUpdateTick();
-    void PrepareParams(OscillorParams& params);
+    void PrepareParams(ModulableParams& params);
     void OnNoteOn(int note);
     void OnNoteOff() {}
 
@@ -36,14 +36,14 @@ private:
     std::array<float, kNumPartials> partials_runnig_frame_idxs_{};
     std::array<float, kNumPartials> partials_frame_idxs_{};
 
-    PolyModuFloatParameter* freq_scale_{};
-    PolyModuFloatParameter* nor_start_pos_{};
+    ModuFloatParameter* freq_scale_{};
+    ModuFloatParameter* nor_start_pos_{};
     FloatParameter* partial_start_range_second_{};
-    PolyModuFloatParameter* speed_{};
-    PolyModuFloatParameter* speedx_{};
-    PolyModuFloatParameter* formant_mix_{};
-    PolyModuFloatParameter* formant_shift_{};
-    PolyModuFloatParameter* gain_mix_{};
+    ModuFloatParameter* speed_{};
+    ModuFloatParameter* speedx_{};
+    ModuFloatParameter* formant_mix_{};
+    ModuFloatParameter* formant_shift_{};
+    ModuFloatParameter* gain_mix_{};
 
     BoolParameter* is_enable_{};
     CurveV2* speed_curve_{};
