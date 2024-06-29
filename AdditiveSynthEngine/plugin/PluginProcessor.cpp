@@ -180,6 +180,14 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
+    if (auto* h = getPlayHead(); h != nullptr) {
+        if (auto hh = h->getPosition(); hh.hasValue()) {
+            if (auto b = hh->getBpm(); b.hasValue()) {
+                bpm_->SetValue(static_cast<float>(*b));
+            }
+        }
+    }
+
     std::scoped_lock audio_lock{ synth_->GetSynthLock() };
 
     auto num_frame = buffer.getNumSamples();

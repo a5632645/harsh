@@ -2,6 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "engine/forward_decalre.h"
+#include <engine/modulation/Parameter.h>
 
 //==============================================================================
 class AudioPluginAudioProcessor final : public juce::AudioProcessor
@@ -47,6 +48,7 @@ public:
     std::unique_ptr<juce::AudioProcessorValueTreeState> apvts_;
 
 private:
+    mana::FloatParameter* bpm_{};
     int update_pos_{};
     int left_num_render_{};
     float inv_buffer_length_{};
