@@ -48,7 +48,7 @@ void LFO::OnUpdateTick() {
         break;
     case tt::kBeats:
     {
-        auto beat_len = 60.0f * 4.0f / bpm_->GetValue();
+        auto beat_rate = bpm_->GetValue() / (60.0f * 4.0f);
         constexpr std::array kBeatRateTable{
             32.0f,
             16.0f,
@@ -63,8 +63,8 @@ void LFO::OnUpdateTick() {
             1.0f / 32.0f
         };
         static_assert(kBeatRateTable.size() == param::LFO_BeatRate::kNames.size());
-        auto beat_rate = kBeatRateTable[param::LFO_BeatRate::GetChoiceIndex(raw_rate)];
-        rate = beat_len * beat_rate;
+        auto acc_rate = 1.0f / kBeatRateTable[param::LFO_BeatRate::GetChoiceIndex(raw_rate)];
+        rate = acc_rate * beat_rate;
     }
     break;
     default:
