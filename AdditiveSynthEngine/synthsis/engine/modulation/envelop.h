@@ -17,23 +17,30 @@ public:
     void OnNoteOn(int note) override;
     void OnNoteOff() override;
 private:
-    enum class State {
-        kInit,
+    enum class EnvState {
+        kInit = 0,
+        kPredelay,
         kAttack,
+        kHold,
         kDecay,
         kSustain,
         kRelease
     };
 
     const int idx_;
+    EnvState env_state_{ EnvState::kInit };
+    float env_time_{};
+    float update_rate_{};
 
-    PolyModuFloatParameter* arg_attack_ms_{};
-    PolyModuFloatParameter* arg_decay_ms_{};
-    PolyModuFloatParameter* arg_sustain_level_{};
-    PolyModuFloatParameter* arg_release_ms_{};
-
-    State env_state_{ State::kInit };
-    float state_offset_ms_{};
-    float update_time_interval_{};
+    PolyModuFloatParameter* predelay_time_{};
+    PolyModuFloatParameter* attack_time_{};
+    PolyModuFloatParameter* hold_time_{};
+    PolyModuFloatParameter* peak_level_{};
+    PolyModuFloatParameter* decay_time_{};
+    PolyModuFloatParameter* sustain_level_{};
+    PolyModuFloatParameter* release_time_{};
+    PolyModuFloatParameter* att_exp_{};
+    PolyModuFloatParameter* dec_exp_{};
+    PolyModuFloatParameter* rel_exp_{};
 };
 }

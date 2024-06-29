@@ -1,92 +1,196 @@
 #include "envelop.h"
 
 #include "param/envelop_param.h"
+#include "utli/warp.h"
 
 namespace mana {
 void Envelop::Init(float sample_rate, float update_rate) {
-    update_time_interval_ = 1000.0f / update_rate;
+    update_rate_ = update_rate;
 }
 
-void Envelop::PrepareParams(OscillorParams& params) {
-    arg_attack_ms_ = params.GetPolyFloatParam("envelop{}.attack", idx_);
-    arg_decay_ms_ = params.GetPolyFloatParam("envelop{}.decay", idx_);
-    arg_sustain_level_ = params.GetPolyFloatParam("envelop{}.sustain", idx_);
-    arg_release_ms_ = params.GetPolyFloatParam("envelop{}.release", idx_);
+void Envelop::PrepareParams(OscillorParams& p) {
+    predelay_time_ = p.GetPolyFloatParam("envelop{}.predelay", idx_);
+    attack_time_ = p.GetPolyFloatParam("envelop{}.attack", idx_);
+    hold_time_ = p.GetPolyFloatParam("envelop{}.hold", idx_);
+    decay_time_ = p.GetPolyFloatParam("envelop{}.decay", idx_);
+    peak_level_ = p.GetPolyFloatParam("envelop{}.peak", idx_);
+    sustain_level_ = p.GetPolyFloatParam("envelop{}.sustain", idx_);
+    release_time_ = p.GetPolyFloatParam("envelop{}.release", idx_);
+    att_exp_ = p.GetPolyFloatParam("envelop{}.att_exp", idx_);
+    dec_exp_ = p.GetPolyFloatParam("envelop{}.dec_exp", idx_);
+    rel_exp_ = p.GetPolyFloatParam("envelop{}.rel_exp", idx_);
 }
 
 void Envelop::OnUpdateTick() {
-    auto att_t = arg_attack_ms_->GetValue();
-    auto dec_t = arg_decay_ms_->GetValue();
-    auto sus_v = arg_sustain_level_->GetValue();
-    auto rel_t = arg_release_ms_->GetValue();
+    auto predelay = predelay_time_->GetValue();
+    auto attack = attack_time_->GetValue();
+    auto hold = hold_time_->GetValue();
+    auto decay = decay_time_->GetValue();
+    auto peak = peak_level_->GetValue();
+    auto sustain = sustain_level_->GetValue();
+    auto release = release_time_->GetValue();
 
-    if (env_state_ == State::kInit) {
-        output_value_ = 0.0f;
-        return;
+    switch (env_state_) {
+    case EnvState::kInit:
+    case EnvState::kSustain:
+        break;
+    case EnvState::kPredelay:
+    {
+        if (predelay != 0.0f) {
+            auto rate = 1.0f / (predelay * update_rate_);
+            env_time_ += rate;
+            if (env_time_ <= 1.0f) {
+                break;
+            }
+        }
+        if (attack != 0.0f) {
+            env_state_ = EnvState::kAttack;
+            env_time_ = 0.0f;
+            break;
+        }
+        if (hold != 0.0f) {
+            env_state_ = EnvState::kHold;
+            env_time_ = 0.0f;
+            break;
+        }
+        if (decay != 0.0f) {
+            env_state_ = EnvState::kDecay;
+            env_time_ = 0.0f;
+            break;
+        }
+        env_state_ = EnvState::kSustain;
+    }
+    break;
+    case EnvState::kAttack:
+    {
+        if (attack != 0.0f) {
+            auto rate = 1.0f / (attack * update_rate_);
+            env_time_ += rate;
+            if (env_time_ <= 1.0f) {
+                break;
+            }
+        }
+        if (hold != 0.0f) {
+            env_state_ = EnvState::kHold;
+            env_time_ = 0.0f;
+            break;
+        }
+        if (decay != 0.0f) {
+            env_state_ = EnvState::kDecay;
+            env_time_ = 0.0f;
+            break;
+        }
+        env_state_ = EnvState::kSustain;
+    }
+    break;
+    case EnvState::kHold:
+    {
+        if (hold != 0.0f) {
+            auto rate = 1.0f / (hold * update_rate_);
+            env_time_ += rate;
+            if (env_time_ <= 1.0f) {
+                break;
+            }
+        }
+        if (decay != 0.0f) {
+            env_state_ = EnvState::kDecay;
+            env_time_ = 0.0f;
+            break;
+        }
+        env_state_ = EnvState::kSustain;
+    }
+    break;
+    case EnvState::kDecay:
+    {
+        if (decay != 0.0f) {
+            auto rate = 1.0f / (decay * update_rate_);
+            env_time_ += rate;
+            if (env_time_ <= 1.0f) {
+                break;
+            }
+        }
+        env_state_ = EnvState::kSustain;
+    }
+    break;
+    case EnvState::kRelease:
+    {
+        if (release != 0.0f) {
+            auto rate = 1.0f / (release * update_rate_);
+            env_time_ += rate;
+            if (env_time_ <= 1.0f) {
+                break;
+            }
+        }
+        env_state_ = EnvState::kInit;
+    }
+    break;
+    default:
+        break;
     }
 
-    if (env_state_ == State::kAttack) {
-        if (att_t == 0.0f || state_offset_ms_ >= att_t) {
-            env_state_ = State::kDecay;
-            state_offset_ms_ = 0.0f;
-        }
-        else {
-            output_value_ = state_offset_ms_ / att_t;
-            state_offset_ms_ += update_time_interval_;
-            return;
-        }
+    switch (env_state_) {
+    case mana::Envelop::EnvState::kInit:
+    case mana::Envelop::EnvState::kPredelay:
+        SetOutput(0.0f);
+        break;
+    case mana::Envelop::EnvState::kAttack:
+        SetOutput(peak * utli::warp::ExpWarp(env_time_, att_exp_->GetValue()));;
+        break;
+    case mana::Envelop::EnvState::kHold:
+        SetOutput(peak);
+        break;
+    case mana::Envelop::EnvState::kDecay:
+    {
+        auto x = utli::warp::ExpWarp(env_time_, dec_exp_->GetValue());
+        SetOutput(std::lerp(peak, sustain, x));
     }
-
-    if (env_state_ == State::kDecay) {
-        if (dec_t == 0.0f || state_offset_ms_ >= dec_t) {
-            env_state_ = State::kSustain;
-            state_offset_ms_ = 0.0f;
-        }
-        else {
-            output_value_ = std::lerp(1.0f, sus_v, state_offset_ms_ / dec_t);
-            state_offset_ms_ += update_time_interval_;
-            return;
-        }
-    }
-
-    if (env_state_ == State::kSustain) {
-        output_value_ = sus_v;
-        return;
-    }
-
-    if (env_state_ == State::kRelease) {
-        if (rel_t == 0.0f || state_offset_ms_ >= rel_t) {
-            output_value_ = 0.0f;
-            state_offset_ms_ = 0.0f;
-            env_state_ = State::kInit;
-        }
-        else {
-            output_value_ = sus_v * (1.0f - state_offset_ms_ / rel_t);
-            state_offset_ms_ += update_time_interval_;
-        }
+        break;
+    case mana::Envelop::EnvState::kSustain:
+        SetOutput(sustain);
+        break;
+    case mana::Envelop::EnvState::kRelease:
+        SetOutput((1.0f - utli::warp::ExpWarp(env_time_, rel_exp_->GetValue())) * sustain);
+        break;
+    default:
+        assert(false);
+        break;
     }
 }
 
 void Envelop::OnNoteOn(int note) {
-    state_offset_ms_ = 0.0f;
+    auto predelay = predelay_time_->GetValue();
+    auto attack = attack_time_->GetValue();
+    auto hold = hold_time_->GetValue();
+    auto decay = decay_time_->GetValue();
 
-    env_state_ = State::kAttack;
-    if (arg_attack_ms_->Get01Value() != 0.0f) {
+    env_time_ = 0.0f;
+    if (predelay != 0.0f) {
+        env_state_ = EnvState::kPredelay;
         return;
     }
-
-    env_state_ = State::kDecay;
-    if (arg_decay_ms_->Get01Value() != 0.0f) {
+    if (attack != 0.0f) {
+        env_state_ = EnvState::kAttack;
         return;
     }
-
-    env_state_ = State::kSustain;
+    if (hold != 0.0f) {
+        env_state_ = EnvState::kHold;
+        return;
+    }
+    if (decay != 0.0f) {
+        env_state_ = EnvState::kDecay;
+        return;
+    }
+    env_state_ = EnvState::kSustain;
 }
 
 void Envelop::OnNoteOff() {
-    if (env_state_ != State::kInit) {
-        env_state_ = State::kRelease;
+    auto release = release_time_->GetValue();
+
+    if (release != 0.0f) {
+        env_state_ = EnvState::kRelease;
+        env_time_ = 0.0f;
+        return;
     }
-    state_offset_ms_ = 0.0f;
+    env_state_ = EnvState::kInit;
 }
 }

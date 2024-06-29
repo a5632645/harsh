@@ -413,11 +413,25 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     for (int env_idx = 0; env_idx < 3; ++env_idx) {
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
+            .id = std::format("envelop{}.predelay", env_idx),
+            .name = std::format("envelop{}.predelay", env_idx),
+            .vmin = param::Env_Predelay::kMin,
+            .vmax = param::Env_Predelay::kMax,
+            .vdefault = param::Env_Predelay::kDefault }));
+        param_bank_.AddParameter(creator->CreateFloatParameter({
+            .type = kPoly,
             .id = std::format("envelop{}.attack", env_idx),
             .name = std::format("envelop{}.attack", env_idx),
             .vmin = param::Env_Attack::kMin,
             .vmax = param::Env_Attack::kMax,
             .vdefault = param::Env_Attack::kDefault }));
+        param_bank_.AddParameter(creator->CreateFloatParameter({
+            .type = kPoly,
+            .id = std::format("envelop{}.hold", env_idx),
+            .name = std::format("envelop{}.hold", env_idx),
+            .vmin = param::Env_Hold::kMin,
+            .vmax = param::Env_Hold::kMax,
+            .vdefault = param::Env_Hold::kDefault }));
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
             .id = std::format("envelop{}.decay", env_idx),
@@ -434,11 +448,39 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
             .vdefault = param::Env_Sustain::kDefault }));
         param_bank_.AddParameter(creator->CreateFloatParameter({
             .type = kPoly,
+            .id = std::format("envelop{}.peak", env_idx),
+            .name = std::format("envelop{}.peak", env_idx),
+            .vmin = param::Env_Peak::kMin,
+            .vmax = param::Env_Peak::kMax,
+            .vdefault = param::Env_Peak::kDefault }));
+        param_bank_.AddParameter(creator->CreateFloatParameter({
+            .type = kPoly,
             .id = std::format("envelop{}.release", env_idx),
             .name = std::format("envelop{}.release", env_idx),
             .vmin = param::Env_Release::kMin,
             .vmax = param::Env_Release::kMax,
             .vdefault = param::Env_Release::kDefault }));
+        param_bank_.AddParameter(creator->CreateFloatParameter({
+            .type = kPoly,
+            .id = std::format("envelop{}.att_exp", env_idx),
+            .name = std::format("envelop{}.att_exp", env_idx),
+            .vmin = -8.0f,
+            .vmax = 8.0f,
+            .vdefault = 0.0f }));
+        param_bank_.AddParameter(creator->CreateFloatParameter({
+            .type = kPoly,
+            .id = std::format("envelop{}.dec_exp", env_idx),
+            .name = std::format("envelop{}.dec_exp", env_idx),
+            .vmin = -8.0f,
+            .vmax = 8.0f,
+            .vdefault = 0.0f }));
+        param_bank_.AddParameter(creator->CreateFloatParameter({
+            .type = kPoly,
+            .id = std::format("envelop{}.rel_exp", env_idx),
+            .name = std::format("envelop{}.rel_exp", env_idx),
+            .vmin = -8.0f,
+            .vmax = 8.0f,
+            .vdefault = 0.0f }));
     }
 
     // ================================================================================
