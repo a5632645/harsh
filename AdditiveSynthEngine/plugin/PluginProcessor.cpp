@@ -24,6 +24,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
                                                                   nullptr,
                                                                   "parameter",
                                                                   juce::AudioProcessorValueTreeState::ParameterLayout{ juce_params.begin(), juce_params.end() });
+    bpm_ = synth_->GetSynthParams().GetParamBank().GetParamPtr("bpm");
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
