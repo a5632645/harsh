@@ -4,7 +4,6 @@
 
 #include <random>
 #include "engine/modulation/curve_v2.h"
-#include "param/lfo_param.h"
 #include "engine/oscillor_param.h"
 
 namespace mana {
@@ -18,20 +17,16 @@ public:
     void OnNoteOn(int note) override;
     void OnNoteOff() override {}
 private:
-    PolyModuFloatParameter* arg_start_phase_{};
-    PolyModuFloatParameter* arg_lfo_rate_{};
-    BoolParameter* restart_{};
-    PolyModuFloatParameter* arg_output_level_{};
-    IntChoiceParameter* arg_wave_type_{};
+    IntChoiceParameter* lfo_mode_{};
+    IntChoiceParameter* lfo_rate_mode_{};
+    IntChoiceParameter* wave_type_{};
+    FloatParameter* bpm_{};
+    PolyModuFloatParameter* lfo_rate_{};
+    PolyModuFloatParameter* start_phase_{};
+    CurveV2* wave_curve_{};
 
     const int idx_{};
     float inv_update_rate_{};
     float lfo_phase_{};
-    float last_random_value_{};
-    float start_phase_{};
-    param::LFO_WaveType::ParamEnum wave_type_{};
-    CurveV2* wave_curve_{};
-    std::random_device random_;
-    std::uniform_real_distribution<float> urd_;
 };
 }

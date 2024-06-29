@@ -77,6 +77,13 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     // pitch and output
     // ================================================================================
     param_bank_.AddParameter(creator->CreateFloatParameter({
+        .type = kDisable,
+        .id = "bpm",
+        .name = "bpm",
+        .vmin = 0.0f,
+        .vmax = 100000.0f,
+        .vdefault = 120.0f }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
         .type = kPoly,
         .id = "pitch_bend",
         .name = "pitch_bend",
@@ -374,37 +381,44 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     // lfo
     // ================================================================================
     for (int lfo_idx = 0; lfo_idx < 5; ++lfo_idx) {
-        param_bank_.AddParameter(creator->CreateBoolParameter({
-            .id = std::format("lfo{}.restart", lfo_idx),
-            .name = std::format("lfo{}.restart", lfo_idx),
-            .vdefault = false }));
-        param_bank_.AddParameter(creator->CreateFloatParameter({
-            .type = kPoly,
-            .id = std::format("lfo{}.rate", lfo_idx),
-            .name = std::format("lfo{}.rate", lfo_idx),
-            .vmin = param::LFO_Rate::kMin,
-            .vmax = param::LFO_Rate::kMax,
-            .vdefault = param::LFO_Rate::kDefault,
-            .vblend = 0.3f }));
-        param_bank_.AddParameter(creator->CreateFloatParameter({
-            .type = kPoly,
-            .id = std::format("lfo{}.start_phase", lfo_idx),
-            .name = std::format("lfo{}.start_phase", lfo_idx),
-            .vmin = param::LFO_Phase::kMin,
-            .vmax = param::LFO_Phase::kMax,
-            .vdefault = param::LFO_Phase::kDefault }));
-        param_bank_.AddParameter(creator->CreateFloatParameter({
-            .type = kPoly,
-            .id = std::format("lfo{}.level", lfo_idx),
-            .name = std::format("lfo{}.level", lfo_idx),
-            .vmin = param::LFO_Level::kMin,
-            .vmax = param::LFO_Level::kMax,
-            .vdefault = param::LFO_Level::kDefault }));
-        param_bank_.AddParameter(creator->CreateIntChoiceParameter({
-            .id = std::format("lfo{}.wave_type", lfo_idx),
-            .name = std::format("lfo{}.wave_type", lfo_idx),
-            .choices = {param::LFO_WaveType::kNames.begin(), param::LFO_WaveType::kNames.end()},
-            .vdefault = 0 }));
+        param_bank_.AddParameter(
+            creator->CreateIntChoiceParameter(
+                {
+                    .id = std::format(param::LFO_Mode::kIdFormater, lfo_idx),
+                    .name = std::string{param::LFO_Mode::kName},
+                    .choices = {param::LFO_Mode::kNames.begin(), param::LFO_Mode::kNames.end()},
+                    .vdefault = 0
+                }),
+            creator->CreateIntChoiceParameter(
+                {
+                    .id = std::format(param::LFO_TimeType::kIdFormater, lfo_idx),
+                    .name = std::string{param::LFO_TimeType::kName},
+                    .choices = {param::LFO_TimeType::kNames.begin(), param::LFO_TimeType::kNames.end()},
+                    .vdefault = 0
+                }),
+            creator->CreateIntChoiceParameter({
+                .id = std::format(param::LFO_WaveType::kIdFormater, lfo_idx),
+                .name = std::string{param::LFO_WaveType::kName},
+                .choices = {param::LFO_WaveType::kNames.begin(), param::LFO_WaveType::kNames.end()},
+                .vdefault = 0
+                                              }),
+            creator->CreateFloatParameter({
+                .type = kPoly,
+                .id = std::format(param::LFO_Phase::kIdFormater, lfo_idx),
+                .name = std::string{param::LFO_Phase::kName},
+                .vmin = param::LFO_Phase::kMin,
+                .vmax = param::LFO_Phase::kMax,
+                .vdefault = param::LFO_Phase::kDefault
+                                          }),
+            creator->CreateFloatParameter({
+                .type = kPoly,
+                .id = std::format("lfo{}.rate", lfo_idx),
+                .name = "rate",
+                .vmin = 0.0f,
+                .vmax = 1.0f,
+                .vdefault = 0.0f
+                                          })
+        );
     }
 
     // ================================================================================
