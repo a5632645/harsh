@@ -90,7 +90,7 @@ void Resynthesis::PreGetFreqDiffsInRatio(Partials& partials) {
 }
 
 std::array<float, kNumPartials> Resynthesis::GetFormantGains(Partials& partials) const {
-    auto formant_ratio = std::exp2(-formant_shift_->GetValue() / 12.0f) * 0.5f;
+    auto formant_ratio = std::exp2(-formant_shift_->GetValue() / 12.0f);
     std::array<float, kNumPartials> output{};
 
     const auto& resynthsis_datas = synth_.GetResynthsisFrames();

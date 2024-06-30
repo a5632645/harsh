@@ -88,7 +88,7 @@ void SineBank::LoadPartials(Partials& partials) {
     for (size_t i = 0; i < kNumPartials; ++i) {
         auto freq = partials.freqs[i];
         const auto normalized_frequency = freq * inv_sample_rate_;
-        const float radix_frequency = normalized_frequency * std::numbers::pi_v<float>;
+        const float radix_frequency = normalized_frequency * std::numbers::pi_v<float> *2.0f;
         freq_table_[i] = std::polar(1.0f, radix_frequency);
 
         if (freq < 0.0f || freq > Partials::kMaxFreq) {
@@ -135,7 +135,7 @@ float SineBank::SrTick() {
     #else
     for (size_t i = 0; i < processed_partials_; ++i) {
         phase_table_[i] *= freq_table_[i];
-}
+    }
 
     float output{};
     auto fir_coef0 = fir_curr_lut_[sr_pos_];
