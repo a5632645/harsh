@@ -18,7 +18,6 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
     update_skip_ = update_skip;
 
     constexpr auto pi = std::numbers::pi_v<float>;
-    //constexpr auto hamming_main_lobe_width_bin = 2.736f;
     constexpr auto hamming_main_lobe_width_bin = 3.0f;
     auto polyphase_fir_length = 2;
     auto fir_order = polyphase_fir_length * update_skip;
@@ -26,7 +25,7 @@ void mana::SineBank::Init(float sample_rate, float update_rate, int update_skip)
     auto passband_freqlen = hamming_main_lobe_width_bin / fir_length;
     auto fir_center = fir_order * 0.5f;
     std::vector<float> fir_org_lut(fir_length);
-    auto fir_cut_f = pi * (update_rate * 0.5f / sample_rate + passband_freqlen * 0.5f);
+    auto fir_cut_f = pi * (update_rate / sample_rate + passband_freqlen * 0.5f);
 
     auto lowpass_sinc = [=](int n) {
         auto x = n - fir_center;
@@ -88,7 +87,7 @@ void SineBank::LoadPartials(Partials& partials) {
     for (size_t i = 0; i < kNumPartials; ++i) {
         auto freq = partials.freqs[i];
         const auto normalized_frequency = freq * inv_sample_rate_;
-        const float radix_frequency = normalized_frequency * std::numbers::pi_v<float>;
+        const float radix_frequency = normalized_frequency * std::numbers::pi_v<float> *2.0f;
         freq_table_[i] = std::polar(1.0f, radix_frequency);
 
         if (freq < 0.0f || freq > Partials::kMaxFreq) {
