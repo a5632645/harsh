@@ -59,15 +59,21 @@ public:
     void resized() override;
 
     void SetCurve(CurveV2* new_curve);
+    void SetSnapGrid(bool snap) { snap_grid_ = snap; }
+    void SetDisplayGrid(bool show) { display_grid_ = show; repaint(); }
+    void SetGridNum(int x, int y) { x_grid_ = x; y_grid_ = y; repaint(); }
 private:
+    bool snap_grid_{ false };
+    bool display_grid_{ true };
+    int x_grid_{ 8 };
+    int y_grid_{ 1 };
+
     void mouseDoubleClick(const juce::MouseEvent& e) override;
 
     friend class ::mana::detail::CurveXYPointComponent;
     friend class ::mana::detail::CurvePowerPointComponent;
 
-    //void LimitXyPoint(detail::CurveXYPointComponent& p);
     void DragXyPoint(detail::CurveXYPointComponent& p, const juce::MouseEvent& e);
-    void DragPowerPoint(detail::CurvePowerPointComponent& p, const juce::MouseEvent& e);
     void SetXyPointPos(detail::CurveXYPointComponent& p);
     void SetXyPointPos(int idx) { SetXyPointPos(*xy_points_[idx]); }
     void RemoveXyPoint(detail::CurveXYPointComponent& p);

@@ -99,6 +99,23 @@ void CommonCurveEditor::paint(juce::Graphics& g) {
     g.setColour(bg_color);
     g.fillRect(GetComponentBounds());
 
+    if (display_grid_) {
+        if (x_grid_ > 2) {
+            g.setColour(juce::Colours::black);
+            auto width = GetComponentBounds().toFloat().getWidth() / (x_grid_ - 1.0f);
+            for (int i = 1; i < x_grid_; ++i) {
+                g.drawVerticalLine(width * i + GetComponentBounds().getX(), GetComponentBounds().getY(), GetComponentBounds().getBottom());
+            }
+        }
+        if (y_grid_ > 2) {
+            g.setColour(juce::Colours::black);
+            auto height = GetComponentBounds().toFloat().getHeight() / (y_grid_ - 1.0f);
+            for (int i = 1; i < y_grid_; ++i) {
+                g.drawHorizontalLine(height * i + GetComponentBounds().getY(), GetComponentBounds().getX(), GetComponentBounds().getRight());
+            }
+        }
+    }
+
     if (curve_ != nullptr) {
         const auto num_points = GetComponentBounds().getWidth();
 
@@ -172,33 +189,6 @@ void CommonCurveEditor::mouseDoubleClick(const juce::MouseEvent& e) {
     curve_->AddPoint(CurveV2::Point{ nor_x, nor_y });
 }
 
-//void CommonCurveEditor::LimitXyPoint(detail::CurveXYPointComponent& p) {
-//    auto left = GetComponentBounds().getX();
-//    auto right = GetComponentBounds().getTopRight().x;
-//    auto top = GetComponentBounds().getY();
-//    auto bottom = GetComponentBounds().getBottom();
-//
-//    if (p.idx_ == 0) { // first
-//        auto b = p.getBounds();
-//        auto center = b.getCentre();
-//        auto clamped_center = juce::Point{ left , std::clamp(center.y, top, bottom) };
-//        p.setBounds(b.withCentre(clamped_center));
-//    }
-//    else if (p.idx_ == xy_points_.size() - 1) { // last
-//        auto b = p.getBounds();
-//        auto center = b.getCentre();
-//        auto clamped_center = juce::Point{ right, std::clamp(center.y, top, bottom) };
-//        p.setBounds(b.withCentre(clamped_center));
-//    }
-//    else {
-//        auto b = p.getBounds();
-//        auto center = b.getCentre();
-//        auto clamped_center = juce::Point{ std::clamp(center.x, xy_points_[p.idx_ - 1]->getBounds().getCentreX(), xy_points_[p.idx_ + 1]->getBounds().getCentreX()),
-//            std::clamp(center.y, top, bottom) };
-//        p.setBounds(b.withCentre(clamped_center));
-//    }
-//}
-
 void CommonCurveEditor::DragXyPoint(detail::CurveXYPointComponent& p, const juce::MouseEvent& e) {
     if (curve_ == nullptr)
         return;
@@ -208,6 +198,27 @@ void CommonCurveEditor::DragXyPoint(detail::CurveXYPointComponent& p, const juce
     auto bound = GetComponentBounds().toFloat();
     auto nor_x = (point_pos.x - bound.getX()) / bound.getWidth();
     auto nor_y = 1.0f - (point_pos.y - bound.getY()) / bound.getHeight();
+
+    nor_x = std::clamp(nor_x, 0.0f, 1.0f);
+    nor_y = std::clamp(nor_y, 0.0f, 1.0f);
+    if (snap_grid_) {
+        if (x_grid_ > 2) {
+            auto tx = (x_grid_ - 1.0f) * nor_x;
+            auto near = std::round(tx);
+            if (std::abs(near - tx) < 0.1f) {
+                tx = near;
+            }
+            nor_x = tx / (x_grid_ - 1.0f);
+        }
+        if (y_grid_ > 2) {
+            auto ty = (y_grid_ - 1.0f) * nor_y;
+            auto near = std::round(ty);
+            if (std::abs(near - ty) < 0.1f) {
+                ty = near;
+            }
+            nor_y = ty / (y_grid_ - 1.0f);
+        }
+    }
     curve_->SetXy(p.idx_, nor_x, nor_y);
 }
 

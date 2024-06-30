@@ -10,11 +10,14 @@ namespace mana {
 class CurveLayout : public juce::Component, public juce::ComboBox::Listener {
 public:
     CurveLayout(CurveBank& bank);
+    ~CurveLayout() override;
 
     void resized() override;
 private:
+    class WrapCurveEditor;
+
     CurveBank& curve_bank_;
-    std::unique_ptr<CommonCurveEditor> curve_editor_;
+    std::unique_ptr<WrapCurveEditor> curve_editor_;
     std::unique_ptr<QuantizeMapEditor> quantize_map_editor_;
     std::unique_ptr<juce::ComboBox> selector_;
 
