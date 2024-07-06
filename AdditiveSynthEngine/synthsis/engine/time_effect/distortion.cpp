@@ -39,7 +39,7 @@ void Distortion::PrepareParams(ModulableParams& params) {
 
 void Distortion::OnUpdateTick() {
     smooth_dist_amount_.SetTarget(dist_amount_->GetValue());
-    smooth_filter_cutoff_.SetTarget(std::clamp(utli::PitchToFreq(filter_cutoff_->GetValue()) * inv_sample_rate_, 0.0f, 0.5f));
+    smooth_filter_cutoff_.SetTarget(std::clamp(utli::PitchToFreq(filter_cutoff_->GetValue()) * inv_sample_rate_, 0.0f, 1.0f));
     smooth_filter_mode_.SetTarget(filter_mode_->GetValue());
 }
 
