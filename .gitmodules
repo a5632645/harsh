@@ -25,3 +25,6 @@
 [submodule "JUCE"]
 	path = JUCE
 	url = https://github.com/juce-framework/JUCE.git
+[submodule "freeverb"]
+	path = freeverb
+	url = https://github.com/elk-audio/freeverb.git
