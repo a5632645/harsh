@@ -7,6 +7,7 @@
 namespace mana {
 class MultiEnvelop {
 public:
+    static void AddSynthParam(SynthParams& s, ParamCreator& c);
     void Init(float sample_rate, float update_rate);
     void PrepareParam(ModulableParams& p);
     void OnUpdateTick();

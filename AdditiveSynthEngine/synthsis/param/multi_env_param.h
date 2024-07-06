@@ -9,6 +9,7 @@ struct VolEnv_PreDelay : FloatParam<VolEnv_PreDelay> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 5.0f;
     static constexpr float kDefault = 0.0f;
+    static constexpr auto kModuType = ModulationType::kPoly;
     static constexpr auto kStuff = "s"sv;
     static constexpr int kTextPrecision = 3;
 };
@@ -18,6 +19,7 @@ struct VolEnv_Attack : FloatParam<VolEnv_Attack> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 10.0f;
     static constexpr float kDefault = 0.0f;
+    static constexpr auto kModuType = ModulationType::kPoly;
     static constexpr auto kStuff = "s"sv;
     static constexpr int kTextPrecision = 3;
 };
@@ -27,6 +29,7 @@ struct VolEnv_Hold : FloatParam<VolEnv_Hold> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 10.0f;
     static constexpr float kDefault = 0.0f;
+    static constexpr auto kModuType = ModulationType::kPoly;
     static constexpr auto kStuff = "s"sv;
     static constexpr int kTextPrecision = 3;
 };
@@ -36,6 +39,7 @@ struct VolEnv_Decay : FloatParam<VolEnv_Decay> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 10.0f;
     static constexpr float kDefault = 0.0f;
+    static constexpr auto kModuType = ModulationType::kPoly;
     static constexpr auto kStuff = "s"sv;
     static constexpr int kTextPrecision = 3;
 };
@@ -46,6 +50,7 @@ struct VolEnv_Peak : FloatParam<VolEnv_Peak> {
     static constexpr float kMax = 0.0f;
     static constexpr float kDefault = 0.0f;
     static constexpr auto kStuff = "dB"sv;
+    static constexpr auto kModuType = ModulationType::kPoly;
     static constexpr int kTextPrecision = 1;
 };
 struct VolEnv_Sustain : FloatParam<VolEnv_Sustain> {
@@ -54,6 +59,7 @@ struct VolEnv_Sustain : FloatParam<VolEnv_Sustain> {
     static constexpr float kMin = -60.0f;
     static constexpr float kMax = 0.0f;
     static constexpr float kDefault = 0.0f;
+    static constexpr auto kModuType = ModulationType::kPoly;
     static constexpr auto kStuff = "dB"sv;
     static constexpr int kTextPrecision = 1;
 };
@@ -63,6 +69,7 @@ struct VolEnv_Release : FloatParam<VolEnv_Release> {
     static constexpr float kMin = 0.0f;
     static constexpr float kMax = 10.0f;
     static constexpr float kDefault = 0.0f;
+    static constexpr auto kModuType = ModulationType::kPoly;
     static constexpr auto kStuff = "s"sv;
     static constexpr int kTextPrecision = 3;
 };
@@ -71,6 +78,7 @@ struct VolEnv_HighScale : FloatParam<VolEnv_HighScale> {
     static constexpr auto kName = "high_scale"sv;
     static constexpr float kMin = 0.1f;
     static constexpr float kMax = 10.0f;
+    static constexpr auto kModuType = ModulationType::kPoly;
     static constexpr float kDefault = 1.0f;
     static constexpr int kTextPrecision = 2;
 };

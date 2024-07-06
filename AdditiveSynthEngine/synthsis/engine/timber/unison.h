@@ -9,6 +9,7 @@
 namespace mana {
 class Unison {
 public:
+    static void AddSynthParam(SynthParams& s, ParamCreator& c);
     void Init(float sample_rate, float update_rate);
     void PrepareParams(ModulableParams& params);
     void Process(Partials& partials);

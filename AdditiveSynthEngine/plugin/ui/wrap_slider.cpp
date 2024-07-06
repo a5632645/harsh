@@ -244,7 +244,7 @@ WrapSlider::WrapSlider(FloatParameter* p)
     setPopupDisplayEnabled(true, true, nullptr);
 }
 
-WrapSlider::WrapSlider(IntParameter * p)
+WrapSlider::WrapSlider(IntParameter* p)
     : juce::Slider(juce::Slider::SliderStyle::RotaryVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox)
     , parameter_(p->As<JuceIntParam>().GetRef()) {
     attachment_ = std::make_unique<juce::SliderParameterAttachment>(p->As<JuceIntParam>().GetRef(), *this);
@@ -312,8 +312,7 @@ void WrapSlider::mouseEnter(const juce::MouseEvent& event) {
     juce::Slider::mouseEnter(event);
 
     juce::String t{ ref_store_->GetName().data(), ref_store_->GetName().size() };
-    t << '\n';
-    t << getTextFromValue(getValue());
+    t << '\n' << getTitle();
     findParentComponentOfClass<MainWindow>()->SetInfoLabelText(t);
 
     if (modulation_tab_ == nullptr)

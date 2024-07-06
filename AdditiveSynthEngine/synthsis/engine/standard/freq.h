@@ -6,6 +6,8 @@
 namespace mana {
 class FreqProcessor {
 public:
+    static void AddSynthParam(SynthParams& s, ParamCreator& c);
+
     void Init(float sample_rate, float update_rate);
     void OnUpdateTick();
     void OnNoteOn(int note);

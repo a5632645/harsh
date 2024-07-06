@@ -69,8 +69,8 @@ inline void PhaseProcessor::DoDispersion(Partials& partials) {
     if (note_on_once_flag_) {
         note_on_once_flag_ = false;
 
-        auto dispersion_v = param::PhaseDispersion_Amount::GetNumber(process_arg0_);
-        auto cpx = param::PhaseDispersion_Warp::GetNumber(process_arg1_);
+        auto dispersion_v = param::PhaseDispersion_Amount::ConvertFrom01(process_arg0_);
+        auto cpx = param::PhaseDispersion_Warp::ConvertFrom01(process_arg1_);
         for (int i = 0; i < kNumPartials; ++i) {
             auto e = static_cast<float>(i);
             auto r = e / kNumPartials;
@@ -85,8 +85,8 @@ inline void PhaseProcessor::DoSpectralRandom(Partials& partials) {
     if (note_on_once_flag_) {
         note_on_once_flag_ = false;
 
-        auto amount = param::PhaseSpRandom_Amount::GetNumber(process_arg0_);
-        auto smooth = param::PhaseSpRandom_Smooth::GetNumber(process_arg1_);
+        auto amount = param::PhaseSpRandom_Amount::ConvertFrom01(process_arg0_);
+        auto smooth = param::PhaseSpRandom_Smooth::ConvertFrom01(process_arg1_);
         auto a = (1.0f - std::exp(-smooth)) / (1.0f - 1.0f / std::numbers::e_v<float>);
         auto latch = 0.0f;
         for (int i = 0; i < kNumPartials; ++i) {
@@ -103,7 +103,7 @@ inline void PhaseProcessor::DoPowDistribute(Partials& partials) {
     if (note_on_once_flag_) {
         note_on_once_flag_ = false;
 
-        auto pro_v = param::PhasePowDist_Pow::GetNumber(process_arg0_);
+        auto pro_v = param::PhasePowDist_Pow::ConvertFrom01(process_arg0_);
         for (int i = 0; i < kNumPartials; ++i) {
             auto e = static_cast<float>(i);
             auto omega = std::pow(e, pro_v) * std::numbers::pi_v<float>;

@@ -8,7 +8,7 @@
 #include "engine/synth.h"
 
 namespace mana {
-MainWindow::MainWindow(Synth & synth)
+MainWindow::MainWindow(Synth& synth)
     : synth_(synth) {
     modulators_layout_ = std::make_unique<ModulatorsLayout>(synth);
     master_ = std::make_unique<MasterLayout>(synth);

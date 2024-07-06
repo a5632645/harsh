@@ -14,6 +14,7 @@ public:
     EffectLayout(Synth& synth, int effect_idx);
 
     void resized() override;
+    void paint(juce::Graphics& g) override;
 private:
     void OnEffectTypeChanged(int c);
 

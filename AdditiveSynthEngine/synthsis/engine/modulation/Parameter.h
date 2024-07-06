@@ -5,16 +5,11 @@
 #include <concepts>
 #include <atomic>
 #include <format>
-#include "param_range.h"
 #include <functional>
+#include "param_range.h"
+#include "modu_type.h"
 
 namespace mana {
-enum class ModulationType {
-    kDisable,
-    kModulable,
-    kPoly
-};
-
 class FloatParameter {
 public:
     FloatParameter(ModulationType t) : modulation_type_(t) {}

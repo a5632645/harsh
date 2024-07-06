@@ -15,6 +15,7 @@ Synth::Synth(std::shared_ptr<ParamCreator> creator, size_t num_osc)
     mono_modu_params_ = std::make_unique<ModulableParams>(synth_params_,
                                                           std::vector{ ModulationType::kModulable, ModulationType::kPoly });
     mono_modulator_bank_.PrepareParams(*mono_modu_params_);
+    timefx_chain_.PrepareParams(*mono_modu_params_);
 
     m_oscillators.reserve(num_oscillor_);
     for (int i = 0; i < num_oscillor_; ++i) {
@@ -27,6 +28,7 @@ Synth::Synth(std::shared_ptr<ParamCreator> creator, size_t num_osc)
 
 void Synth::NoteOn(int note, float velocity) {
     mono_modulator_bank_.OnNoteOn(note);
+    timefx_chain_.OnNoteOn(note);
     // rr one time
     for (size_t i = 0; i < num_oscillor_; ++i) {
         if (!m_oscillators[m_rrPosition].IsPlaying()) {
@@ -53,48 +55,7 @@ void Synth::NoteOff(int note, float velocity) {
     }
 }
 
-void Synth::Render(size_t numFrame) {
-    std::ranges::fill(audio_buffer_, 0.0F);
-
-    int write_pos = 0;
-    int left = static_cast<int>(numFrame);
-
-    auto render_func = [&](int num) mutable {
-        for (Oscillor& o : m_oscillators) {
-            if (!o.IsPlaying()) {
-                continue;
-            }
-
-            auto write_iter = audio_buffer_.begin() + write_pos;
-            for (int i = 0; i < num; ++i) {
-                *write_iter++ += o.SrTick();
-            };
-        }
-        write_pos += num;
-    };
-
-    while (left != 0) {
-        if (left >= update_counter_) {
-            left -= update_counter_;
-            render_func(update_counter_);
-            update_counter_ = update_skip_;
-            update_state(update_skip_);
-        }
-        else {
-            render_func(left);
-            update_counter_ -= left;
-            break;
-        }
-    }
-
-    auto output_gain = utli::DbToGain(output_gain_->GetValue());
-    std::ranges::transform(audio_buffer_, audio_buffer_.begin(), [output_gain](float v) {return v * output_gain; });
-}
-
 void Synth::Render(float* buffer, int num_frame) {
-    auto output_gain = utli::DbToGain(output_gain_->GetValue());
-
-    auto ptr_begin = buffer;
     for (Oscillor& o : m_oscillators) {
         if (!o.IsPlaying()) {
             continue;
@@ -104,8 +65,13 @@ void Synth::Render(float* buffer, int num_frame) {
             buffer[i] += o.SrTick();
         };
     }
+    timefx_chain_.Process(buffer, num_frame);
 
-    std::transform(ptr_begin, ptr_begin + num_frame, ptr_begin, [output_gain](float v) {return v * output_gain; });
+    auto output_gain = utli::DbToGain(output_gain_->GetValue());
+    smooth_output_gain_.SetTarget(output_gain);
+    for (int i = 0; i < num_frame; ++i) {
+        buffer[i] *= smooth_output_gain_.TickNext();
+    }
 }
 
 void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {
@@ -113,8 +79,9 @@ void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {
     update_skip_ = static_cast<int>(std::round(sample_rate / update_rate));
     update_rate_ = sample_rate / static_cast<float>(update_skip_);
 
-    audio_buffer_.resize(buffer_size);
     mono_modulator_bank_.Init(sample_rate, update_rate_);
+    timefx_chain_.Init(sample_rate, update_rate_);
+    smooth_output_gain_.SetSmooth(sample_rate);
     for (Oscillor& o : m_oscillators) {
         o.Init(buffer_size, sample_rate, update_rate_, update_skip_);
     }
@@ -123,6 +90,7 @@ void Synth::Init(size_t buffer_size, float sample_rate, float update_rate) {
 void Synth::update_state(int step) {
     mono_modu_params_->UpdateParams();
     mono_modulator_bank_.OnUpdateTick();
+    timefx_chain_.OnUpdateTick();
     for (Oscillor& o : m_oscillators) {
         o.update_state(step);
     }
@@ -630,11 +598,14 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromImage(std::unique_ptr<ImageBas
 }
 
 nlohmann::json Synth::SaveState() const {
-    return synth_params_.SaveState();
+    auto s = synth_params_.SaveState();
+    s["timefx_order"] = timefx_chain_.SaveState();
+    return s;
 }
 
 void Synth::LoadState(const nlohmann::json& json) {
     synth_params_.LoadState(json);
+    timefx_chain_.LoadState(json["timefx_order"]);
 }
 
 void Synth::OnModulationAdded(std::shared_ptr<ModulationConfig> config) {

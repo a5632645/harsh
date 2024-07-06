@@ -118,8 +118,8 @@ public:
         flanger_cycles_ = cycle01 * kNumPartials / 2;
         harmonic_cycles_ = cycle01 * kNumPartials;
 
-        std::tie(first_shape_, second_shape_, shape_fraction_) = param::Phaser_Shape::GetInterpIndex(args.args[param::Phaser_Shape::kArgIdx]->Get01Value());
-        std::tie(first_mode_, second_mode_, mode_fraction_) = param::Phaser_Mode::GetInterpIndex(args.args[param::Phaser_Mode::kArgIdx]->Get01Value());
+        std::tie(first_shape_, second_shape_, shape_fraction_) = param::Phaser_Shape::GetInterpIndexFrom01(args.args[param::Phaser_Shape::kArgIdx]->Get01Value());
+        std::tie(first_mode_, second_mode_, mode_fraction_) = param::Phaser_Mode::GetInterpIndexFrom01(args.args[param::Phaser_Mode::kArgIdx]->Get01Value());
 
         mix_ = helper::GetAlterParamValue(args.args, param::Phaser_Mix{});
         pinch_ = helper::GetAlterParamValue(args.args, param::Phaser_Pinch{});

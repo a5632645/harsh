@@ -6,6 +6,7 @@
 #include "effect_base.h"
 #include "param/effect_param.h"
 #include "utli/convert.h"
+#include "param/param_helper.h"
 
 namespace mana {
 class Decay : public EffectBase {
@@ -27,8 +28,8 @@ public:
     }
 
     void OnUpdateTick(EffectParams& args) override {
-        decay_slope_ = param::Decay_Slope::GetNumber(args.args[param::Decay_Slope::kArgIdx]->Get01Value());
-        decay_time_ = param::Decay_Time::GetNumber(args.args[param::Decay_Time::kArgIdx]->Get01Value());
+        decay_slope_ = helper::GetAlterParamValue(args.args, param::Decay_Slope{});
+        decay_time_ = helper::GetAlterParamValue(args.args, param::Decay_Time{});
 
         constexpr auto kSilenceDb = -60.0f;
         decay_a_ = utli::Calc1stSmoothFilterCoeffByDecayRate((-kSilenceDb * 1000.0f) / decay_time_, update_rate_);

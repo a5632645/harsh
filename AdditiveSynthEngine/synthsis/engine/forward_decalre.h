@@ -2,6 +2,7 @@
 
 namespace mana {
 class SynthParams;
+class ParamCreator;
 class Synth;
 class CurveManager;
 struct ResynthsisFrames;

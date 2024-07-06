@@ -8,7 +8,8 @@
 #include "param/param_helper.h"
 
 namespace mana {
-static void DoHarmonicStretch(Partials& partials, float stretch) {
+void Dissonance::DoHarmonicStretch(Partials& partials) {
+    auto stretch = helper::GetAlterParamValue(args_, param::HarmonicStrech{});
     auto ratio = 1.0f;
     auto base_freq = partials.base_frequency;
 
@@ -21,7 +22,8 @@ static void DoHarmonicStretch(Partials& partials, float stretch) {
     }
 }
 
-static void DoSemitoneSpace(Partials& partials, float semitone) {
+void Dissonance::DoSemitoneSpace(Partials& partials) {
+    auto semitone = helper::GetAlterParamValue(args_, param::SemitoneSpace{});
     auto ratio = 1.0f;
     auto ratio_mul = std::exp2(semitone / 12.0f);
     auto base_freq = partials.base_frequency;
@@ -104,7 +106,9 @@ void Dissonance::DoPrism(Partials& partials) {
 // =========================================================
 // dispersion
 // =========================================================
-static void DoDispersion(Partials& partials, float amount, float warp) {
+void Dissonance::DoDispersion(Partials& partials) {
+    auto amount = helper::GetAlterParamValue(args_, param::Dispersion_Amount{});
+    auto warp = helper::GetAlterParamValue(args_, param::Dispersion_Warp{});
     auto first_ratio = partials.ratios[0] + 1.0f;
     partials.freqs[0] = first_ratio * partials.base_frequency;
     partials.pitches[0] = utli::RatioToPitch(first_ratio, partials.base_pitch);
@@ -136,6 +140,8 @@ static void DoDispersion(Partials& partials, float amount, float warp) {
 // noise
 // =========================================================
 void Dissonance::DoSyncNoise(Partials& partials) {
+    auto error_ramp = helper::GetAlterParamValue(args_, param::ErrorRamp{});
+    auto error_range = helper::GetAlterParamValue(args_, param::ErrorRange{});
     auto first_ratio = partials.ratios[0] + 1.0f;
     partials.freqs[0] = first_ratio * partials.base_frequency;
     partials.pitches[0] = utli::RatioToPitch(first_ratio, partials.base_pitch);
@@ -143,9 +149,9 @@ void Dissonance::DoSyncNoise(Partials& partials) {
 
     for (int i = 1; i < kNumPartials; ++i) {
         auto org_ratio = i + 1.0f + partials.ratios[i];
-        auto ramp_k = (1.0f - error_ramp_) / (kNumPartials - 1);
-        auto ramp_mult = error_ramp_ + ramp_k * i;
-        auto ratio_mult = ramp_mult * error_range_;
+        auto ramp_k = (1.0f - error_ramp) / (kNumPartials - 1);
+        auto ramp_mult = error_ramp + ramp_k * i;
+        auto ratio_mult = ramp_mult * error_range;
         auto error_ratio = ratio_mult * static_noise_[i];
         auto final_ratio = error_ratio + org_ratio;
         partials.freqs[i] = partials.base_frequency * final_ratio;
@@ -157,7 +163,9 @@ void Dissonance::DoSyncNoise(Partials& partials) {
 // =========================================================
 // fake unison
 // =========================================================
-static void DoFakeUnison(Partials& partials, float ratio0, float ratio1) {
+void Dissonance::DoFakeUnison(Partials& partials) {
+    auto ratio0 = helper::GetAlterParamValue(args_, param::FakeUnisonRatio0{}) / 12.0f;
+    auto ratio1 = helper::GetAlterParamValue(args_, param::FakeUnisonRatio1{}) / 12.0f;
     for (int i = 0; i < kNumPartials; i += 3) {
         auto ratio = i + 1.0f + partials.ratios[i];
         partials.freqs[i] = partials.base_frequency * ratio;
@@ -182,7 +190,9 @@ static void DoFakeUnison(Partials& partials, float ratio0, float ratio1) {
     }
 }
 
-static void DoFakeUnison2(Partials& partials, float ratio0, float ratio1) {
+void Dissonance::DoFakeUnison2(Partials& partials) {
+    auto ratio0 = helper::GetAlterParamValue(args_, param::FakeUnisonRatio0{}) / 12.0f;
+    auto ratio1 = helper::GetAlterParamValue(args_, param::FakeUnisonRatio1{}) / 12.0f;
     int harmonic_idx = 1;
     for (int i = 0; i < kNumPartials; i += 3) {
         auto ratio = harmonic_idx + partials.ratios[i];
@@ -224,7 +234,7 @@ void Dissonance::PrepareParams(ModulableParams& params) {
     pitch_quantize_map_ = cb.GetQuantizeMapPtr("dissonance.pitch_quantize");
     prism_map_ = cb.GetCurvePtr("dissonance.prism");
 
-    is_enable_param_ = params.GetParam<BoolParameter>("dissonance.enable");
+    is_enable_ = params.GetParam<BoolParameter>("dissonance.enable");
     diss_type_ = params.GetParam<IntChoiceParameter>("dissonance.type");
 
     for (int i = 0; auto & arg : args_) {
@@ -233,7 +243,7 @@ void Dissonance::PrepareParams(ModulableParams& params) {
 }
 
 void Dissonance::Process(Partials& partials) {
-    if (!is_enable_) {
+    if (!is_enable_->GetBool()) {
         for (int i = 0; i < kNumPartials; ++i) {
             auto ratio = i + 1.0f + partials.ratios[i];
             partials.freqs[i] = ratio * partials.base_frequency;
@@ -250,22 +260,22 @@ void Dissonance::Process(Partials& partials) {
         DoStringDiss(partials);
         break;
     case kHarmonicStretch:
-        DoHarmonicStretch(partials, harmonic_stretch_ratio_);
+        DoHarmonicStretch(partials);
         break;
     case kSemitoneSpace:
-        DoSemitoneSpace(partials, st_space_semitone_);
+        DoSemitoneSpace(partials);
         break;
     case kStaticError:
         DoSyncNoise(partials);
         break;
     case kFakeUnison:
-        DoFakeUnison(partials, ratio2x_ratio_, ratio3x_ratio_);
+        DoFakeUnison(partials);
         break;
     case kFakeUnison2:
-        DoFakeUnison2(partials, ratio2x_ratio_, ratio3x_ratio_);
+        DoFakeUnison2(partials);
         break;
     case kDispersion:
-        DoDispersion(partials, dispersion_amount_, dispersion_warp_);
+        DoDispersion(partials);
         break;
     case kPitchQuantize:
         DoPitchQuantize(partials);
@@ -279,26 +289,6 @@ void Dissonance::Process(Partials& partials) {
 }
 
 void Dissonance::OnUpdateTick() {
-    is_enable_ = is_enable_param_->GetBool();
-
-    harmonic_stretch_ratio_ = param::HarmonicStrech::GetNumber(args_[param::HarmonicStrech::kArgIdx]->Get01Value());
-
-    st_space_semitone_ = param::SemitoneSpace::GetNumber(args_[param::SemitoneSpace::kArgIdx]->Get01Value());
-
-    {
-        error_ramp_ = param::ErrorRamp::GetNumber(args_[param::ErrorRamp::kArgIdx]->Get01Value());
-        error_range_ = param::ErrorRange::GetNumber(args_[param::ErrorRange::kArgIdx]->Get01Value());
-    }
-
-    {
-        ratio2x_ratio_ = std::exp2(param::FakeUnisonRatio0::GetNumber(args_[param::FakeUnisonRatio0::kArgIdx]->Get01Value()) / 12.0f);
-        ratio3x_ratio_ = std::exp2(param::FakeUnisonRatio1::GetNumber(args_[param::FakeUnisonRatio1::kArgIdx]->Get01Value()) / 12.0f);
-    }
-
-    {
-        dispersion_amount_ = param::Dispersion_Amount::GetNumber(args_[param::Dispersion_Amount::kArgIdx]->Get01Value());
-        dispersion_warp_ = param::Dispersion_Warp::GetNumber(args_[param::Dispersion_Warp::kArgIdx]->Get01Value());
-    }
 }
 
 void Dissonance::OnNoteOn(int note) {
@@ -312,7 +302,7 @@ void Dissonance::OnNoteOff() {
 }
 
 void Dissonance::DoPitchQuantize(Partials& partials) {
-    float amount = param::PitchQuantize_Amount::GetNumber(args_[param::PitchQuantize_Amount::kArgIdx]->Get01Value());
+    auto amount = helper::GetAlterParamValue(args_, param::PitchQuantize_Amount{});
 
     for (int i = 0; i < kNumPartials; ++i) {
         float ratio = i + 1.0f + partials.ratios[i];

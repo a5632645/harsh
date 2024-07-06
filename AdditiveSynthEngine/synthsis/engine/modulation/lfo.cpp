@@ -9,6 +9,7 @@
 #include <numbers>
 #include "utli/warp.h"
 #include "param/lfo_param.h"
+#include "param/param_helper.h"
 
 namespace mana {
 static constexpr auto kSineTable = MakeNormalizeTable<kNumPartials>(
@@ -41,10 +42,10 @@ void LFO::OnUpdateTick() {
     using tt = param::LFO_TimeType::ParamEnum;
     switch (time_type) {
     case tt::kHz:
-        rate = param::LFO_HzRate::GetNumber(raw_rate);
+        rate = param::LFO_HzRate::ConvertFrom01(raw_rate);
         break;
     case tt::kSeconds:
-        rate = 1.0f / param::LFO_SecondRate::GetNumber(raw_rate);
+        rate = 1.0f / param::LFO_SecondRate::ConvertFrom01(raw_rate);
         break;
     case tt::kBeats:
     {
@@ -63,7 +64,7 @@ void LFO::OnUpdateTick() {
             1.0f / 32.0f
         };
         static_assert(kBeatRateTable.size() == param::LFO_BeatRate::kNames.size());
-        auto acc_rate = 1.0f / kBeatRateTable[param::LFO_BeatRate::GetChoiceIndex(raw_rate)];
+        auto acc_rate = 1.0f / kBeatRateTable[param::LFO_BeatRate::GetChoiceIndexFrom01(raw_rate)];
         rate = acc_rate * beat_rate;
     }
     break;

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include "modulation/Parameter.h"
+#include "param/param.h"
 
 namespace mana {
 struct ModuFloatParameter {

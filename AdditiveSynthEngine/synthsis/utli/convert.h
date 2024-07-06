@@ -2,6 +2,7 @@
 
 #include <gcem.hpp>
 #include <cmath>
+#include <concepts>
 
 namespace mana::utli {
 template<std::floating_point T>
@@ -95,5 +96,10 @@ inline static constexpr T RatioToPitch(T ratio, T base_pitch) {
     else {
         return base_pitch + 12.0f * std::log2(ratio);
     }
+}
+
+template<std::floating_point T>
+inline static constexpr T BpmToSeconds(T bpm, T beats) {
+    return 60.0f * 4.0f / bpm * beats;
 }
 }

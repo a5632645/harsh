@@ -8,7 +8,7 @@ ModulableParams::ModulableParams(SynthParams& synth_param, std::vector<Modulatio
     auto& bank = synth_param.GetParamBank();
     auto& synth_param_map = bank.GetParamMap<FloatParameter>();
 
-    for (auto&&[k, v] : synth_param_map) {
+    for (auto&& [k, v] : synth_param_map) {
         if (auto m = v->GetModulationType();
             std::ranges::find(collect_type, m) != collect_type.cend()) {
             // add to oscillor params
@@ -47,6 +47,7 @@ void ModulableParams::RemoveModulation(std::string_view modulator_id, std::strin
         return m.config->modulator_id == modulator_id
             && m.config->param_id == param_id;
     });
+    it->target->modulation_value = 0.0f;
     oscillor_modulations_.erase(it);
 }
 

@@ -61,7 +61,7 @@ const std::vector<float>& Filter::Process(Partials& partials) {
         return filter_output_;
     }
 
-    auto reso_type = param::Filter_ResonanceType::GetEnum(filter_args_[param::Filter_ResonanceType::kArgIdx]->Get01Value());
+    auto reso_type = param::Filter_ResonanceType::GetEnumFrom01(filter_args_[param::Filter_ResonanceType::kArgIdx]->Get01Value());
     using rt = param::Filter_ResonanceType::ParamEnum;
     switch (reso_type) {
     case rt::kCos:
@@ -98,7 +98,7 @@ const std::vector<float>& Filter::Process(Partials& partials) {
     return filter_output_;
 }
 
-void Filter::PrepareParams(ModulableParams & params) {
+void Filter::PrepareParams(ModulableParams& params) {
     filter_type_arg_ = params.GetParam<IntChoiceParameter>("filter{}.type", idx_);
     for (int i = 0; auto & parg : filter_args_) {
         parg = params.GetModuFloatParam("filter{}.arg{}", idx_, i++);

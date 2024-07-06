@@ -5,6 +5,10 @@
 #include "utli/convert.h"
 
 namespace mana {
+void FreqProcessor::AddSynthParam(SynthParams& s, ParamCreator& c) {
+    s.GetParamBank().AddParameter(c.CreateParameter(param::PitchBend{}));
+}
+
 void FreqProcessor::Init(float sample_rate, float update_rate) {
 }
 
@@ -20,7 +24,7 @@ void FreqProcessor::OnNoteOn(int note) {
 void FreqProcessor::OnNoteOff() {
 }
 
-void FreqProcessor::PrepareParams(ModulableParams & params) {
+void FreqProcessor::PrepareParams(ModulableParams& params) {
     pitch_bend_ = params.GetModuFloatParam("pitch_bend");
 }
 

@@ -9,12 +9,18 @@ FinalFxLayout::FinalFxLayout(Synth& synth) {
         sp_effects_.emplace_back(std::make_unique<EffectLayout>(synth, i));
         addAndMakeVisible(sp_effects_.back().get());
     }
+
+    time_fx_ = std::make_unique<TimeFxChain>(synth);
+    addAndMakeVisible(time_fx_.get());
 }
 
 void FinalFxLayout::resized() {
+    auto w = getLocalBounds().toFloat().getWidth() / sp_effects_.size();
     for (int i = 0; auto & e : sp_effects_) {
-        e->setBounds(i * 150, 0, 150, getHeight());
+        e->setBounds(juce::Rectangle{ i * w, 0.0f, w, 130.0f }.toNearestInt());
         ++i;
     }
+    auto b = getLocalBounds();
+    time_fx_->setBounds(b.removeFromBottom(150));
 }
 }

@@ -12,6 +12,7 @@ class Synth;
 namespace mana {
 class Resynthesis {
 public:
+    static void AddSynthParam(SynthParams& s, ParamCreator& c);
     Resynthesis(Synth& s) : synth_(s) {}
 
     void Init(float sample_rate, float update_rate);

@@ -23,6 +23,7 @@ public:
 
     void SetInfoLabelText(const juce::String& t) { master_->SetInfoLabelText(t); }
 private:
+
     Synth& synth_;
     std::unique_ptr<ModulatorsLayout> modulators_layout_;
     std::unique_ptr<MasterLayout> master_;

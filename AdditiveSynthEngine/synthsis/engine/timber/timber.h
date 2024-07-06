@@ -12,6 +12,7 @@ class TimberGen;
 namespace mana {
 class Timber {
 public:
+    static void AddSynthParam(SynthParams& s, ParamCreator& c);
     Timber();
     ~Timber();
 

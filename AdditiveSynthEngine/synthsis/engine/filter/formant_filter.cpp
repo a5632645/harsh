@@ -3,6 +3,7 @@
 #include "engine/oscillor_param.h"
 #include "param/filter_param.h"
 #include "utli/convert.h"
+#include "param/param_helper.h"
 
 namespace mana {
 struct VowelInfo {
@@ -200,9 +201,9 @@ void FormantFilter::PrepareParams(ModulableParams & params) {
 }
 
 void FormantFilter::Process(Partials& partials, std::vector<float>& out) {
-    auto slope = param::VowelFilter_Slope::GetNumber(arg_slope_->GetValue());
-    auto resonance = param::VowelFilter_Resonance::GetNumber(arg_resonance_->GetValue());
-    auto shift = param::VowelFilter_Formant::GetNumber(arg_formant_shift_->GetValue());
+    auto slope = helper::GetAlterParamValue(arg_slope_, param::VowelFilter_Slope{});
+    auto resonance = helper::GetAlterParamValue(arg_resonance_, param::VowelFilter_Resonance{});
+    auto shift = helper::GetAlterParamValue(arg_formant_shift_, param::VowelFilter_Formant{});
 
     std::ranges::fill(out, 0.0f);
     for (int filter_idx = 0; filter_idx < 5; ++filter_idx) {
@@ -236,7 +237,7 @@ void FormantFilter::OnUpdateTick() {
     using sgr = param::VowelFilter_Singer::ParamEnum;
 
     auto singer_enum = param::VowelFilter_Singer::GetEnum(arg_singer_->Get01Value());
-    auto select = param::VowelFilter_Select::GetChoiceIndex(arg_select_->Get01Value());
+    auto select = arg_select_->Get01Value();
 
     const auto& singer_infos = GetVowelInfoArray(singer_enum);
     const auto& vowel_info = singer_infos.at(select);

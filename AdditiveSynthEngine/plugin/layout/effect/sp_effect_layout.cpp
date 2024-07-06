@@ -28,16 +28,25 @@ EffectLayout::EffectLayout(Synth& synth, int effect_idx)
 }
 
 void EffectLayout::resized() {
-    is_enable_->setBounds(0, 0, getWidth(), 16);
-    effect_type_->setBounds(0, 0 + 12, getWidth(), 16);
-    auto first_y = 12 + 16;
-    arg_knobs_[0]->setBounds(0, first_y, 50, 50);
-    arg_knobs_[1]->setBounds(50, first_y, 50, 50);
-    arg_knobs_[2]->setBounds(100, first_y, 50, 50);
-    auto second_y = first_y + 70;
-    arg_knobs_[3]->setBounds(0, second_y, 50, 50);
-    arg_knobs_[4]->setBounds(50, second_y, 50, 50);
-    arg_knobs_[5]->setBounds(100, second_y, 50, 50);
+    auto b = getLocalBounds();
+    auto top = b.removeFromTop(20);
+    is_enable_->setBounds(top.removeFromLeft(30));
+    effect_type_->setBounds(top);
+
+    auto line1 = b.removeFromTop(50);
+    for (int i = 0; i < 3; ++i) {
+        arg_knobs_[i]->setBounds(line1.removeFromLeft(50));
+    }
+
+    auto line2 = b.removeFromTop(50);
+    for (int i = 3; i < 6; ++i) {
+        arg_knobs_[i]->setBounds(line2.removeFromLeft(50));
+    }
+}
+
+void EffectLayout::paint(juce::Graphics& g) {
+    g.setColour(juce::Colours::black);
+    g.drawRect(getLocalBounds(), 1);
 }
 
 void EffectLayout::OnEffectTypeChanged(int c) {

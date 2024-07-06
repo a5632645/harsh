@@ -38,7 +38,7 @@ void Sync::Process(TimberFrame& frame) {
 }
 
 void Sync::OnUpdateTick(OscParam& params) {
-    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndex(params.args[param::Sync_WaveShape::kArgIdx]->Get01Value());
+    auto [a, b, c] = param::Sync_WaveShape::GetInterpIndexFrom01(params.args[param::Sync_WaveShape::kArgIdx]->Get01Value());
     first_shape_ = a;
     second_shape_ = b;
     fraction_ = c;

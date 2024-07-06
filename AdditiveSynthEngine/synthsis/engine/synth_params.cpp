@@ -11,67 +11,21 @@
 #include "param/resynthsis_param.h"
 #include "param/unison_param.h"
 #include "param/multi_env_param.h"
+#include "param/timefx/delay_param.h"
+#include "param/timefx/distortion_param.h"
+#include "param/timefx/chrous_param.h"
+#include "param/timefx/reverb_param.h"
 
 namespace mana {
 static constexpr ParamRange kUnitRange{ 0.0f,1.0f };
 }
 
 namespace mana {
-inline static constexpr struct FloatTag {} floatparam;
-inline static constexpr struct IntTag {} intparam;
-inline static constexpr struct IntChoiceTag {} intchoiceparam;
-inline static constexpr struct BoolTag {} boolparam;
-
-namespace detail {
-template<typename T, typename Tag>
-inline static auto CreateParam(ParamCreator& c, ModulationType t, float blend, T param, std::string id, Tag) {
-    if constexpr (std::same_as<Tag, FloatTag>) {
-        return c.CreateFloatParameter({
-        .type = t,
-        .id = std::move(id),
-        .name = std::string{T::kName},
-        .vmin = T::kMin,
-        .vmax = T::kMax,
-        .vdefault = T::kDefault,
-        .vblend = blend });
-    }
-    else if constexpr (std::same_as<Tag, IntTag>) {
-        return c.CreateIntParameter({
-        .type = t,
-        .id = std::move(id),
-        .name = std::string{T::kName},
-        .vmin = T::kMin,
-        .vmax = T::kMax,
-        .vdefault = T::kDefault
-        .vblend = blend });
-    }
-    else if constexpr (std::same_as<Tag, BoolTag>) {
-        return c.CreateBoolParameter({
-        .id = std::move(id),
-        .name = std::string{T::kName},
-        .vdefault = T::kDefault });
-    }
-    else if constexpr (std::same_as<Tag, IntChoiceTag>) {
-        return c.CreateIntChoiceParameter({
-        .id = std::move(id),
-        .name = std::string{T::kName},
-        .vdefault = T::kDefault
-        .choices = {T::kNames.begin(), T::kNames.end() } });
-    }
-}
-}
-
-template<typename T, typename Tag>
-    requires requires {
-    T::kId;
-}
-inline static auto CreateParam(Tag tag, ParamCreator& c, T param, ModulationType t = ModulationType::kDisable, float vblend = 1.0f) {
-    return detail::CreateParam(c, t, vblend, param, std::string{ T::kId }, tag);
-}
-}
-
-namespace mana {
 SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
+    auto CreateAndAdd = [this, &creator](auto...p) {
+        int _[]{ (param_bank_.AddParameter(creator->CreateParameter(p)) ,0)... };
+    };
+
     using enum ModulationType;
     // ================================================================================
     // pitch and output
@@ -119,38 +73,14 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     // ================================================================================
     // harmonic envelope
     // ================================================================================
-    param_bank_.AddParameter(CreateParam(floatparam,
-                                         *creator,
-                                         param::VolEnv_PreDelay{},
-                                         kPoly),
-                             CreateParam(floatparam,
-                                         *creator,
-                                         param::VolEnv_Attack{},
-                                         kPoly),
-                             CreateParam(floatparam,
-                                         *creator,
-                                         param::VolEnv_Hold{},
-                                         kPoly),
-                             CreateParam(floatparam,
-                                         *creator,
-                                         param::VolEnv_Peak{},
-                                         kPoly),
-                             CreateParam(floatparam,
-                                         *creator,
-                                         param::VolEnv_Decay{},
-                                         kPoly),
-                             CreateParam(floatparam,
-                                         *creator,
-                                         param::VolEnv_Sustain{},
-                                         kPoly),
-                             CreateParam(floatparam,
-                                         *creator,
-                                         param::VolEnv_Release{},
-                                         kPoly),
-                             CreateParam(floatparam,
-                                         *creator,
-                                         param::VolEnv_HighScale{},
-                                         kPoly));
+    param_bank_.AddParameter(creator->CreateParameter(param::VolEnv_Attack{}),
+                             creator->CreateParameter(param::VolEnv_Decay{}),
+                             creator->CreateParameter(param::VolEnv_HighScale{}),
+                             creator->CreateParameter(param::VolEnv_Hold{}),
+                             creator->CreateParameter(param::VolEnv_Peak{}),
+                             creator->CreateParameter(param::VolEnv_PreDelay{}),
+                             creator->CreateParameter(param::VolEnv_Release{}),
+                             creator->CreateParameter(param::VolEnv_Sustain{}));
 
     // ================================================================================
     // timber
@@ -383,25 +313,25 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     for (int lfo_idx = 0; lfo_idx < 5; ++lfo_idx) {
         param_bank_.AddParameter(
             creator->CreateIntChoiceParameter(
-                {
-                    .id = std::format(param::LFO_Mode::kIdFormater, lfo_idx),
-                    .name = std::string{param::LFO_Mode::kName},
-                    .choices = {param::LFO_Mode::kNames.begin(), param::LFO_Mode::kNames.end()},
-                    .vdefault = 0
-                }),
+            {
+                .id = std::format(param::LFO_Mode::kIdFormater, lfo_idx),
+                .name = std::string{param::LFO_Mode::kName},
+                .choices = {param::LFO_Mode::kNames.begin(), param::LFO_Mode::kNames.end()},
+                .vdefault = 0
+            }),
             creator->CreateIntChoiceParameter(
-                {
-                    .id = std::format(param::LFO_TimeType::kIdFormater, lfo_idx),
-                    .name = std::string{param::LFO_TimeType::kName},
-                    .choices = {param::LFO_TimeType::kNames.begin(), param::LFO_TimeType::kNames.end()},
-                    .vdefault = 0
-                }),
+            {
+                .id = std::format(param::LFO_TimeType::kIdFormater, lfo_idx),
+                .name = std::string{param::LFO_TimeType::kName},
+                .choices = {param::LFO_TimeType::kNames.begin(), param::LFO_TimeType::kNames.end()},
+                .vdefault = 0
+            }),
             creator->CreateIntChoiceParameter({
                 .id = std::format(param::LFO_WaveType::kIdFormater, lfo_idx),
                 .name = std::string{param::LFO_WaveType::kName},
                 .choices = {param::LFO_WaveType::kNames.begin(), param::LFO_WaveType::kNames.end()},
                 .vdefault = 0
-                                              }),
+            }),
             creator->CreateFloatParameter({
                 .type = kPoly,
                 .id = std::format(param::LFO_Phase::kIdFormater, lfo_idx),
@@ -409,7 +339,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
                 .vmin = param::LFO_Phase::kMin,
                 .vmax = param::LFO_Phase::kMax,
                 .vdefault = param::LFO_Phase::kDefault
-                                          }),
+            }),
             creator->CreateFloatParameter({
                 .type = kPoly,
                 .id = std::format("lfo{}.rate", lfo_idx),
@@ -417,7 +347,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
                 .vmin = 0.0f,
                 .vmax = 1.0f,
                 .vdefault = 0.0f
-                                          })
+            })
         );
     }
 
@@ -496,6 +426,57 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
             .vmax = 8.0f,
             .vdefault = 0.0f }));
     }
+
+    // ================================================================================
+    // timefx
+    // ================================================================================
+    param_bank_.AddParameter(creator->CreateBoolParameter({
+        .id = "timefx.delay.enable",
+        .name = "timefx.delay.enable",
+        .vdefault = false }),
+        creator->CreateUnitParameter(ModulationType::kModulable, "time", "timefx.delay.time"),
+        creator->CreateParameter(param::DelayTimeMode{}),
+        creator->CreateParameter(param::DelayMode{}),
+        creator->CreateParameter(param::DelayFeedback{}),
+        creator->CreateParameter(param::DelayFbCenter{}),
+        creator->CreateParameter(param::DelayFbBw{})
+        );
+    param_bank_.AddParameter(creator->CreateBoolParameter({
+        .id = "timefx.distortion.enable",
+        .name = "timefx.distortion.enable",
+        .vdefault = false }),
+        creator->CreateParameter(param::DistortionType{}),
+        creator->CreateParameter(param::DistortionAmount{}),
+        creator->CreateParameter(param::DistortionFilterType{}),
+        creator->CreateParameter(param::DistortionFilterCutoff{}),
+        creator->CreateParameter(param::DistortionFilterMode{}));
+    param_bank_.AddParameter(creator->CreateBoolParameter({
+        .id = "timefx.chrous.enable",
+        .name = "timefx.chrous.enable",
+        .vdefault = false }),
+        creator->CreateUnitParameter(ModulationType::kModulable, "rate", "timefx.chrous.rate"),
+        creator->CreateParameter(param::Chrous_Delay1{}),
+        creator->CreateParameter(param::Chrous_Delay2{}),
+        creator->CreateParameter(param::Chrous_Depth{}),
+        creator->CreateParameter(param::Chrous_Feedback{}),
+        creator->CreateParameter(param::Chrous_RateMode{}));
+    param_bank_.AddParameter(creator->CreateBoolParameter({
+        .id = "timefx.reverb.enable",
+        .name = "timefx.reverb.enable",
+        .vdefault = false }),
+        creator->CreateParameter(param::TimeReverb_Damp{}),
+        creator->CreateParameter(param::TimeReverb_Dry{}),
+        creator->CreateParameter(param::TimeReverb_RoomSize{}),
+        creator->CreateParameter(param::TimeReverb_Wet{}),
+        creator->CreateParameter(param::TimeReverb_Width{})
+        );
+    param_bank_.AddParameter(creator->CreateParameter(param::TimeReverb_Distribution{}),
+                             creator->CreateParameter(param::TimeReverb_Separate{}),
+                             creator->CreateParameter(param::TimeReverb_Feedback2{}),
+                             creator->CreateParameter(param::TimeReverb_Feedback3{}),
+                             creator->CreateParameter(param::TimeReverb_FreqShift{}),
+                             creator->CreateParameter(param::TimeReverb_FdnMatrix{}),
+                             creator->CreateParameter(param::TimeReverb_ReverbType{}));
 
     // ================================================================================
     // curves

@@ -131,7 +131,7 @@ void FilterLayout::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) {
 }
 
 void FilterLayout::sliderValueChanged(juce::Slider* slider) {
-    auto reso_type = param::Filter_ResonanceType::GetChoiceIndex(slider->getValue());
+    auto reso_type = static_cast<int>(param::Filter_ResonanceType::GetChoiceIndexFrom01(slider->getValue()));
     if (reso_type != last_resonance_type_) {
         last_resonance_type_ = reso_type;
         OnResonanceTypeChanged(reso_type);

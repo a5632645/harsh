@@ -10,6 +10,8 @@
 #include "resynthsis/resynthsis_data.h"
 #include "resynthsis/image_base.h"
 #include "oscillor_param.h"
+#include "time_effect/fx_chain.h"
+#include "utli/smoother.h"
 
 namespace mana {
 class Synth : private SynthParams::ModulationListener {
@@ -20,18 +22,11 @@ public:
 
     void NoteOff(int note, float velocity);
 
-    void Render(size_t numFrame);
     void Render(float* buffer, int num_frame);
 
     void Init(size_t bufferSize, float sampleRate, float update_rate);
-
     void update_state(int step);
     int GetUpdateSkip() const { return update_skip_; }
-
-    decltype(auto) getBuffer() const {
-        return (audio_buffer_);
-    }
-
     nlohmann::json SaveState() const;
     void LoadState(const nlohmann::json& json);
 
@@ -49,6 +44,7 @@ public:
     std::vector<std::string_view> GetModulatorIds() const { return mono_modulator_bank_.GetModulatorsIds(); }
     std::vector<std::string_view> GetModulableParamIds() const { return mono_modu_params_->GetParamIds(); }
     decltype(auto) GetSynthLock() { return (synth_lock_); }
+    FxChain& GetTimeFxChain() { return timefx_chain_; }
 
     std::pair<bool, ModulationConfig*> CreateModulation(std::string_view modulator, std::string_view param);
     void RemoveModulation(ModulationConfig& config);
@@ -63,8 +59,8 @@ private:
     ResynthsisFrames resynthsis_frames_;
     SynthParams synth_params_;
     ModulatorBank mono_modulator_bank_;
+    FxChain timefx_chain_;
     std::unique_ptr<ModulableParams> mono_modu_params_;
-    std::vector<float> audio_buffer_;
     std::vector<Oscillor> m_oscillators;
     size_t m_rrPosition{};
     const size_t num_oscillor_{};
@@ -74,5 +70,6 @@ private:
     int update_skip_{};
     int update_counter_{};
     ModuFloatParameter* output_gain_{};
+    utli::Smoother smooth_output_gain_;
 };
 }

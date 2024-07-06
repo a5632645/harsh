@@ -11,7 +11,7 @@ add_subdirectory("AudioFFT")
 add_subdirectory("AudioFile")
 add_subdirectory("gcem")
 add_subdirectory("JUCE")
-add_subdirectory("test")
+add_subdirectory("freeverb")
 
 set(DOWNLOAD_DOCTEST ON)
 add_subdirectory("xsimd")
