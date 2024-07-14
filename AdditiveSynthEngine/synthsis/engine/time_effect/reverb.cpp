@@ -90,7 +90,7 @@ void TimeReverb::Process(float* pbuffer, int num) {
         }
         break;
     case rt::kFreeverb:
-        reverb_.ProcessLeft(pbuffer, num);
+        reverb_.processmix(pbuffer, pbuffer, pbuffer, pbuffer, num, 1);
         break;
     default:
         assert(false);
