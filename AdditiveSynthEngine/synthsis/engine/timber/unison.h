@@ -9,7 +9,8 @@
 namespace mana {
 class Unison {
 public:
-    static void AddSynthParam(SynthParams& s, ParamCreator& c);
+    Unison();
+
     void Init(float sample_rate, float update_rate);
     void PrepareParams(ModulableParams& params);
     void Process(Partials& partials);
@@ -26,8 +27,8 @@ private:
     std::uniform_real_distribution<float> urd_{ -1.0f,1.0f };
     float inv_update_rate_{};
 
-    std::array<float, 9> random_voice_ratios_{};
-    std::array<float, 9> voice_phases_{};
+    std::vector<float> random_voice_ratios_{};
+    std::vector<float> voice_phases_{};
 
     // random gen
     std::array<float, kNumPartials> last_rand_{};

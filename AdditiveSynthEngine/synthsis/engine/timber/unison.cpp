@@ -6,9 +6,11 @@
 #include "param/unison_param.h"
 #include "utli/convert.h"
 
+static constexpr int kMaxNumUnisonVoice = static_cast<int>(mana::param::Unison_NumVoice::kMax);
+
 namespace mana::detail {
 static consteval auto MakeUniformArray(int size) {
-    std::array<float, 9> table{};
+    std::array<float, kMaxNumUnisonVoice> table{};
     if (size == 1) {
         table[0] = 1.0f;
     }
@@ -22,8 +24,8 @@ static consteval auto MakeUniformArray(int size) {
     return table;
 }
 static consteval auto MakeUniformTable(int size) {
-    std::array<std::array<float, 9>, 9> table{};
-    for (int i = 1; i <= 9; ++i) {
+    std::array<std::array<float, kMaxNumUnisonVoice>, kMaxNumUnisonVoice> table{};
+    for (int i = 1; i <= kMaxNumUnisonVoice; ++i) {
         table[i - 1] = MakeUniformArray(i);
     }
     return table;
@@ -31,10 +33,15 @@ static consteval auto MakeUniformTable(int size) {
 }
 
 namespace mana {
-static constexpr auto kUniformTable = detail::MakeUniformTable(9);
+static constexpr auto kUniformTable = detail::MakeUniformTable(kMaxNumUnisonVoice);
 }
 
 namespace mana {
+Unison::Unison() {
+    random_voice_ratios_.resize(kMaxNumUnisonVoice);
+    voice_phases_.resize(kMaxNumUnisonVoice);
+}
+
 void Unison::Init(float sample_rate, float update_rate) {
     inv_update_rate_ = 1.0f / update_rate;
 }
@@ -73,7 +80,7 @@ void Unison::Process(Partials& partials) {
 }
 
 static constexpr auto kHzUniformTable = []() {
-    std::array<std::array<float, 4>, 10> table{};
+    std::array<std::array<float, kMaxNumUnisonVoice / 2>, kMaxNumUnisonVoice + 1> table{};
     for (int i = 2; i < table.size(); ++i) {// idx: 2..9
         int num_cos = i / 2;
         float interval = 1.0f / num_cos;

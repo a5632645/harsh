@@ -28,7 +28,7 @@ struct Unison_Type : IntChoiceParam<Unison_Type> {
 struct Unison_NumVoice : IntParam<Unison_NumVoice> {
     static constexpr auto kName = "num_voice"sv;
     static constexpr int kMin = 1;
-    static constexpr int kMax = 9;
+    static constexpr int kMax = 16;
     static constexpr int kDefault = 1;
     static constexpr int kTextPrecision = 0;
 };
