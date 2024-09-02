@@ -12,6 +12,7 @@
 #include "oscillor_param.h"
 #include "time_effect/fx_chain.h"
 #include "utli/smoother.h"
+#include "resynthsis/resynthsis_option.h"
 
 namespace mana {
 class Synth : private SynthParams::ModulationListener {
@@ -39,7 +40,7 @@ public:
 
     void SetResynthsisFrames(ResynthsisFrames new_frame);
     bool IsResynthsisAvailable() const { return !resynthsis_frames_.frames.empty(); }
-    ResynthsisFrames CreateResynthsisFramesFromAudio(const std::vector<float>& audio_in, float sample_rate) const;
+    ResynthsisFrames CreateResynthsisFramesFromAudio(const std::vector<float>& audio_in, float sample_rate, ResynthsisOption option) const;
     ResynthsisFrames CreateResynthsisFramesFromImage(std::unique_ptr<ImageBase> image_in, bool stretch_image);
     std::vector<std::string_view> GetModulatorIds() const { return mono_modulator_bank_.GetModulatorsIds(); }
     std::vector<std::string_view> GetModulableParamIds() const { return mono_modu_params_->GetParamIds(); }

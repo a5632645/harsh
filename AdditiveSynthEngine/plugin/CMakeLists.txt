@@ -78,6 +78,7 @@ set(UI_SRC
     "layout/synth/filter_layout.cpp"
     "layout/effect/sp_effect_layout.cpp"
     "layout/resynthsis/resynthsis_layout.cpp"
+    "layout/resynthsis/audio_option_window.cpp"
  
     "layout/synth/osc_layout.cpp"
     #"ui/curve_editor.cpp"
@@ -103,7 +104,12 @@ set(UI_SRC
     "layout/cruve/curve_layout.cpp"
     "ui/quantize_map_editor.cpp"
     "ui/common_curve_editor.cpp"
-    "layout/synth/vol_env_layout.cpp" "layout/effect/delay_section.cpp" "layout/effect/distortion_section.cpp" "layout/effect/timefx_chain.cpp" "layout/effect/chrous_section.cpp" "layout/effect/reverb_section.cpp")
+    "layout/synth/vol_env_layout.cpp"
+    "layout/effect/delay_section.cpp" 
+    "layout/effect/distortion_section.cpp" 
+    "layout/effect/timefx_chain.cpp" 
+    "layout/effect/chrous_section.cpp" 
+    "layout/effect/reverb_section.cpp")
 set(UI_HEADER
     "layout/modulators/envelop_layout.h"
     "layout/synth/synth_layout.h"
@@ -140,7 +146,13 @@ set(UI_HEADER
     "layout/cruve/curve_layout.h"
     "ui/quantize_map_editor.h"
     "ui/common_curve_editor.h"
-    "layout/synth/vol_env_layout.h" "layout/effect/delay_section.h" "layout/effect/distortion_section.h" "layout/effect/timefx_chain.h" "layout/effect/chrous_section.h" "layout/effect/reverb_section.h")
+    "layout/synth/vol_env_layout.h" 
+    "layout/effect/delay_section.h" 
+    "layout/effect/distortion_section.h" 
+    "layout/effect/timefx_chain.h" 
+    "layout/effect/chrous_section.h" 
+    "layout/resynthsis/audio_option_window.h"
+    "layout/effect/reverb_section.h")
 
 target_sources(Harsh
     PRIVATE

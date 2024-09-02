@@ -145,6 +145,8 @@ void Synth::RemoveModulation(ModulationConfig& config) {
 
 class FuriesTransform {
 public:
+    FuriesTransform(ResynthsisOption& option) : option_(option) {}
+
     static double KaiserParamBeta(double lobe_level) {
         assert(lobe_level >= 0);
         if (lobe_level < 21.0) {
@@ -165,6 +167,7 @@ public:
         auto alpha = beta / std::numbers::pi;
         auto main_width_in_bin = 2.0 * std::sqrt(1.0 + alpha * alpha);
         auto n = static_cast<int>(std::ceil(main_width_in_bin / main_lobe_width));
+        n = option_.custom_win_len_ ? option_.custom_win_len_ : n;
         if (n % 2 == 0) ++n;
 
         window_.resize(n);
@@ -188,20 +191,150 @@ public:
                 dwindow_[i] = std::cyl_bessel_i(1, beta * arg) * beta * (-t / arg) * down;
             }
         }
-        twindow_ = window_;
-        ApplyTimeRamp(twindow_);
 
         auto window_sum = std::accumulate(window_.cbegin(), window_.cend(), 0.0f);
         window_scale_ = 2.0f / window_sum;
-        twindow_scale_ = window_scale_;
         dwindow_scale_ = window_scale_ / (2 * std::numbers::pi);
 
         return n;
     }
 
+    int TaylorWindow(double side_lobe_level, double norm_freq, int nb) {
+        auto wc = std::numbers::sqrt2 * norm_freq * std::numbers::pi;
+        auto r = std::pow(10.0, -side_lobe_level / 20.0);
+        auto Mf = 1 + std::acosh(1.0 / r) / std::acosh(1.0 / std::cos(wc / 2));
+        auto window_size = static_cast<int>(std::ceil(Mf)) + 1;
+        window_size = option_.custom_win_len_ ? option_.custom_win_len_ : window_size;
+        if ((window_size & 1) == 0)
+            ++window_size;
+
+        // auto R = std::pow(10.0, side_lobe_level / 20.0);
+        // std::vector<double> n;
+        // n.resize(nb - 1);
+        // std::iota(n.begin(), n.end(), 1);
+        // auto A = std::acosh(R) / std::numbers::pi_v<double>;
+        // auto xn_ranges = n | std::views::transform([A](auto nx){
+        //                                                         return nx / std::sqrt(A * A + (nx - 0.5) * (nx - 0.5));
+        //                                                     })
+        //                                                     | std::views::transform([A](auto sigma){
+        //                                                         return sigma * std::sqrt(A * A + (sigma - 0.5) * (sigma - 0.5));
+        //                                                     });
+        // auto h = n;
+        // auto n2 = n | std::views::transform([](auto x) -> decltype(x) { return x * x; });
+        // auto xn2 = xn_ranges | std::views::transform([](auto x) -> decltype(x) { return 1 / (x * x); });
+        // auto prod = std::inner_product(n2.begin(), n2.end(), xn2.begin(), 0.0);
+        // std::ranges::transform(n, xn_ranges, h.begin(), [prod, nb](auto nx, auto xnx) -> decltype(xnx) {
+        //     auto a = std::tgamma(nb);
+        //     auto b = std::tgamma(nx + nb);
+        //     auto c = std::tgamma(nb - nx);
+        //     return a * a / (b * c * prod);
+        // });
+
+        // auto fs_view = std::views::iota(0, window_size) | std::views::transform([window_size](int x) {
+        //                                                         return x / (window_size - 1.0) - 0.5;
+        //                                                     });
+        // std::vector<double> fs(fs_view.begin(), fs_view.end());
+        // window_.resize(window_size);
+        // dwindow_.resize(window_size);
+        // auto a = h | std::views::transform([](auto x) { return x * 2; });
+
+        // constexpr auto kTimeDelta = 0.001;
+        // for (int i = 0; i < window_size; ++i) {
+        //     auto b = n | std::views::transform([fsx = fs[i]](auto x) { return std::cos(2 * std::numbers::pi * x) *  fsx; });
+        //     window_[i] = static_cast<float>(1 + std::inner_product(a.begin(), a.end(), b.begin(), 0.0));
+
+        //     auto b_front = n | std::views::transform([fsx = fs[i] - kTimeDelta](auto x) { return std::cos(2 * std::numbers::pi * x) *  fsx; });
+        //     auto b_back = n | std::views::transform([fsx = fs[i] + kTimeDelta](auto x) { return std::cos(2 * std::numbers::pi * x) *  fsx; });
+        //     dwindow_[i] = static_cast<float>(std::inner_product(b_front.begin(), b_front.end(), b_back.begin(), 0.0) / (2 * kTimeDelta));
+        // }
+        window_.resize(window_size);
+        dwindow_.resize(window_size);
+        taylorwin(window_.data(), dwindow_.data(), window_size, nb, -side_lobe_level);
+
+        auto window_sum = std::accumulate(window_.cbegin(), window_.cend(), 0.0f);
+        window_scale_ = 2.0f / window_sum;
+        dwindow_scale_ = static_cast<float>(window_scale_ / (2 * std::numbers::pi));
+
+        return window_size;
+    }
+
+    constexpr auto sq(auto x) {
+        return x * x;
+    }
+
+    static constexpr auto M_PI = std::numbers::pi;
+
+    void taylorwin(float* w, float* dw, unsigned n, unsigned nbar, double sll)
+    {
+        // Taylor window.
+        //
+        // Default Matlab parameters: nbar ==4, sll == -30.0.
+        //
+        // The Taylor window is cosine-window like, in that it is the sum of weighted
+        // cosines of different periods.
+
+        // sll is in dB(power).
+        // Calculate the amplification factor, e.g. sll = -60 --> amplification = 1000.0
+
+        const double amplification = pow(10.0, -sll / 20.0);
+
+        const double a = acosh(amplification) / M_PI;
+
+        const double a2 = sq(a);
+
+        // Taylor pulse widening (dilation) factor.
+
+        const double sp2 = sq(nbar) / (a2 + sq(nbar - 0.5));
+
+        for (unsigned i = 0; i < n; ++i)
+        {
+            w[i] = 1.0; // Initial value.
+        }
+
+        constexpr auto time_delta = 0.0001;
+        std::vector<double> front_val(n, 1.0);
+        std::vector<double> back_val(n, 1.0);
+        for (unsigned m = 1; m < nbar; ++m)
+        {
+            // Calculate Fm as a function of: m, sp2, a
+
+            double numerator = 1.0;
+            double denominator = 1.0;
+
+            for (unsigned i = 1; i < nbar; ++i)
+            {
+                numerator *= (1.0 - sq(m) / (sp2 * (a2 + sq(i - 0.5))));
+                if (i != m)
+                {
+                    denominator *= (1.0 - sq(m) / sq(i));
+                }
+            }
+
+            const double Fm = -(numerator / denominator);
+
+            // Add cosine term to each of the window components.
+
+            for (unsigned i = 0; i < n; ++i)
+            {
+                const double x = 2 * M_PI * (i + 0.5) / n;
+                const double front_x = 2 * M_PI * ((i + 0.5) / n - time_delta);
+                const double back_x = 2 * M_PI * ((i + 0.5) / n + time_delta);
+                w[i] += static_cast<float>(Fm * cos(m * x));
+                front_val[i] += static_cast<float>(Fm * cos(m * front_x));
+                back_val[i] += static_cast<float>(Fm * cos(m * back_x));
+            }
+        }
+
+        for (unsigned i = 0; i < n; ++i)
+        {
+            dw[i] = static_cast<float>((back_val[i] - front_val[i]) / (2 * time_delta));
+        }
+    }
+
     int BlackManWin(float main_lobe_width) {
         auto main_width_in_bin = 2.0 * 1.727;
         auto n = static_cast<int>(std::ceil(main_width_in_bin / main_lobe_width));
+        n = option_.custom_win_len_ ? option_.custom_win_len_ : n;
         if (n % 2 == 0) ++n;
 
         window_.resize(n);
@@ -215,12 +348,9 @@ public:
             window_[i] = a0 - 0.5 * std::cos(std::numbers::pi * 2 * t) + a2 * std::cos(std::numbers::pi * 4 * t);
             dwindow_[i] = 0.5 * std::numbers::pi * 2 * std::sin(std::numbers::pi * 2 * t) - a2 * std::numbers::pi * 4 * std::sin(std::numbers::pi * 4 * t);
         }
-        twindow_ = window_;
-        ApplyTimeRamp(twindow_);
 
         auto window_sum = std::accumulate(window_.cbegin(), window_.cend(), 0.0f);
         window_scale_ = 2.0f / window_sum;
-        twindow_scale_ = window_scale_;
         dwindow_scale_ = window_scale_ / (2 * std::numbers::pi);
 
         return n;
@@ -230,7 +360,6 @@ public:
         assert(buffer.size() == WindowLen());
         xh_data_.resize(FftDataLen());
         xdh_data_.resize(FftDataLen());
-        xth_data_.resize(FftDataLen());
 
         std::vector<float> real(FftDataLen());
         std::vector<float> imag(FftDataLen());
@@ -254,14 +383,6 @@ public:
             cpx = std::complex{ real[i],imag[i] } *dwindow_scale_;
             ++i;
         }
-
-        //std::ranges::transform(buffer | std::views::take(k), twindow_ | std::views::take(k), sample.begin() + fft_size - k, std::multiplies{});
-        //std::ranges::transform(buffer | std::views::drop(k), twindow_ | std::views::drop(k), sample.begin(), std::multiplies{});
-        //fft.fft(sample.data(), real.data(), imag.data());
-        //for (int i = 0; auto & cpx : xth_data_) {
-        //    cpx = std::complex{ real[i],imag[i] } *twindow_scale_;
-        //    ++i;
-        //}
     }
 
     int WindowLen() const {
@@ -288,45 +409,57 @@ public:
         return std::abs(xh_data_[i]);
     }
 
-    float CorrectTimeInSamples(int i) const {
-        auto up = xth_data_[i].imag() * xh_data_[i].real() - xth_data_[i].real() * xh_data_[i].imag();
-        auto down = std::norm(xh_data_[i]);
-        return up / down;
-    }
-
     int FftSize() const { return fft_size; }
+
 private:
-    void ApplyTimeRamp(std::vector<float>& win) {
-        auto center = (win.size() - 1.0f) * 0.5f;
-        for (int i = 0; auto & s : win) {
-            s *= (i - center);
-        }
-    }
+    ResynthsisOption& option_;
 
     float window_scale_{};
     float dwindow_scale_{};
-    float twindow_scale_{};
 
     int fft_size = 8192;
     std::vector<float> window_;
     std::vector<float> dwindow_;
-    std::vector<float> twindow_;
     std::vector<std::complex<float>> xh_data_;
     std::vector<std::complex<float>> xdh_data_;
-    std::vector<std::complex<float>> xth_data_;
 };
 
-ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>& sample, float source_sample_rate) const {
+ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(
+    const std::vector<float>& sample,
+    float source_sample_rate,
+    ResynthsisOption option
+) const {
     constexpr auto c2_freq = utli::PitchToFreq(36.0f);
     constexpr auto analyze_fft_size = 8192;
     constexpr auto kFFtHop = 256;
-    constexpr auto kThreadshoud = -60.0f;
-    constexpr auto kCompressRange = 10.0f;
-    constexpr auto kCompressThreadShound = kThreadshoud + kCompressRange;
 
-    FuriesTransform transform;
-    //int win_len = transform.KaiserWindow(65.0f, c2_freq * 0.9f / source_sample_rate);
-    const int win_len = transform.BlackManWin(c2_freq * 2.0f / source_sample_rate);
+    // option
+    if (!option.custom_freq_res_)
+        option.frequency_resolution_ = c2_freq;
+    if (!option.custom_side_lobe_level_)
+        option.side_lobe_level_ = 80.0f;
+    if (!option.custom_peak_filter_level_)
+        option.peak_filter_level_ = -60.0f;
+    if (!option.custom_smooth_time_)
+        option.smooth_time_ = 10.0f;
+
+    FuriesTransform transform{option};
+    int win_len = 0;
+
+    switch (option.window_) {
+    case ResynthsisOption::Window::kBlackman:
+        win_len = transform.BlackManWin(c2_freq / source_sample_rate);
+        break;
+    case ResynthsisOption::Window::kKaiser:
+        win_len = transform.KaiserWindow(option.side_lobe_level_, c2_freq / source_sample_rate);
+        break;
+    case ResynthsisOption::Window::kTaylor:
+        win_len = transform.TaylorWindow(option.side_lobe_level_, c2_freq / source_sample_rate / 2, 4);
+        break;
+    default:
+        assert(false);
+        break;
+    }
     const int num_frames = static_cast<int>(std::ceil((sample.size() - win_len) / static_cast<float>(kFFtHop)));
 
     ResynthsisFrames audio_frames;
@@ -390,16 +523,12 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
                 continue;
             }
 
-            //if (transform.CorrectTimeInSamples(i) < 0) {
-            //    continue;
-            //}
-
             auto tmp = high_resolution_infos[i + 1];
             if (transform.CorrectGain(i) > transform.CorrectGain(i + 1)) {
                 tmp = high_resolution_infos[i];
             }
 
-            if (tmp.gain_db < kThreadshoud) {
+            if (tmp.gain_db < option.peak_filter_level_) {
                 continue;
             }
             peaks.push_back(tmp);
@@ -456,8 +585,7 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         ++frame_idx;
     }
 
-    constexpr auto kFadeTime = 20; // ms
-    const auto fade_samples = sample_rate_ * kFadeTime / 1000.0f;
+    const auto fade_samples = sample_rate_ * option.smooth_time_ / 1000.0f;
     const auto fade_frames = static_cast<int>(std::ceil(fade_samples / kFFtHop));
     const auto slope = 60.0f / (fade_frames + 1.0f);
     for (int i = 0; i < kNumPartials; ++i) {

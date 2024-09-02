@@ -75,6 +75,8 @@ ResynthsisLayout::ResynthsisLayout(Synth& synth)
         }
     };
 
+    audio_post_window_ = std::make_unique<AudioOptionWindow>();
+
     auto& bank = synth.GetSynthParams().GetParamBank();
     arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.freq_scale")));
     arg_knobs_.emplace_back(std::make_unique<WrapSlider>(bank.GetParamPtr("resynthsis.start_offset")));
@@ -140,6 +142,7 @@ void ResynthsisLayout::paintOverChildren(juce::Graphics& g) {
     }
 }
 
+
 void ResynthsisLayout::resized() {
     is_enable_->setBounds(0, 0, 100, 16);
     audio_button_->setBounds(200, 0, 100, 16);
@@ -152,8 +155,8 @@ void ResynthsisLayout::resized() {
     image_view_->setBounds(0, 16 + 50, getWidth(), getHeight() - 16 - 50);
 }
 
-void ResynthsisLayout::CreateAudioResynthsis(const juce::String& path) {
-    auto task = [file_path = path.toStdString(), work_id = ++resynthsis_work_counter_, this] {
+void ResynthsisLayout::CreateAudioResynthsis(const juce::String& path, ResynthsisOption option) {
+    auto task = [file_path = path.toStdString(), work_id = ++resynthsis_work_counter_, this, option] {
         ResynthsisFrames frame;
         AudioFile<float> audio_file_;
         if (!audio_file_.load(file_path) || audio_file_.samples.empty()) {
@@ -162,7 +165,8 @@ void ResynthsisLayout::CreateAudioResynthsis(const juce::String& path) {
         }
 
         frame = synth_.CreateResynthsisFramesFromAudio(audio_file_.samples.at(0),
-                                                       static_cast<float>(audio_file_.getSampleRate()));
+                                                       static_cast<float>(audio_file_.getSampleRate()),
+                                                       option);
         DBG(std::format(R"([resynthsis]: load file "{}" *success*)", file_path));
 
         if (resynthsis_work_counter_.load() != work_id) {
@@ -271,8 +275,17 @@ void ResynthsisLayout::buttonClicked(juce::Button* ptr_button) {
             if (chooser.getResults().isEmpty()) {
                 return;
             }
-            auto load_file = chooser.getResult();
-            CreateAudioResynthsis(load_file.getFullPathName());
+
+            audio_window_ = std::make_unique<juce::AlertWindow>("image stretch",
+                                                                "do you want to stretch the image?",
+                                                                juce::MessageBoxIconType::InfoIcon);
+            audio_window_->addCustomComponent(audio_post_window_.get());
+            audio_window_->addButton("process", 0);
+            audio_window_->enterModalState(true, juce::ModalCallbackFunction::create([this, file_path = chooser.getResult().getFullPathName()](int w) {
+                audio_window_->exitModalState(w);
+                audio_window_->setVisible(false);
+                CreateAudioResynthsis(file_path, audio_post_window_->GetOption());
+            }));
         });
     }
     else if (ptr_button == image_button_.get()) {
