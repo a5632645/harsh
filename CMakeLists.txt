@@ -24,5 +24,9 @@ URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
 DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 FetchContent_MakeAvailable(json)
 
-set(USE_XSIMD OFF)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(USE_XSIMD ON)
+else()
+    set(USE_XSIMD OFF)
+endif()
 add_subdirectory ("AdditiveSynthEngine")
