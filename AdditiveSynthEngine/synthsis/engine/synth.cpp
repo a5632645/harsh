@@ -321,12 +321,10 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
     constexpr auto analyze_fft_size = 8192;
     constexpr auto kFFtHop = 256;
     constexpr auto kThreadshoud = -60.0f;
-    constexpr auto kCompressRange = 10.0f;
-    constexpr auto kCompressThreadShound = kThreadshoud + kCompressRange;
+    constexpr auto kFadeTime = 20; // ms
 
     FuriesTransform transform;
-    //int win_len = transform.KaiserWindow(65.0f, c2_freq * 0.9f / source_sample_rate);
-    const int win_len = transform.BlackManWin(c2_freq * 2.0f / source_sample_rate);
+    const int win_len = transform.BlackManWin(c2_freq * 1.5f / source_sample_rate);
     const int num_frames = static_cast<int>(std::ceil((sample.size() - win_len) / static_cast<float>(kFFtHop)));
 
     ResynthsisFrames audio_frames;
@@ -409,7 +407,9 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         std::vector<GainAndFreqPhase> filter_peaks;
         for (auto peak : peaks) {
             if (std::ranges::find_if(filter_peaks, [f = c2_freq, peak](GainAndFreqPhase p) -> bool {
-                return peak.freq > p.freq - f && peak.freq < p.freq + f;
+                bool in_range = peak.freq > p.freq - f && peak.freq < p.freq + f;
+                bool louder = peak.gain_db < p.gain_db;
+                return in_range && louder;
             }) == filter_peaks.cend()) {
                 filter_peaks.push_back(peak);
             }
@@ -456,10 +456,9 @@ ResynthsisFrames Synth::CreateResynthsisFramesFromAudio(const std::vector<float>
         ++frame_idx;
     }
 
-    constexpr auto kFadeTime = 20; // ms
     const auto fade_samples = sample_rate_ * kFadeTime / 1000.0f;
     const auto fade_frames = static_cast<int>(std::ceil(fade_samples / kFFtHop));
-    const auto slope = 60.0f / (fade_frames + 1.0f);
+    const auto slope = (-kThreadshoud) / (fade_frames + 1.0f);
     for (int i = 0; i < kNumPartials; ++i) {
         const auto& transit_dis = transit_discontinue[i];
         const auto& silence_dis = silence_discontinue[i];

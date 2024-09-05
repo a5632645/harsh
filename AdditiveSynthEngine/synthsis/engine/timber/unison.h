@@ -17,16 +17,12 @@ public:
     void OnNoteOn();
     void OnNoteOff();
 private:
-    void UniformProcess(Partials& partials);
-    void HzUniformProcess(Partials& partials);
-    void RandomRmProcess(Partials& partials);
-    void RandomProcess(Partials& partials);
-
     std::default_random_engine random_;
     std::uniform_real_distribution<float> urd_{ -1.0f,1.0f };
     float inv_update_rate_{};
 
     std::array<float, 9> random_voice_ratios_{};
+    std::array<float, 9> voice_ratios_{};
     std::array<float, 9> voice_phases_{};
 
     // random gen
@@ -34,11 +30,13 @@ private:
     std::array<float, kNumPartials> curr_rand_{};
     std::array<float, kNumPartials> rand_phase_{};
 
-    IntChoiceParameter* unison_type_{};
     IntParameter* arg_num_voice_{};
     int num_voice_{};
     ModuFloatParameter* pitch_{};
     ModuFloatParameter* phase_{};
     ModuFloatParameter* pan_{};
+    ModuFloatParameter* morph_{};
+    ModuFloatParameter* wave_{};
+    ModuFloatParameter* randomness_{};
 };
 }

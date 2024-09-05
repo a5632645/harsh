@@ -133,11 +133,6 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     // ================================================================================
     // unison(alsing)
     // ================================================================================
-    param_bank_.AddParameter(creator->CreateIntChoiceParameter({
-        .id = "unison.type",
-        .name = "unison.type",
-        .choices = {param::Unison_Type::kNames.begin(), param::Unison_Type::kNames.end()},
-        .vdefault = 0 }));
     param_bank_.AddParameter(creator->CreateIntParameter({
         .id = "unison.num_voice",
         .name = "unison.num_voice",
@@ -166,6 +161,20 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
         .vmin = param::Unison_Pan::kMin,
         .vmax = param::Unison_Pan::kMax,
         .vdefault = param::Unison_Pan::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+        .type = kPoly,
+        .id = "unison.morph",
+        .name = "unison.morph",
+        .vmin = param::Unison_Morph::kMin,
+        .vmax = param::Unison_Morph::kMax,
+        .vdefault = param::Unison_Morph::kDefault }));
+    param_bank_.AddParameter(creator->CreateFloatParameter({
+        .type = kPoly,
+        .id = "unison.randomness",
+        .name = "unison.randomness",
+        .vmin = param::Unison_Randomness::kMin,
+        .vmax = param::Unison_Randomness::kMax,
+        .vdefault = param::Unison_Randomness::kDefault }));
 
     // ================================================================================
     // dissonance(inharmonic)
@@ -313,25 +322,25 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
     for (int lfo_idx = 0; lfo_idx < 5; ++lfo_idx) {
         param_bank_.AddParameter(
             creator->CreateIntChoiceParameter(
-            {
-                .id = std::format(param::LFO_Mode::kIdFormater, lfo_idx),
-                .name = std::string{param::LFO_Mode::kName},
-                .choices = {param::LFO_Mode::kNames.begin(), param::LFO_Mode::kNames.end()},
-                .vdefault = 0
-            }),
+                {
+                    .id = std::format(param::LFO_Mode::kIdFormater, lfo_idx),
+                    .name = std::string{param::LFO_Mode::kName},
+                    .choices = {param::LFO_Mode::kNames.begin(), param::LFO_Mode::kNames.end()},
+                    .vdefault = 0
+                }),
             creator->CreateIntChoiceParameter(
-            {
-                .id = std::format(param::LFO_TimeType::kIdFormater, lfo_idx),
-                .name = std::string{param::LFO_TimeType::kName},
-                .choices = {param::LFO_TimeType::kNames.begin(), param::LFO_TimeType::kNames.end()},
-                .vdefault = 0
-            }),
+                {
+                    .id = std::format(param::LFO_TimeType::kIdFormater, lfo_idx),
+                    .name = std::string{param::LFO_TimeType::kName},
+                    .choices = {param::LFO_TimeType::kNames.begin(), param::LFO_TimeType::kNames.end()},
+                    .vdefault = 0
+                }),
             creator->CreateIntChoiceParameter({
                 .id = std::format(param::LFO_WaveType::kIdFormater, lfo_idx),
                 .name = std::string{param::LFO_WaveType::kName},
                 .choices = {param::LFO_WaveType::kNames.begin(), param::LFO_WaveType::kNames.end()},
                 .vdefault = 0
-            }),
+                                              }),
             creator->CreateFloatParameter({
                 .type = kPoly,
                 .id = std::format(param::LFO_Phase::kIdFormater, lfo_idx),
@@ -339,7 +348,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
                 .vmin = param::LFO_Phase::kMin,
                 .vmax = param::LFO_Phase::kMax,
                 .vdefault = param::LFO_Phase::kDefault
-            }),
+                                          }),
             creator->CreateFloatParameter({
                 .type = kPoly,
                 .id = std::format("lfo{}.rate", lfo_idx),
@@ -347,7 +356,7 @@ SynthParams::SynthParams(std::shared_ptr<ParamCreator> creator) {
                 .vmin = 0.0f,
                 .vmax = 1.0f,
                 .vdefault = 0.0f
-            })
+                                          })
         );
     }
 

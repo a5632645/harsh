@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 #include "param_range.h"
 #include "Parameter.h"
+#include "param/param.h"
 
 namespace mana {
 template<IsParamter... PT>
@@ -42,6 +43,41 @@ public:
         auto e = storer.at(id).get();
         assert(e != nullptr);
         return static_cast<Type*>(e);
+    }
+
+    template<typename P, class... Args> requires requires { typename P::Tag; }
+    auto* GetParameterPtr(P, Args&&... args) const {
+        using tag_t = typename P::Tag;
+
+        std::string id;
+        if constexpr (requires{P::kId; }) {
+            id = std::string{ P::kId };
+        }
+        else if constexpr (requires{P::kIdFormater; }) {
+            static_assert(sizeof...(args) > 0);
+            id = std::format(P::kIdFormater, std::forward<Args>(args)...);
+        }
+        else {
+            static_assert("no param id found");
+            return nullptr;
+        }
+
+        if constexpr (std::same_as<tag_t, param::param_tag::FloatTag>) {
+            return GetParamPtr<FloatParameter>(id);
+        }
+        else if constexpr (std::same_as<tag_t, param::param_tag::IntTag>) {
+            return GetParamPtr<IntParameter>(id);
+        }
+        else if constexpr (std::same_as<tag_t, param::param_tag::FloatChoiceTag>) {
+            return GetParamPtr<FloatParameter>(id);
+        }
+        else if constexpr (std::same_as<tag_t, param::param_tag::IntChoiceTag>) {
+            return GetParamPtr<IntChoiceParameter>(id);
+        }
+        else {
+            static_assert("invalid param type");
+            return nullptr;
+        }
     }
 
     template<IsParamter Type>

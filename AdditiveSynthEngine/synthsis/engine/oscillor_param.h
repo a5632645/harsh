@@ -36,6 +36,10 @@ public:
     ModuFloatParameter* GetModuFloatParam(std::format_string<T...> format_text, T&&... args) { return oscillor_param_table_.at(std::format(format_text, std::forward<T>(args)...)); }
     SynthParams& GetParentSynthParams() { return parent_synth_param_; }
 
+    template<typename P, class... Args>
+    auto* GetParamPtr(P p, Args&&... args) {
+        return parent_synth_param_.GetParamBank().GetParameterPtr(p, std::forward<Args>(args)...);
+    }
 private:
     struct SingleOscillorParamModulation {
         ModuFloatParameter* target{};

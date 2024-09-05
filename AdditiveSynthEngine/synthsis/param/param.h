@@ -13,7 +13,6 @@ using namespace std::string_literals;
 
 namespace param_tag {
 struct FloatTag {};
-struct MultiplexFloatTag {};
 struct IntTag {};
 struct FloatChoiceTag {};
 struct IntChoiceTag {};
