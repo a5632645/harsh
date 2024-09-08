@@ -1,9 +1,11 @@
 ﻿project ("AdditiveSynthEngine")
 
-if(WIN32)
+if(MSVC)
     add_compile_options(/wd4819)
     add_compile_options("/arch:AVX")
     add_compile_options("/constexpr:steps2147483647")
+else()
+    add_compile_options("-mavx")
 endif()
 
 option(USE_XSIMD "Use xsimd" OFF)

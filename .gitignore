@@ -399,3 +399,7 @@ FodyWeavers.xsd
 
 # VS cmake Output
 out/
+build/
+
+# vscode output
+.vscode/
